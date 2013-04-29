@@ -129,6 +129,15 @@
             <groupId>org.openmrs.module</groupId>
             <artifactId>emr-api</artifactId>
             <version>${emrVersion}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>emr-api</artifactId>
+            <version>${emrVersion}</version>
             <scope>provided</scope>
         </dependency>
 
