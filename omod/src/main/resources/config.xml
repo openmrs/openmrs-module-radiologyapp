@@ -24,7 +24,7 @@
     </require_modules>
 	
 	<!-- Module Activator -->
-	<activator>${project.parent.groupId}.${project.parent.artifactId}.RegistrationAppActivator</activator>
+	<activator>${project.parent.groupId}.${project.parent.artifactId}.RadiologyAppActivator</activator>
 	
 	
 	<!-- Maps hibernate file's, if present -->

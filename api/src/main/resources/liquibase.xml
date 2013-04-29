@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
@@ -13,7 +12,7 @@
     <changeSet id="20121101-2" author="abarbosa and ffreire">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="radiology_order" />
+                <tableExists tableName="emr_radiology_order" />
             </not>
         </preConditions>
         <comment>Create radiology_order table</comment>
