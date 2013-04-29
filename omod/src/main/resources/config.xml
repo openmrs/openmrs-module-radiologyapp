@@ -19,6 +19,8 @@
         <require_module version="${uiframeworkVersion}">org.openmrs.module.uiframework</require_module>
         <require_module version="${appframeworkVersion}">org.openmrs.module.appframework</require_module>
         <require_module version="${uicommonsVersion}">org.openmrs.module.uicommons</require_module>
+        <require_module version="${emrapiVersion}">org.openmrs.module.emrapi</require_module>
+        <require_module version="${emrVersion}">org.openmrs.module.emr</require_module>
     </require_modules>
 	
 	<!-- Module Activator -->
@@ -27,7 +29,7 @@
 	
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
-				
+        RadiologyOrder.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -45,6 +47,63 @@
 		<file>messages_ht.properties</file>
 	</messages>
 	<!-- /Internationalization -->
+
+    <!-- Global Properties -->
+    <globalProperty>
+        <property>emr.xrayOrderablesConcept</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the concept whose set members are the orderable Xray studies
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.radiologyTestOrderType</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the the Radiology Test order type
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.radiologyOrderEncounterType</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the the Radiology Order encounter type
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.radiologyReportEncounterType</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the the Radiology Report encounter type
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.radiologyStudyEncounterType</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the the Radiology Study encounter type
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.radiologyTechnicianEncounterRole</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the the Radiology Technician encounter role
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.principalResultsInterpreterEncounterRole</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the the Radiology principal results interpreter encounter role
+        </description>
+    </globalProperty>
 
 </module>
 

@@ -4,10 +4,21 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
   		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<!-- Add here beans related to the web context -->
-
+    <!-- UI Framework setup -->
     <bean class="org.openmrs.ui.framework.StandardModuleUiConfiguration">
         <property name="moduleId" value="${project.parent.artifactId}"/>
     </bean>
+
+    <!-- Tasks -->
+
+    <bean id="emrOrderXrayTask" class="org.openmrs.module.emr.task.SimpleTaskDescriptor">
+        <property name="id" value="radiology.orderXray"/>
+        <property name="labelCode" value="radiology.task.orderXray.label"/>
+        <property name="url" value="radiology/orderXray.page"/>
+        <property name="priority" value="20.2"/>
+        <property name="extensionPoint" value="patient.visits.active.actions"/>
+        <property name="iconUrl" value="icon-x-ray"/>
+    </bean>
+
 
 </beans>

@@ -1,4 +1,4 @@
-/**
+/*
  * The contents of this file are subject to the OpenMRS Public License
  * Version 1.0 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
@@ -14,11 +14,19 @@
 
 package org.openmrs.module.radiologyapp;
 
+import org.openmrs.Encounter;
+import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.emr.EmrContext;
 
-import org.openmrs.module.BaseModuleActivator;
+public interface RadiologyService extends OpenmrsService {
 
-/**
- * This class contains the logic that is run every time this module is either started or stopped.
- */
-public class RadiologyAppActivator extends BaseModuleActivator {
+    Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition);
+
+    Encounter saveRadiologyReport(RadiologyReport radiologyReport);
+
+    Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy);
+
+    RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);
+
+
 }

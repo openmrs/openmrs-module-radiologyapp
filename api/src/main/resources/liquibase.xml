@@ -1,0 +1,34 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <!--
+        See http://www.liquibase.org/manual/home#available_database_refactorings
+        for a list of supported elements and attributes
+    -->
+
+    <changeSet id="20121101-2" author="abarbosa and ffreire">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="radiology_order" />
+            </not>
+        </preConditions>
+        <comment>Create radiology_order table</comment>
+        <createTable tableName="emr_radiology_order">
+            <column name="order_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="exam_location" type="int" />
+        </createTable>
+        <addForeignKeyConstraint constraintName="emr_radiology_order_test_order_id_fk"
+                                 baseTableName="emr_radiology_order" baseColumnNames="order_id"
+                                 referencedTableName="test_order" referencedColumnNames="order_id" />
+        <addForeignKeyConstraint constraintName="emr_radiology_order_location_fk"
+                                 baseTableName="emr_radiology_order" baseColumnNames="exam_location"
+                                 referencedTableName="location" referencedColumnNames="location_id" />
+    </changeSet>
+
+</databaseChangeLog>

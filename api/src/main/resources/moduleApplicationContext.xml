@@ -6,5 +6,43 @@
 
 	<!-- Add here beans related to the API context -->
 
+    <bean id="radiologyService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="${project.parent.groupId}.${project.parent.artifactId}.RadiologyServiceImpl">
+                <property name="emrApiProperties" ref="emrApiProperties"/>
+                <property name="emrProperties" ref="emrProperties"/>
+                <property name="radiologyProperties" ref="radiologyProperties"/>
+                <property name="encounterService" ref="encounterService"/>
+                <property name="conceptService" ref="conceptService"/>
+                <property name="emrOrderService" ref="emrOrderService"/>
+                <property name="radiologyOrderDAO">
+                    <bean class="${project.parent.groupId}.${project.parent.artifactId}.db.HibernateRadiologyOrderDAO">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>${project.parent.groupId}.${project.parent.artifactId}.RadiologyService</value>
+                <ref local="radiologyService"/>
+            </list>
+        </property>
+    </bean>
+
 	
 </beans>
