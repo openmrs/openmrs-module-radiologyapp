@@ -21,12 +21,12 @@
 		<url>http://openmrs.org</url>
 	</organization>
 
-	<scm>
-		<connection>scm:git:git@github.com:openmrs</connection>
-		<developerConnection>scm:git:git@github.com:openmrs</developerConnection>
-		<url>scm:git:git@github.com:openmrs</url>
+    <scm>
+        <connection>scm:git:git@github.com:PIH/openmrs-module-radiologyapp.git</connection>
+        <developerConnection>scm:git:git@github.com:PIH/openmrs-module-radiologyapp.git</developerConnection>
+        <url>scm:git:git@github.com:PIH/openmrs-module-radiologyapp.git</url>
         <tag>HEAD</tag>
-	</scm>
+    </scm>
 
 	<modules>
 		<module>api</module>
