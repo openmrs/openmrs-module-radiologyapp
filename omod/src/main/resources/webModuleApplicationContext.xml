@@ -12,7 +12,7 @@
     <!-- Tasks -->
 
     <bean id="emrOrderXrayTask" class="org.openmrs.module.emr.task.SimpleTaskDescriptor">
-        <property name="id" value="radiology.orderXray"/>
+        <property name="id" value="emr.orderXray"/>
         <property name="labelCode" value="radiology.task.orderXray.label"/>
         <property name="url" value="radiology/orderXray.page"/>
         <property name="priority" value="20.2"/>
