@@ -58,6 +58,22 @@
     </globalProperty>
 
     <globalProperty>
+        <property>emr.ctScanOrderablesConcept</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the concept whose set members are the orderable CT scan studies
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>emr.ultrasoundOrderablesConcept</property>
+        <defaultValue></defaultValue>
+        <description>
+            UUID of the concept whose set members are the orderable ultrasound studies
+        </description>
+    </globalProperty>
+
+    <globalProperty>
         <property>emr.radiologyTestOrderType</property>
         <defaultValue></defaultValue>
         <description>
