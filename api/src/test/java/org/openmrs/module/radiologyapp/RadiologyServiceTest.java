@@ -73,7 +73,6 @@ import static org.mockito.Mockito.when;
 public class RadiologyServiceTest{
 
     private RadiologyServiceImpl radiologyService;
-    private EmrProperties emrProperties;
     private EmrApiProperties emrApiProperties;
     private RadiologyProperties radiologyProperties;
     private EncounterService encounterService;
@@ -128,7 +127,6 @@ public class RadiologyServiceTest{
         prepareMocks();
 
         radiologyService = new RadiologyServiceImpl();
-        radiologyService.setEmrProperties(emrProperties);
         radiologyService.setEmrApiProperties(emrApiProperties);
         radiologyService.setRadiologyProperties(radiologyProperties);
         radiologyService.setEncounterService(encounterService);
@@ -138,7 +136,6 @@ public class RadiologyServiceTest{
     }
 
     private void prepareMocks() {
-        emrProperties = mock(EmrProperties.class);
         emrApiProperties = mock(EmrApiProperties.class);
         radiologyProperties = mock(RadiologyProperties.class);
         encounterService = mock(EncounterService.class);
@@ -154,7 +151,7 @@ public class RadiologyServiceTest{
         when(radiologyProperties.getRadiologyReportEncounterType()).thenReturn(radiologyReportEncounterType);
         when(radiologyProperties.getRadiologyTechnicianEncounterRole()).thenReturn(radiologyTechnicianEncounterRole);
         when(radiologyProperties.getPrincipalResultsInterpreterEncounterRole()).thenReturn(principalResultsInterpreterEncounterRole);
-        when(emrProperties.getOrderingProviderEncounterRole()).thenReturn(clinicianEncounterRole);
+        when(emrApiProperties.getOrderingProviderEncounterRole()).thenReturn(clinicianEncounterRole);
         when(emrApiProperties.getUnknownLocation()).thenReturn(unknownLocation);
         when(emrApiProperties.getUnknownProvider()).thenReturn(unknownProvider);
         when(emrContext.getSessionLocation()).thenReturn(currentLocation);

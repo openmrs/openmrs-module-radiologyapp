@@ -34,8 +34,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private EmrApiProperties emrApiProperties;
 
-    private EmrProperties emrProperties;
-
     private RadiologyProperties radiologyProperties;
 
     private EmrOrderService emrOrderService;
@@ -51,7 +49,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     public Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition) {
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyOrderEncounterType());
-        encounter.setProvider(emrProperties.getOrderingProviderEncounterRole(), requisition.getRequestedBy());
+        encounter.setProvider(emrApiProperties.getOrderingProviderEncounterRole(), requisition.getRequestedBy());
         encounter.setPatient(requisition.getPatient());
         encounter.setLocation(emrContext.getSessionLocation());
         VisitDomainWrapper activeVisitSummary = emrContext.getActiveVisit();
@@ -132,10 +130,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Override
     public RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber) {
         return radiologyOrderDAO.getRadiologyOrderByAccessionNumber(accessionNumber);
-    }
-
-    public void setEmrProperties(EmrProperties emrProperties) {
-        this.emrProperties = emrProperties;
     }
 
     public void setEmrApiProperties(EmrApiProperties emrApiProperties) {
