@@ -26,7 +26,7 @@ import org.openmrs.ui.framework.fragment.action.SuccessResult;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class RadiologyRequistionFragmentController {
+public class RadiologyRequisitionFragmentController {
 
     public FragmentActionResult orderXray(@BindParams RadiologyRequisition requisition,
                                           EmrContext emrContext,
@@ -34,13 +34,13 @@ public class RadiologyRequistionFragmentController {
                                           @SpringBean("messageSourceService") MessageSourceService messageSourceService,
                                           UiUtils ui, HttpServletRequest request) {
         if (requisition.getStudies().size() == 0) {
-            throw new IllegalArgumentException(ui.message("emr.orderXray.noStudiesSelected"));
+            throw new IllegalArgumentException(ui.message("radiologyapp.orderXray.noStudiesSelected"));
         }
 
         radiologyService.placeRadiologyRequisition(emrContext, requisition);
 
         request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_INFO_MESSAGE,
-                messageSourceService.getMessage("emr.task.orderXray.success"));
+                messageSourceService.getMessage("radiologyapp.task.orderXray.success"));
 
         request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_TOAST_MESSAGE, "true");
 
