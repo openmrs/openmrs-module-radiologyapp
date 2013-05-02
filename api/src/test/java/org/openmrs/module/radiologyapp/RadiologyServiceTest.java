@@ -51,6 +51,7 @@ import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
+import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -518,6 +519,8 @@ public class RadiologyServiceTest{
         return encounter;
     }
 
+    // TODO: could move the rest of these matchers out into separate classes in matchers package
+
     private class IsExpectedOrder extends ArgumentMatcher<Order> {
         private Location expectedLocation;
         private Concept expectedStudy;
@@ -638,29 +641,4 @@ public class RadiologyServiceTest{
         }
 
     }
-
-    private class IsExpectedRadiologyStudy extends ArgumentMatcher<RadiologyStudy> {
-
-        private RadiologyStudy expectedStudy;
-
-        public IsExpectedRadiologyStudy(RadiologyStudy expectedStudy) {
-            this.expectedStudy = expectedStudy;
-        }
-
-        @Override
-        public boolean matches(Object o) {
-            RadiologyStudy radiologyStudy = (RadiologyStudy) o;
-
-            assertThat(radiologyStudy.getDatePerformed(), is (expectedStudy.getDatePerformed()));
-            assertThat(radiologyStudy.getPatient(), is(expectedStudy.getPatient()));
-            assertThat(radiologyStudy.getStudyLocation(), is(expectedStudy.getStudyLocation()));
-            assertThat(radiologyStudy.getTechnician(), is (expectedStudy.getTechnician()));
-            assertThat(radiologyStudy.getAccessionNumber(), is(expectedStudy.getAccessionNumber()));
-            assertThat(radiologyStudy.getProcedure(), is(expectedStudy.getProcedure()));
-            assertThat(radiologyStudy.isImagesAvailable(), is(expectedStudy.isImagesAvailable()));
-
-            return true;
-        }
-    }
-
 }

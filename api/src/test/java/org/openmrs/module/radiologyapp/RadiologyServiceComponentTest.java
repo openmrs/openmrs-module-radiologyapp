@@ -14,22 +14,29 @@
 
 package org.openmrs.module.radiologyapp;
 
+import org.hamcrest.CoreMatchers;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
+import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emrapi.EmrApiProperties;
+import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,6 +49,7 @@ import java.util.Set;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +64,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     private PatientService patientService;
 
     @Autowired
+    @Qualifier("providerService")
+    private ProviderService providerService;
+
     @Qualifier("orderService")
     private OrderService orderService;
 
@@ -282,4 +293,54 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
     }
 
+    @Test
+    public void shouldRetrieveRadiologyStudiesForPatient() {
+
+        // first create a couple studies
+
+        Date timeOfFirstStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
+        Date timeOfSecondStudy = new DateTime(2013,4,3,20,20,20,20).toDate();
+
+        // use patient demo database
+        Patient patient = patientService.getPatient(6);
+
+        // from radiologyServiceComponentTestDataset.xml
+        Concept procedure = conceptService.getConcept(1001);
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+
+        // location and provider from test database
+        Location location = locationService.getLocation(2);
+        Provider provider = providerService.getProvider(1);
+
+        RadiologyStudy firstRadiologyStudy = new RadiologyStudy();
+        firstRadiologyStudy.setPatient(patient);
+        firstRadiologyStudy.setProcedure(procedure);
+        firstRadiologyStudy.setImagesAvailable(true);
+        firstRadiologyStudy.setAccessionNumber("12345");
+        firstRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
+        firstRadiologyStudy.setDatePerformed(timeOfFirstStudy);
+        firstRadiologyStudy.setStudyLocation(emrApiProperties.getUnknownLocation());
+        firstRadiologyStudy.setTechnician(emrApiProperties.getUnknownProvider());
+
+        radiologyService.saveRadiologyStudy(firstRadiologyStudy);
+
+        RadiologyStudy secondRadiologyStudy = new RadiologyStudy();
+        secondRadiologyStudy.setPatient(patient);
+        secondRadiologyStudy.setProcedure(procedure);
+        secondRadiologyStudy.setImagesAvailable(false);
+        secondRadiologyStudy.setAccessionNumber("678910");
+        secondRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
+        secondRadiologyStudy.setDatePerformed(timeOfSecondStudy);
+        secondRadiologyStudy.setStudyLocation(location);
+        secondRadiologyStudy.setTechnician(provider);
+
+        radiologyService.saveRadiologyStudy(secondRadiologyStudy);
+
+        // now fetch the studies for the patient
+        List<RadiologyStudy> studies = radiologyService.getRadiologyStudiesForPatient(patient);
+        assertThat(studies.size(), is (2));
+
+        assertTrue(new IsExpectedRadiologyStudy(secondRadiologyStudy).matches(studies.get(0)));
+        assertTrue(new IsExpectedRadiologyStudy(firstRadiologyStudy).matches(studies.get(1)));
+    }
 }

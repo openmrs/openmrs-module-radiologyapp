@@ -4,9 +4,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import org.openmrs.module.radiologyapp.RadiologyStudy;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
