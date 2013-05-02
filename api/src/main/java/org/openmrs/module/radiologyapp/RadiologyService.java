@@ -15,8 +15,11 @@
 package org.openmrs.module.radiologyapp;
 
 import org.openmrs.Encounter;
+import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emr.EmrContext;
+
+import java.util.List;
 
 public interface RadiologyService extends OpenmrsService {
 
@@ -28,5 +31,11 @@ public interface RadiologyService extends OpenmrsService {
 
     RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);
 
+    /**
+     * Returns all the radiology studies for the selected patient, sorted by date, with most recent first
+     * @param patient
+     * @return
+     */
+    List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient);
 
 }

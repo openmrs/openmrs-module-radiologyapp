@@ -199,6 +199,13 @@
 
         <!-- start other dependencies -->
 
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.2</version>
+            <scope>provided</scope>   <!-- provided by emr-api module -->
+        </dependency>
+
         <!-- end other dependencies -->
 
     </dependencies>

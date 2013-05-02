@@ -14,23 +14,33 @@
 
 package org.openmrs.module.radiologyapp;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.emr.EmrContext;
-import org.openmrs.module.emr.EmrProperties;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
+import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class RadiologyServiceImpl  extends BaseOpenmrsService implements RadiologyService {
+
+    private static final Log log = LogFactory.getLog(RadiologyServiceImpl.class);
 
     private EmrApiProperties emrApiProperties;
 
@@ -125,6 +135,52 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         encounter.addObs(radiologyStudyConceptSet.buildRadiologyStudyObsGroup(radiologyStudy));
 
         return encounterService.saveEncounter(encounter);
+    }
+
+    @Override
+    public List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient) {
+
+        // first fetch all the radiology study encounters for this patient
+        List<Encounter> encounters = encounterService.getEncounters(patient, null, null, null, null,
+                Collections.singletonList(radiologyProperties.getRadiologyStudyEncounterType()),
+                null, null, null, false);
+
+        // return an empty list if no matching encounters
+        if (encounters == null || encounters.size() == 0) {
+            return new ArrayList<RadiologyStudy>();
+        }
+
+        List<RadiologyStudy> radiologyStudies = new ArrayList<RadiologyStudy>();
+
+        for (Encounter encounter : encounters) {
+            radiologyStudies.add(convertEncounterToRadiologyStudy(encounter));
+        }
+
+        Collections.sort(radiologyStudies, new RadiologyStudyByDateComparator());
+        return radiologyStudies;
+    }
+
+    private RadiologyStudy convertEncounterToRadiologyStudy(Encounter encounter) {
+
+        RadiologyStudy radiologyStudy = new RadiologyStudy();
+        radiologyStudy.setPatient(encounter.getPatient());
+        radiologyStudy.setDatePerformed(encounter.getEncounterDatetime());
+        radiologyStudy.setStudyLocation(encounter.getLocation());
+
+        Set<Provider> technicians = encounter.getProvidersByRole(radiologyProperties.getRadiologyTechnicianEncounterRole());
+        if (technicians != null && !technicians.isEmpty()) {
+            if (technicians.size() > 1) {
+                log.warn("Multiple technicians listed for radiology encounter encounter " + encounter);
+            }
+            radiologyStudy.setTechnician(technicians.iterator().next());
+        }
+
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        radiologyStudy.setProcedure(radiologyStudyConceptSet.getProcedureFromEncounter(encounter));
+        radiologyStudy.setImagesAvailable(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter));
+        radiologyStudy.setAccessionNumber(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
+
+        return radiologyStudy;
     }
 
     @Override

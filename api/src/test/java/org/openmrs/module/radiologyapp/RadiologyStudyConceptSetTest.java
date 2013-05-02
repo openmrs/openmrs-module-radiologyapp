@@ -21,6 +21,7 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptSource;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
@@ -30,6 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,6 +53,9 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
     @Before
     public void setUp() throws Exception {
+
+        trueConcept.setId(1000);
+        falseConcept.setId(1001);
 
         mockStatic(Context.class);
         conceptService = mock(ConceptService.class);
@@ -149,11 +154,137 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
         Obs procedureObs = radiologyStudyObsSet.getGroupMembers().iterator().next();
 
-
         assertNotNull(procedureObs);
         assertThat(procedureObs.getValueCoded(), is(procedure));
     }
 
+
+    @Test
+    public void shouldFetchAccessionNumberFromObsGroup() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyStudyConceptSet.getAccessionNumberFromObsGroup(obsGroup), is("123"));
+    }
+
+    @Test
+    public void shouldFetchProcedureFromObsGroup() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyStudyConceptSet.getProcedureFromObsGroup(obsGroup).getId(), is(321));
+    }
+
+    @Test
+    public void shouldFetchImagesAvailableFromObsGroup() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyStudyConceptSet.getImagesAvailableFromObsGroup(obsGroup), is(true));
+    }
+
+    @Test
+    public void shouldFetchObsGroupFromEncounter() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyStudyConceptSet.getObsGroupFromEncounter(encounter).getId(), is(222));
+    }
+
+    @Test
+    public void shouldFetchAccessionNumberFromEncounter() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter), is("123"));
+    }
+
+    @Test
+    public void shouldFetchProcedureFromEncounter() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyStudyConceptSet.getProcedureFromEncounter(encounter).getId(), is(321));
+    }
+
+    @Test
+    public void shouldFetchImagesAvailableFromEncounter() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter), is(true));
+    }
+
+    @Test
+    public void shouldReturnNullIfNoAccessionNumberObs() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = createEncounterWithoutAccessionNumberAndImagesAvailable();
+        assertNull(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
+    }
+
+    @Test
+    public void shouldReturnNullIfNoImagesAvailableObs() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = createEncounterWithoutAccessionNumberAndImagesAvailable();
+        assertNull(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter));
+    }
+
+    @Test
+    public void shouldReturnNullIfNoObsGroup() {
+        RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
+        Encounter encounter = new Encounter();
+        assertNull(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
+        assertNull(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter));
+        assertNull(radiologyStudyConceptSet.getProcedureFromEncounter(encounter));
+    }
+
+    private Encounter createEncounter() {
+        Encounter encounter = new Encounter();
+        encounter.addObs(createObsGroup());
+        return encounter;
+    }
+
+    private Obs createObsGroup() {
+
+        Obs obsGroup = new Obs();
+        obsGroup.setId(222);
+        obsGroup.setConcept(radiologyStudySetConcept);
+
+        Obs accessionNumber = new Obs();
+        accessionNumber.setConcept(accessionNumberConcept);
+        accessionNumber.setValueText("123");
+        obsGroup.addGroupMember(accessionNumber);
+
+        Obs imagesAvailable = new Obs();
+        imagesAvailable.setConcept(imagesAvailableConcept);
+        imagesAvailable.setValueCoded(trueConcept);
+        obsGroup.addGroupMember(imagesAvailable);
+
+        Concept procedure = new Concept();
+        procedure.setId(321);
+        Obs procedureObs = new Obs();
+        procedureObs.setConcept(procedureConcept);
+        procedureObs.setValueCoded(procedure);
+        obsGroup.addGroupMember(procedureObs);
+
+        return obsGroup;
+
+    }
+
+    private Encounter createEncounterWithoutAccessionNumberAndImagesAvailable() {
+        Encounter encounter = new Encounter();
+        encounter.addObs(createObsGroupWithoutAccessionNumberAndImagesAvailable());
+        return encounter;
+    }
+
+    private Obs createObsGroupWithoutAccessionNumberAndImagesAvailable() {
+
+        Obs obsGroup = new Obs();
+        obsGroup.setId(222);
+        obsGroup.setConcept(radiologyStudySetConcept);
+
+        Concept procedure = new Concept();
+        procedure.setId(321);
+        Obs procedureObs = new Obs();
+        procedureObs.setConcept(procedureConcept);
+        procedureObs.setValueCoded(procedure);
+        obsGroup.addGroupMember(procedureObs);
+
+        return obsGroup;
+    }
 
 }
 
