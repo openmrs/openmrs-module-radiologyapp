@@ -99,6 +99,10 @@ public class RadiologyStudy {
         return imagesAvailable;
     }
 
+    public Boolean getImagesAvailable() {
+        return imagesAvailable;
+    }
+
     public void setImagesAvailable(Boolean imagesAvailable) {
         this.imagesAvailable = imagesAvailable;
     }

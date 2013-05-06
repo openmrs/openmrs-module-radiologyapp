@@ -27,6 +27,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
+import org.openmrs.module.emrapi.db.EmrApiDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
@@ -53,6 +54,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     private ConceptService conceptService;
 
     private RadiologyOrderDAO radiologyOrderDAO;
+
+    private EmrApiDAO emrApiDAO;
 
     @Transactional
     @Override
@@ -95,6 +98,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         }
     }
 
+    @Transactional
     @Override
     public Encounter saveRadiologyReport(RadiologyReport radiologyReport) {
 
@@ -116,6 +120,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return encounterService.saveEncounter(encounter);
     }
 
+    @Transactional
     @Override
     public Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
 
@@ -137,6 +142,34 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return encounterService.saveEncounter(encounter);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber) {
+        return radiologyOrderDAO.getRadiologyOrderByAccessionNumber(accessionNumber);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber) {
+
+        List<Encounter> radiologyStudyEncounters =
+                emrApiDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
+                accessionNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
+
+        if (radiologyStudyEncounters == null || radiologyStudyEncounters.size() == 0) {
+            return null;
+        }
+
+        // note that we log an error if we find more than one study with the same accession number, but we don't
+        // throw an exception and instead just return the first study
+        if (radiologyStudyEncounters.size() > 1) {
+            log.error("More than one Radiology Study Encounter with accession number " + accessionNumber);
+        }
+
+        return convertEncounterToRadiologyStudy(radiologyStudyEncounters.get(0));
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient) {
 
@@ -183,11 +216,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return radiologyStudy;
     }
 
-    @Override
-    public RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber) {
-        return radiologyOrderDAO.getRadiologyOrderByAccessionNumber(accessionNumber);
-    }
-
     public void setEmrApiProperties(EmrApiProperties emrApiProperties) {
         this.emrApiProperties = emrApiProperties;
     }
@@ -210,5 +238,9 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     public void setRadiologyOrderDAO(RadiologyOrderDAO radiologyOrderDAO) {
         this.radiologyOrderDAO = radiologyOrderDAO;
+    }
+
+    public void setEmrApiDAO(EmrApiDAO emrApiDAO) {
+        this.emrApiDAO = emrApiDAO;
     }
 }

@@ -45,10 +45,10 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.EmrConstants;
 import org.openmrs.module.emr.EmrContext;
-import org.openmrs.module.emr.EmrProperties;
 import org.openmrs.module.emr.TestUtils;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
+import org.openmrs.module.emrapi.db.EmrApiDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
@@ -57,7 +57,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -69,12 +68,15 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
@@ -93,6 +95,8 @@ public class RadiologyServiceTest{
     private EmrOrderService emrOrderService;
 
     private ConceptService conceptService;
+
+    private EmrApiDAO emrApiDAO;
 
     private EmrContext emrContext;
 
@@ -192,6 +196,7 @@ public class RadiologyServiceTest{
         radiologyService.setEmrOrderService(emrOrderService);
         radiologyService.setRadiologyOrderDAO(radiologyOrderDAO);
         radiologyService.setConceptService(conceptService);
+        radiologyService.setEmrApiDAO(emrApiDAO);
     }
 
     private void prepareMocks() {
@@ -203,6 +208,7 @@ public class RadiologyServiceTest{
         conceptService = mock(ConceptService.class);
         radiologyOrderDAO = mock(RadiologyOrderDAO.class);
         conceptService = mock(ConceptService.class);
+        emrApiDAO = mock(EmrApiDAO.class);
         booleanType = mock(ConceptDatatype.class);
 
         VisitDomainWrapper currentVisitSummary = new VisitDomainWrapper(currentVisit);
@@ -379,6 +385,11 @@ public class RadiologyServiceTest{
     }
 
     @Test
+    public void getRadiologyStudyByAccessionNumberShouldReturnMatchingRadiologyStudy() {
+
+    }
+
+    @Test
     public void getRadiologyStudiesShouldReturnAllRadiologyStudiesForPatient() {
 
         Date firstStudyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
@@ -472,6 +483,92 @@ public class RadiologyServiceTest{
         List<RadiologyStudy> radiologyStudies = radiologyService.getRadiologyStudiesForPatient(patient);
         assertThat(radiologyStudies.size(), is(0));
 
+    }
+
+    @Test
+    public void getRadiologyStudyByAccessionNumberShouldReturnAllRadiologyStudyWithAccessionNumber() {
+
+        Date studyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
+        Provider studyTechnician = new Provider();
+        Location studyLocation = new Location();
+        Concept studyProcedure = new Concept();
+        studyProcedure.setId(111);
+
+        RadiologyStudy expectedStudy = new RadiologyStudy();
+        expectedStudy.setDatePerformed(studyDate);
+        expectedStudy.setTechnician(studyTechnician);
+        expectedStudy.setStudyLocation(studyLocation);
+        expectedStudy.setPatient(patient);
+        expectedStudy.setAccessionNumber("123");
+        expectedStudy.setImagesAvailable(true);
+        expectedStudy.setProcedure(studyProcedure);
+
+        List<Encounter> encounters = new ArrayList<Encounter>();
+        encounters.add(setupRadiologyStudyEncounter(studyDate, studyLocation, patient, studyTechnician,
+                "123", studyProcedure));
+
+        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+                .thenReturn(encounters);
+
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
+        assertTrue(new IsExpectedRadiologyStudy(expectedStudy).matches(radiologyStudy));
+    }
+
+    @Test
+    public void getRadiologyStudyByAccessionNumberShouldNotFailIfMultipleResults() {
+
+        Date firstStudyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
+        Date secondStudyDate = new DateTime(2011, 10, 10, 10, 0, 0, 0).toDate();
+        Provider firstStudyTechnician = new Provider();
+        Provider secondStudyTechnician = new Provider();
+        Location firstStudyLocation = new Location();
+        Location secondStudyLocation = new Location();
+        Concept firstStudyProcedure = new Concept();
+        firstStudyProcedure.setId(111);
+        Concept secondStudyProcedure = new Concept();
+        secondStudyProcedure.setId(222);
+
+        RadiologyStudy firstStudy = new RadiologyStudy();
+        firstStudy.setDatePerformed(firstStudyDate);
+        firstStudy.setTechnician(firstStudyTechnician);
+        firstStudy.setStudyLocation(firstStudyLocation);
+        firstStudy.setPatient(patient);
+        firstStudy.setAccessionNumber("123");
+        firstStudy.setImagesAvailable(true);
+        firstStudy.setProcedure(firstStudyProcedure);
+
+        RadiologyStudy secondStudy = new RadiologyStudy();
+        secondStudy.setDatePerformed(secondStudyDate);
+        secondStudy.setTechnician(secondStudyTechnician);
+        secondStudy.setStudyLocation(secondStudyLocation);
+        secondStudy.setPatient(patient);
+        secondStudy.setAccessionNumber("456");
+        secondStudy.setImagesAvailable(true);
+        secondStudy.setProcedure(secondStudyProcedure);
+
+        List<Encounter> encounters = new ArrayList<Encounter>();
+        encounters.add(setupRadiologyStudyEncounter(firstStudyDate, firstStudyLocation, patient, firstStudyTechnician,
+                "123", firstStudyProcedure));
+        encounters.add(setupRadiologyStudyEncounter(secondStudyDate, secondStudyLocation, patient, secondStudyTechnician,
+                "456", secondStudyProcedure));
+
+
+        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+                .thenReturn(encounters);
+
+        // should just return the first study
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
+        assertTrue(new IsExpectedRadiologyStudy(firstStudy).matches(radiologyStudy));
+    }
+
+
+    @Test
+    public void getRadiologyStudyByAccessionNumberShouldReturnNullIfNoMatchingStudy() {
+        when(emrApiDAO.getEncountersByObsValueText(any(Concept.class), any(String.class)
+                , any(EncounterType.class), eq(false))).thenReturn(null);
+
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("1234");
+        assertNull(radiologyStudy);
     }
 
 

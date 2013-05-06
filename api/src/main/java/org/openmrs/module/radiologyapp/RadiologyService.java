@@ -31,6 +31,8 @@ public interface RadiologyService extends OpenmrsService {
 
     RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);
 
+    RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber);
+
     /**
      * Returns all the radiology studies for the selected patient, sorted by date, with most recent first
      * @param patient
