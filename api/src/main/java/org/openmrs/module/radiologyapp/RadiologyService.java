@@ -25,8 +25,21 @@ public interface RadiologyService extends OpenmrsService {
 
     Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition);
 
+    /**
+     * Converts a radiology report to an encounter and saves it
+     * (Note that this method cannot be used to
+     *
+     * @param radiologyReport
+     * @return
+     */
     Encounter saveRadiologyReport(RadiologyReport radiologyReport);
 
+    /**
+     * Converts a radiology study to an encounter and saves it
+     *
+     * @param radiologyStudy
+     * @return
+     */
     Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy);
 
     RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);

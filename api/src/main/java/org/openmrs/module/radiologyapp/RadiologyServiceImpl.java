@@ -123,7 +123,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional
     @Override
-    public Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
+    // we synchronize this method so that we can verify that we never create two studies with the same accession number
+    public synchronized Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
 
         validate(radiologyStudy);
 
