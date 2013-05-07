@@ -14,6 +14,7 @@
 
 package org.openmrs.module.radiologyapp;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
@@ -31,6 +32,7 @@ import org.openmrs.module.emrapi.db.EmrApiDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
+import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -102,8 +104,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Override
     public Encounter saveRadiologyReport(RadiologyReport radiologyReport) {
 
-        // TODO: add a validator
-        // TODO: or just validate that there is an accession number, report date?
+        validate(radiologyReport);
 
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyReportEncounterType());
@@ -124,8 +125,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Override
     public Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
 
-        // TODO: add a validator?
-        // TODO: or just validate that there is an accession number, report date?
+        validate(radiologyStudy);
 
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyStudyEncounterType());
@@ -160,8 +160,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             return null;
         }
 
-        // note that we log an error if we find more than one study with the same accession number, but we don't
-        // throw an exception and instead just return the first study
+        // note that also the API should prevent two radiology study encounters with the same accession number from being created,
+        // if we do encounter this issue, we log an error, but we don't throw an exception and instead just return the first study
         if (radiologyStudyEncounters.size() > 1) {
             log.error("More than one Radiology Study Encounter with accession number " + accessionNumber);
         }
@@ -214,6 +214,56 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         radiologyStudy.setAccessionNumber(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
 
         return radiologyStudy;
+    }
+
+    private void validate(RadiologyReport radiologyReport) {
+
+        // TODO: perhaps move these into an external validator?
+
+        if (StringUtils.isBlank(radiologyReport.getAccessionNumber())) {
+            throw new RadiologyAPIException("Accession number must be specified when saving Radiology Report. Patient: "
+                    + radiologyReport.getPatient() + ", Procedure: " + radiologyReport.getProcedure());
+        }
+
+        if (radiologyReport.getReportDate() == null) {
+            throw new RadiologyAPIException("Date performed must be specified when saving Radiology Report. Patient: "
+                    + radiologyReport.getPatient() + ", Accession Number: " + radiologyReport.getAccessionNumber());
+        }
+
+        if (radiologyReport.getPatient() == null) {
+            throw new RadiologyAPIException("Patient must be specified when saving Radiology Report. Accession Number: "
+                    + radiologyReport.getAccessionNumber());
+        }
+
+    }
+
+    private void validate(RadiologyStudy radiologyStudy) {
+
+        // TODO: perhaps move these into an external validator?
+
+        if (StringUtils.isBlank(radiologyStudy.getAccessionNumber())) {
+            throw new RadiologyAPIException("Accession number must be specified when saving Radiology Study. Patient: "
+                    + radiologyStudy.getPatient() + ", Procedure: " + radiologyStudy.getProcedure());
+        }
+
+        if (radiologyStudy.getDatePerformed() == null) {
+            throw new RadiologyAPIException("Date performed must be specified when saving Radiology Study. Patient: "
+                    + radiologyStudy.getPatient() + ", Accession Number: " + radiologyStudy.getAccessionNumber());
+        }
+
+        if (radiologyStudy.getPatient() == null) {
+            throw new RadiologyAPIException("Patient must be specified when saving Radiology Study. Accession Number: "
+                    + radiologyStudy.getAccessionNumber());
+        }
+
+        // make sure no existing study with the same accession number
+        List<Encounter> radiologyStudyEncounters = emrApiDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
+                radiologyStudy.getAccessionNumber(), radiologyProperties.getRadiologyStudyEncounterType(), false);
+
+        if (radiologyStudyEncounters != null && radiologyStudyEncounters.size() > 0) {
+            throw new RadiologyAPIException("A Radiology Study already exists with accession number " + radiologyStudy.getAccessionNumber());
+        }
+
     }
 
     public void setEmrApiProperties(EmrApiProperties emrApiProperties) {

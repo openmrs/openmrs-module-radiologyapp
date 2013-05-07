@@ -51,6 +51,7 @@ import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.db.EmrApiDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
+import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -315,7 +316,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void shouldCreateRadiologyStudyEncounter() {
+    public void saveRadiologyStudy_shouldCreateRadiologyStudyEncounter() {
 
         RadiologyStudy study = new RadiologyStudy();
         study.setPatient(patient);
@@ -330,8 +331,63 @@ public class RadiologyServiceTest{
         verify(encounterService).saveEncounter(argThat(new IsExpectedRadiologyStudyEncounter(currentLocation, provider)));
     }
 
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyStudy_shouldFailIfAccessionNumberNotSpecified() {
+
+        RadiologyStudy study = new RadiologyStudy();
+        study.setPatient(patient);
+        study.setDatePerformed(currentDate);
+        study.setStudyLocation(currentLocation);
+        study.setTechnician(provider);
+        study.setProcedure(new Concept());
+
+        radiologyService.saveRadiologyStudy(study);
+    }
+
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyStudy_shouldFailIfPatientNotSpecified() {
+
+        RadiologyStudy study = new RadiologyStudy();
+        study.setDatePerformed(currentDate);
+        study.setStudyLocation(currentLocation);
+        study.setTechnician(provider);
+        study.setAccessionNumber("123");
+        study.setProcedure(new Concept());
+
+        radiologyService.saveRadiologyStudy(study);
+    }
+
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyStudy_shouldFailIfDatePerformedNotSpecified() {
+
+        RadiologyStudy study = new RadiologyStudy();
+        study.setPatient(patient);
+        study.setStudyLocation(currentLocation);
+        study.setTechnician(provider);
+        study.setAccessionNumber("123");
+        study.setProcedure(new Concept());
+
+        radiologyService.saveRadiologyStudy(study);
+    }
+
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyStudy_shouldFailIfAnotherStudyExistsWithSameAccessionNumber() {
+
+        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+                .thenReturn(Collections.singletonList(new Encounter()));
+
+        RadiologyStudy study = new RadiologyStudy();
+        study.setPatient(patient);
+        study.setStudyLocation(currentLocation);
+        study.setTechnician(provider);
+        study.setAccessionNumber("123");
+        study.setProcedure(new Concept());
+
+        radiologyService.saveRadiologyStudy(study);
+    }
+
     @Test
-    public void shouldNotFailIfTechnicianAndLocationNotSpecified() {
+    public void saveRadiologyStudy_shouldNotFailIfTechnicianAndLocationNotSpecified() {
 
         RadiologyStudy study = new RadiologyStudy();
         study.setPatient(patient);
@@ -347,7 +403,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void shouldCreateRadiologyReportEncounter() {
+    public void saveRadiologyReport_shouldCreateRadiologyReportEncounter() {
 
         RadiologyReport report = new RadiologyReport();
         report.setPatient(patient);
@@ -365,8 +421,54 @@ public class RadiologyServiceTest{
 
     }
 
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyReport_shouldFailIfAccessionNumberNotSpecified() {
+
+        RadiologyReport report = new RadiologyReport();
+        report.setPatient(patient);
+        report.setReportDate(currentDate);
+        report.setPrincipalResultsInterpreter(provider);
+        report.setReportLocation(currentLocation);
+        report.setReportBody("test");
+        report.setProcedure(new Concept());
+        report.setReportType(new Concept());
+
+        radiologyService.saveRadiologyReport(report);
+    }
+
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyReport_shouldFailIfReportDateNotSpecified() {
+
+        RadiologyReport report = new RadiologyReport();
+        report.setPatient(patient);
+        report.setPrincipalResultsInterpreter(provider);
+        report.setReportLocation(currentLocation);
+        report.setAccessionNumber("123");
+        report.setReportBody("test");
+        report.setProcedure(new Concept());
+        report.setReportType(new Concept());
+
+        radiologyService.saveRadiologyReport(report);
+    }
+
+    @Test(expected = RadiologyAPIException.class)
+    public void saveRadiologyReport_shouldFailIfPatientNotSpecified() {
+
+        RadiologyReport report = new RadiologyReport();
+        report.setReportDate(currentDate);
+        report.setPrincipalResultsInterpreter(provider);
+        report.setReportLocation(currentLocation);
+        report.setAccessionNumber("123");
+        report.setReportBody("test");
+        report.setProcedure(new Concept());
+        report.setReportType(new Concept());
+
+        radiologyService.saveRadiologyReport(report);
+    }
+
+
     @Test
-    public void shouldNotFailIfInterpreterAndLocationNotSpecified() {
+    public void saveRadiologyReport_shouldNotFailIfInterpreterAndLocationNotSpecified() {
 
         RadiologyReport report = new RadiologyReport();
         report.setPatient(patient);
@@ -381,11 +483,6 @@ public class RadiologyServiceTest{
         radiologyService.saveRadiologyReport(report);
 
         verify(encounterService).saveEncounter(argThat(new IsExpectedRadiologyReportEncounter(unknownLocation, unknownProvider)));
-
-    }
-
-    @Test
-    public void getRadiologyStudyByAccessionNumberShouldReturnMatchingRadiologyStudy() {
 
     }
 
@@ -486,7 +583,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumberShouldReturnAllRadiologyStudyWithAccessionNumber() {
+    public void getRadiologyStudyByAccessionNumberShouldReturnRadiologyStudyWithAccessionNumber() {
 
         Date studyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Provider studyTechnician = new Provider();

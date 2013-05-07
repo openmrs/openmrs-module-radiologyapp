@@ -36,6 +36,7 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emrapi.EmrApiProperties;
+import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,6 +222,39 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
     }
 
+    @Test(expected = RadiologyAPIException.class)
+    public void shouldFailIfAttemptingToSaveRadiologyStudyWithSameAccessionNumberAsExistingStudy() {
+
+        Date timeOfStudy = new Date();
+
+        // use patient demo database
+        Patient patient = patientService.getPatient(6);
+
+        // from radiologyServiceComponentTestDataset.xml
+        Concept procedure = conceptService.getConcept(1001);
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+
+        RadiologyStudy firstRadiologyStudy = new RadiologyStudy();
+        firstRadiologyStudy.setPatient(patient);
+        firstRadiologyStudy.setProcedure(procedure);
+        firstRadiologyStudy.setImagesAvailable(true);
+        firstRadiologyStudy.setAccessionNumber("12345");
+        firstRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
+        firstRadiologyStudy.setDatePerformed(timeOfStudy);
+
+        RadiologyStudy secondRadiologyStudy = new RadiologyStudy();
+        secondRadiologyStudy.setPatient(patient);
+        secondRadiologyStudy.setProcedure(procedure);
+        secondRadiologyStudy.setImagesAvailable(true);
+        secondRadiologyStudy.setAccessionNumber("12345");
+        secondRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
+        secondRadiologyStudy.setDatePerformed(timeOfStudy);
+
+        radiologyService.saveRadiologyStudy(firstRadiologyStudy);
+        radiologyService.saveRadiologyStudy(secondRadiologyStudy);
+
+    }
+
     @Test
     public void shouldSaveARadiologyReport() {
 
@@ -342,5 +376,41 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         assertTrue(new IsExpectedRadiologyStudy(secondRadiologyStudy).matches(studies.get(0)));
         assertTrue(new IsExpectedRadiologyStudy(firstRadiologyStudy).matches(studies.get(1)));
+    }
+
+    @Test
+    public void shouldRetrieveRadiologyStudyByAccessionNumber() {
+
+        // first create a study
+
+        Date timeOfStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
+
+        // use patient demo database
+        Patient patient = patientService.getPatient(6);
+
+        // from radiologyServiceComponentTestDataset.xml
+        Concept procedure = conceptService.getConcept(1001);
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+
+        // location and provider from test database
+        Location location = locationService.getLocation(2);
+        Provider provider = providerService.getProvider(1);
+
+        RadiologyStudy expectedRadiologyStudy = new RadiologyStudy();
+        expectedRadiologyStudy.setPatient(patient);
+        expectedRadiologyStudy.setProcedure(procedure);
+        expectedRadiologyStudy.setImagesAvailable(true);
+        expectedRadiologyStudy.setAccessionNumber("12345");
+        expectedRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
+        expectedRadiologyStudy.setDatePerformed(timeOfStudy);
+        expectedRadiologyStudy.setStudyLocation(emrApiProperties.getUnknownLocation());
+        expectedRadiologyStudy.setTechnician(emrApiProperties.getUnknownProvider());
+
+        radiologyService.saveRadiologyStudy(expectedRadiologyStudy);
+
+        // fetch the study
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("12345");
+
+        assertTrue(new IsExpectedRadiologyStudy(expectedRadiologyStudy).matches(radiologyStudy));
     }
 }
