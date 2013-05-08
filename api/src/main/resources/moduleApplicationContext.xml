@@ -24,7 +24,7 @@
                         </property>
                     </bean>
                 </property>
-                <property name="emrApiDAO" ref="emrApiDAO"/>
+                <property name="emrEncounterDAO" ref="emrEncounterDAO"/>
             </bean>
         </property>
         <property name="preInterceptors">

@@ -28,7 +28,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
-import org.openmrs.module.emrapi.db.EmrApiDAO;
+import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
@@ -58,7 +58,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private RadiologyOrderDAO radiologyOrderDAO;
 
-    private EmrApiDAO emrApiDAO;
+    private EmrEncounterDAO emrEncounterDAO;
 
     @Transactional
     @Override
@@ -155,7 +155,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     public RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber) {
 
         List<Encounter> radiologyStudyEncounters =
-                emrApiDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
+                emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
                 accessionNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
 
         if (radiologyStudyEncounters == null || radiologyStudyEncounters.size() == 0) {
@@ -176,7 +176,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     public List<RadiologyReport> getRadiologyReportsByAccessionNumber(String accessionNumber) {
 
         List<Encounter> radiologyReportEncounters =
-                emrApiDAO.getEncountersByObsValueText(new RadiologyReportConceptSet(conceptService).getAccessionNumberConcept(),
+                emrEncounterDAO.getEncountersByObsValueText(new RadiologyReportConceptSet(conceptService).getAccessionNumberConcept(),
                 accessionNumber, radiologyProperties.getRadiologyReportEncounterType(), false);
 
         List<RadiologyReport> radiologyReports = new ArrayList<RadiologyReport>();
@@ -305,7 +305,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         }
 
         // make sure no existing study with the same accession number
-        List<Encounter> radiologyStudyEncounters = emrApiDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
+        List<Encounter> radiologyStudyEncounters = emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
                 radiologyStudy.getAccessionNumber(), radiologyProperties.getRadiologyStudyEncounterType(), false);
 
         if (radiologyStudyEncounters != null && radiologyStudyEncounters.size() > 0) {
@@ -338,7 +338,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         this.radiologyOrderDAO = radiologyOrderDAO;
     }
 
-    public void setEmrApiDAO(EmrApiDAO emrApiDAO) {
-        this.emrApiDAO = emrApiDAO;
+    public void setEmrEncounterDAO(EmrEncounterDAO emrEncounterDAO) {
+        this.emrEncounterDAO = emrEncounterDAO;
     }
 }

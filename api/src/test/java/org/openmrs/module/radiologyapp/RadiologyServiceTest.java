@@ -48,7 +48,7 @@ import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.TestUtils;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
-import org.openmrs.module.emrapi.db.EmrApiDAO;
+import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
@@ -98,7 +98,7 @@ public class RadiologyServiceTest{
 
     private ConceptService conceptService;
 
-    private EmrApiDAO emrApiDAO;
+    private EmrEncounterDAO emrEncounterDAO;
 
     private EmrContext emrContext;
 
@@ -198,7 +198,7 @@ public class RadiologyServiceTest{
         radiologyService.setEmrOrderService(emrOrderService);
         radiologyService.setRadiologyOrderDAO(radiologyOrderDAO);
         radiologyService.setConceptService(conceptService);
-        radiologyService.setEmrApiDAO(emrApiDAO);
+        radiologyService.setEmrEncounterDAO(emrEncounterDAO);
     }
 
     private void prepareMocks() {
@@ -210,7 +210,7 @@ public class RadiologyServiceTest{
         conceptService = mock(ConceptService.class);
         radiologyOrderDAO = mock(RadiologyOrderDAO.class);
         conceptService = mock(ConceptService.class);
-        emrApiDAO = mock(EmrApiDAO.class);
+        emrEncounterDAO = mock(EmrEncounterDAO.class);
         booleanType = mock(ConceptDatatype.class);
 
         VisitDomainWrapper currentVisitSummary = new VisitDomainWrapper(currentVisit);
@@ -374,7 +374,7 @@ public class RadiologyServiceTest{
     @Test(expected = RadiologyAPIException.class)
     public void saveRadiologyStudy_shouldFailIfAnotherStudyExistsWithSameAccessionNumber() {
 
-        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(Collections.singletonList(new Encounter()));
 
         RadiologyStudy study = new RadiologyStudy();
@@ -605,7 +605,7 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyStudyEncounter(studyDate, studyLocation, patient, studyTechnician,
                 "123", studyProcedure));
 
-        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(encounters);
 
         RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
@@ -651,7 +651,7 @@ public class RadiologyServiceTest{
                 "456", secondStudyProcedure));
 
 
-        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(encounters);
 
         // should just return the first study
@@ -662,7 +662,7 @@ public class RadiologyServiceTest{
 
     @Test
     public void getRadiologyStudyByAccessionNumber_shouldReturnNullIfNoMatchingStudy() {
-        when(emrApiDAO.getEncountersByObsValueText(any(Concept.class), any(String.class)
+        when(emrEncounterDAO.getEncountersByObsValueText(any(Concept.class), any(String.class)
                 , any(EncounterType.class), eq(false))).thenReturn(null);
 
         RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("1234");
@@ -710,7 +710,7 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounter(firstExpectedRadiologyReport));
         encounters.add(setupRadiologyReportEncounter(secondExpectedRadiologyReport));
 
-        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
         List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
@@ -753,7 +753,7 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounterWithoutObsGroup(firstExpectedRadiologyReport));
         encounters.add(setupRadiologyReportEncounterWithoutObsGroup(secondExpectedRadiologyReport));
 
-        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
         List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
@@ -767,7 +767,7 @@ public class RadiologyServiceTest{
     @Test
     public void getRadiologyReportsByAccessionNumber_shouldReturnEmptyListIfNoMatchingStudies() {
 
-        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(new ArrayList<Encounter>());
 
         List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
