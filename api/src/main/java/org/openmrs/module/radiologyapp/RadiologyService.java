@@ -42,12 +42,34 @@ public interface RadiologyService extends OpenmrsService {
      */
     Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy);
 
+    /**
+     * Fetches the radiology order with the specified accession number
+     *
+     * @param accessionNumber
+     * @return
+     */
     RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);
 
+    /**
+     * Fetches the radiology study with the specified accession number
+     *
+     * @param accessionNumber
+     * @return
+     */
     RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber);
 
     /**
+     * Fetches all radiology reports with the specified accession number
+     * (i.e., all the reports for a single study)
+     *
+     * @param accessionNumber
+     * @return
+     */
+    List<RadiologyReport> getRadiologyReportsByAccessionNumber(String accessionNumber);
+
+    /**
      * Returns all the radiology studies for the selected patient, sorted by date, with most recent first
+     *
      * @param patient
      * @return
      */

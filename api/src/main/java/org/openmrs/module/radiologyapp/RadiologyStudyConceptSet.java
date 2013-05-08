@@ -90,17 +90,17 @@ public class RadiologyStudyConceptSet extends ConceptSetDescriptor {
 
     public String getAccessionNumberFromEncounter(Encounter encounter) {
         Obs obsGroup = getObsGroupFromEncounter(encounter);
-        return obsGroup != null ? getAccessionNumberFromObsGroup(obsGroup) : null;
+        return obsGroup != null && obsGroup.getGroupMembers() != null ? getAccessionNumberFromObsGroup(obsGroup) : null;
     }
 
     public Concept getProcedureFromEncounter(Encounter encounter) {
         Obs obsGroup = getObsGroupFromEncounter(encounter);
-        return obsGroup != null ? getProcedureFromObsGroup(obsGroup) : null;
+        return obsGroup != null && obsGroup.getGroupMembers() != null  ? getProcedureFromObsGroup(obsGroup) : null;
     }
 
     public Boolean getImagesAvailableFromEncounter(Encounter encounter) {
         Obs obsGroup = getObsGroupFromEncounter(encounter);
-        return obsGroup != null ? getImagesAvailableFromObsGroup(obsGroup) : null;
+        return obsGroup != null && obsGroup.getGroupMembers() != null  ? getImagesAvailableFromObsGroup(obsGroup) : null;
     }
 
     public Obs getObsGroupFromEncounter(Encounter encounter) {

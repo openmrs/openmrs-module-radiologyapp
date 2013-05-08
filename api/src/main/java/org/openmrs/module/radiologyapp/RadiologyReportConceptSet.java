@@ -16,6 +16,7 @@ package org.openmrs.module.radiologyapp;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.emrapi.EmrApiConstants;
@@ -79,6 +80,64 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
         }
 
         return radiologyReportSet;
+    }
+
+    public String getAccessionNumberFromObsGroup(Obs obsGroup) {
+        Obs accessionNumberObs = getMemberObsByConcept(obsGroup, getAccessionNumberConcept());
+        return accessionNumberObs != null ? accessionNumberObs.getValueText() : null;
+    }
+
+    public String getReportBodyFromObsGroup(Obs obsGroup) {
+        Obs reportBodyObs = getMemberObsByConcept(obsGroup, getReportBodyConcept());
+        return reportBodyObs != null ? reportBodyObs.getValueText() : null;
+    }
+
+    public Concept getReportTypeFromObsGroup(Obs obsGroup) {
+        Obs reportTypeObs = getMemberObsByConcept(obsGroup, getReportTypeConcept());
+        return reportTypeObs != null ? reportTypeObs.getValueCoded() : null;
+    }
+
+    public Concept getProcedureFromObsGroup(Obs obsGroup) {
+        Obs procedureObs = getMemberObsByConcept(obsGroup, getProcedureConcept());
+        return procedureObs != null ? procedureObs.getValueCoded() : null;
+    }
+
+    public String getAccessionNumberFromEncounter(Encounter encounter) {
+        Obs obsGroup = getObsGroupFromEncounter(encounter);
+        return obsGroup != null && obsGroup.getGroupMembers() != null ? getAccessionNumberFromObsGroup(obsGroup) : null;
+    }
+
+    public String getReportBodyFromEncounter(Encounter encounter) {
+        Obs obsGroup = getObsGroupFromEncounter(encounter);
+        return obsGroup != null && obsGroup.getGroupMembers() != null ? getReportBodyFromObsGroup(obsGroup) : null;
+    }
+
+    public Concept getReportTypeFromEncounter(Encounter encounter) {
+        Obs obsGroup = getObsGroupFromEncounter(encounter);
+        return obsGroup != null && obsGroup.getGroupMembers() != null ? getReportTypeFromObsGroup(obsGroup) : null;
+    }
+
+    public Concept getProcedureFromEncounter(Encounter encounter) {
+        Obs obsGroup = getObsGroupFromEncounter(encounter);
+        return obsGroup != null && obsGroup.getGroupMembers() != null ? getProcedureFromObsGroup(obsGroup) : null;
+    }
+
+    public Obs getObsGroupFromEncounter(Encounter encounter) {
+        for (Obs obs : encounter.getObsAtTopLevel(false)) {
+            if (obs.getConcept().equals(getRadiologyReportSetConcept())) {
+                return obs;
+            }
+        }
+        return null;
+    }
+
+    private Obs getMemberObsByConcept(Obs obsGroup, Concept concept) {
+        for (Obs obs : obsGroup.getGroupMembers()) {
+            if (obs.getConcept().equals(concept)) {
+                return obs;
+            }
+        }
+        return null;
     }
 
     public Concept getRadiologyReportSetConcept() {

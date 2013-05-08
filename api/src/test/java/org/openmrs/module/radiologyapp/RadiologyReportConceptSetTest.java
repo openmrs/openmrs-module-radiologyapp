@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptSource;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.emr.EmrConstants;
@@ -26,6 +27,7 @@ import org.openmrs.module.emr.EmrConstants;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
@@ -160,4 +162,140 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
 
     }
 
+    @Test
+    public void shouldFetchAccessionNumberFromObsGroup() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyReportConceptSet.getAccessionNumberFromObsGroup(obsGroup), is("123"));
+    }
+
+    @Test
+    public void shouldFetchProcedureFromObsGroup() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyReportConceptSet.getProcedureFromObsGroup(obsGroup).getId(), is(321));
+    }
+
+    @Test
+    public void shouldFetchReportTypeFromObsGroup() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyReportConceptSet.getReportTypeFromObsGroup(obsGroup).getId(), is(345));
+    }
+
+    @Test
+    public void shouldFetchReportBodyFromObsGroup() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Obs obsGroup = createObsGroup();
+        assertThat(radiologyReportConceptSet.getReportBodyFromObsGroup(obsGroup), is("Some report"));
+    }
+
+    @Test
+    public void shouldFetchObsGroupFromEncounter() {
+        RadiologyReportConceptSet radiologyStudyConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyStudyConceptSet.getObsGroupFromEncounter(encounter).getId(), is(222));
+    }
+
+    @Test
+    public void shouldFetchAccessionNumberFromEncounter() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter), is("123"));
+    }
+
+    @Test
+    public void shouldFetchProcedureFromEncounter() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyReportConceptSet.getProcedureFromEncounter(encounter).getId(), is(321));
+    }
+
+    @Test
+    public void shouldFetchReportTypeFromObsEncounter() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyReportConceptSet.getReportTypeFromEncounter(encounter).getId(), is(345));
+    }
+
+    @Test
+    public void shouldFetchReportBodyFromEncounter() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = createEncounter();
+        assertThat(radiologyReportConceptSet.getReportBodyFromEncounter(encounter), is("Some report"));
+    }
+
+    @Test
+    public void shouldReturnNullForAllObs() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = createEncounterWithObsGroupWithNoObs();
+        assertNull(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getProcedureFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getReportBodyFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getReportTypeFromEncounter(encounter));
+    }
+
+    @Test
+    public void shouldReturnNullForIfNoObsGroup() {
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        Encounter encounter = new Encounter();
+        assertNull(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getProcedureFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getReportBodyFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getReportTypeFromEncounter(encounter));
+    }
+
+    private Encounter createEncounter() {
+        Encounter encounter = new Encounter();
+        encounter.addObs(createObsGroup());
+        return encounter;
+    }
+
+    private Obs createObsGroup() {
+
+        Obs obsGroup = new Obs();
+        obsGroup.setId(222);
+        obsGroup.setConcept(radiologyReportSetConcept);
+
+        Obs accessionNumber = new Obs();
+        accessionNumber.setConcept(accessionNumberConcept);
+        accessionNumber.setValueText("123");
+        obsGroup.addGroupMember(accessionNumber);
+
+        Concept procedure = new Concept();
+        procedure.setId(321);
+        Obs procedureObs = new Obs();
+        procedureObs.setConcept(procedureConcept);
+        procedureObs.setValueCoded(procedure);
+        obsGroup.addGroupMember(procedureObs);
+
+        Concept reportType = new Concept();
+        reportType.setId(345);
+        Obs reportTypeObs = new Obs();
+        reportTypeObs.setConcept(reportTypeConcept);
+        reportTypeObs.setValueCoded(reportType);
+        obsGroup.addGroupMember(reportTypeObs);
+
+        Obs reportBody = new Obs();
+        reportBody.setConcept(reportBodyConcept);
+        reportBody.setValueText("Some report");
+        obsGroup.addGroupMember(reportBody);
+
+        return obsGroup;
+    }
+
+    private Encounter createEncounterWithObsGroupWithNoObs() {
+        Encounter encounter = new Encounter();
+        encounter.addObs(createObsGroupWithNoObs());
+        return encounter;
+    }
+
+    private Obs createObsGroupWithNoObs() {
+
+        Obs obsGroup = new Obs();
+        obsGroup.setId(222);
+        obsGroup.setConcept(radiologyReportSetConcept);
+
+        return obsGroup;
+    }
 }

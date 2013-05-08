@@ -52,6 +52,7 @@ import org.openmrs.module.emrapi.db.EmrApiDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
+import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -269,7 +270,7 @@ public class RadiologyServiceTest{
 
 
     @Test
-    public void shouldPlaceARadiologyRequisitionWithOneStudyOnFixedMachine() {
+    public void placeRadiologyRequisition_shouldPlaceARadiologyRequisitionWithOneStudyOnFixedMachine() {
         Concept study = new Concept();
         RadiologyRequisition radiologyRequisition = new RadiologyRequisition();
         radiologyRequisition.setPatient(patient);
@@ -284,7 +285,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void shouldPlaceARadiologyRequisitionWithTwoStudiesOnPortableMachine() {
+    public void placeRadiologyRequisition_shouldPlaceARadiologyRequisitionWithTwoStudiesOnPortableMachine() {
         Location examLocation = new Location();
         Concept study = new Concept();
         Concept secondStudy = new Concept();
@@ -304,7 +305,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void shouldPlaceOrderEvenIfThereIsNoVisit() {
+    public void placeRadiologyRequisition_shouldPlaceOrderEvenIfThereIsNoVisit() {
         RadiologyRequisition radiologyRequisition = new RadiologyRequisition();
         radiologyRequisition.setPatient(patient);
 
@@ -487,7 +488,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyStudiesShouldReturnAllRadiologyStudiesForPatient() {
+    public void getRadiologyStudiesForPatient_shouldReturnAllRadiologyStudiesForPatient() {
 
         Date firstStudyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Date secondStudyDate = new DateTime(2011, 10, 10, 10, 0, 0, 0).toDate();
@@ -535,7 +536,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyStudiesShouldNotFailIfNoObsGroup() {
+    public void getRadiologyStudiesForPatient_shouldNotFailIfNoObsGroup() {
 
         Date firstStudyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Date secondStudyDate = new DateTime(2011, 10, 10, 10, 0, 0, 0).toDate();
@@ -572,7 +573,7 @@ public class RadiologyServiceTest{
 
 
     @Test
-    public void getRadiologyStudiesShouldReturnEmptyListIfNoStudiesForPatient() {
+    public void getRadiologyStudiesForPatient_shouldReturnEmptyListIfNoStudiesForPatient() {
 
         when(encounterService.getEncounters(patient, null, null, null, null, Collections.singletonList(radiologyStudyEncounterType),
                 null, null, null, false)).thenReturn(null);
@@ -583,7 +584,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumberShouldReturnRadiologyStudyWithAccessionNumber() {
+    public void getRadiologyStudyByAccessionNumber_shouldReturnRadiologyStudyWithAccessionNumber() {
 
         Date studyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Provider studyTechnician = new Provider();
@@ -612,7 +613,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumberShouldNotFailIfMultipleResults() {
+    public void getRadiologyStudyByAccessionNumber_shouldNotFailIfMultipleResults() {
 
         Date firstStudyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Date secondStudyDate = new DateTime(2011, 10, 10, 10, 0, 0, 0).toDate();
@@ -660,7 +661,7 @@ public class RadiologyServiceTest{
 
 
     @Test
-    public void getRadiologyStudyByAccessionNumberShouldReturnNullIfNoMatchingStudy() {
+    public void getRadiologyStudyByAccessionNumber_shouldReturnNullIfNoMatchingStudy() {
         when(emrApiDAO.getEncountersByObsValueText(any(Concept.class), any(String.class)
                 , any(EncounterType.class), eq(false))).thenReturn(null);
 
@@ -668,6 +669,57 @@ public class RadiologyServiceTest{
         assertNull(radiologyStudy);
     }
 
+
+    @Test
+    public void getRadiologyReportsByAccessionNumber_shouldReturnRadiologyReportsWithAccessionNumber() {
+
+        Concept prelimReport = new Concept();
+        Concept finalReport = new Concept();
+        Concept procedure = new Concept();
+        procedure.setId(111);
+
+        Date firstReportDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
+        Provider firstReporter = new Provider();
+        Location firstLocation = new Location();
+
+        RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();
+        firstExpectedRadiologyReport.setAccessionNumber("123");
+        firstExpectedRadiologyReport.setReportDate(firstReportDate);
+        firstExpectedRadiologyReport.setProcedure(procedure);
+        firstExpectedRadiologyReport.setPatient(patient);
+        firstExpectedRadiologyReport.setPrincipalResultsInterpreter(firstReporter);
+        firstExpectedRadiologyReport.setReportLocation(firstLocation);
+        firstExpectedRadiologyReport.setReportType(prelimReport);
+        firstExpectedRadiologyReport.setReportBody("Some prelim report");
+
+        Date secondReportDate = new DateTime(2012, 12, 30, 12, 0, 0, 0).toDate();
+        Provider secondReporter = new Provider();
+        Location secondLocation = new Location();
+
+        RadiologyReport secondExpectedRadiologyReport = new RadiologyReport();
+        secondExpectedRadiologyReport.setAccessionNumber("123");
+        secondExpectedRadiologyReport.setReportDate(secondReportDate);
+        secondExpectedRadiologyReport.setProcedure(procedure);
+        secondExpectedRadiologyReport.setPatient(patient);
+        secondExpectedRadiologyReport.setPrincipalResultsInterpreter(secondReporter);
+        secondExpectedRadiologyReport.setReportLocation(secondLocation);
+        secondExpectedRadiologyReport.setReportType(finalReport);
+        secondExpectedRadiologyReport.setReportBody("Some final report");
+
+        List<Encounter> encounters = new ArrayList<Encounter>();
+        encounters.add(setupRadiologyReportEncounter(firstExpectedRadiologyReport));
+        encounters.add(setupRadiologyReportEncounter(secondExpectedRadiologyReport));
+
+        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+                .thenReturn(encounters);
+
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
+        assertThat(radiologyReports.size(), is(2));
+
+        // should now be in reverse order since we sort by report date with most recent first
+        assertTrue(new IsExpectedRadiologyReport(secondExpectedRadiologyReport).matches(radiologyReports.get(0)));
+        assertTrue(new IsExpectedRadiologyReport(firstExpectedRadiologyReport).matches(radiologyReports.get(1)));
+    }
 
     private Encounter setupRadiologyStudyEncounter(Date datePerformed, Location location, Patient patient,
                                                    Provider provider, String accessionNumber, Concept procedure) {
@@ -709,6 +761,44 @@ public class RadiologyServiceTest{
         encounter.setLocation(location);
         encounter.setPatient(patient);
         encounter.addProvider(radiologyTechnicianEncounterRole, provider);
+
+        return encounter;
+    }
+
+    private Encounter setupRadiologyReportEncounter(RadiologyReport report) {
+
+        Encounter encounter = new Encounter();
+        encounter.setEncounterType(radiologyReportEncounterType);
+        encounter.setEncounterDatetime(report.getReportDate());
+        encounter.setLocation(report.getReportLocation());
+        encounter.setPatient(report.getPatient());
+        encounter.setProvider(principalResultsInterpreterEncounterRole, report.getPrincipalResultsInterpreter());
+
+        Obs radiologyReportObsGroup = new Obs();
+        radiologyReportObsGroup.setConcept(radiologyReportSetConcept);
+        radiologyReportObsGroup.setId(333);
+
+        Obs accessionNumberObs = new Obs();
+        accessionNumberObs.setConcept(accessionNumberConcept);
+        accessionNumberObs.setValueText(report.getAccessionNumber());
+        radiologyReportObsGroup.addGroupMember(accessionNumberObs);
+
+        Obs procedureObs = new Obs();
+        procedureObs.setConcept(procedureConcept);
+        procedureObs.setValueCoded(report.getProcedure());
+        radiologyReportObsGroup.addGroupMember(procedureObs);
+
+        Obs reportTypeObs = new Obs();
+        reportTypeObs.setConcept(reportTypeConcept);
+        reportTypeObs.setValueCoded(report.getReportType());
+        radiologyReportObsGroup.addGroupMember(reportTypeObs);
+
+        Obs reportBodyObs = new Obs();
+        reportBodyObs.setConcept(reportBodyConcept);
+        reportBodyObs.setValueText(report.getReportBody());
+        radiologyReportObsGroup.addGroupMember(reportBodyObs);
+
+        encounter.addObs(radiologyReportObsGroup);
 
         return encounter;
     }

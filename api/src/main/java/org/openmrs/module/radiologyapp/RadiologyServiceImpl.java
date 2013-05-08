@@ -30,6 +30,7 @@ import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.db.EmrApiDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
+import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
@@ -172,6 +173,27 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
+    public List<RadiologyReport> getRadiologyReportsByAccessionNumber(String accessionNumber) {
+
+        List<Encounter> radiologyReportEncounters =
+                emrApiDAO.getEncountersByObsValueText(new RadiologyReportConceptSet(conceptService).getAccessionNumberConcept(),
+                accessionNumber, radiologyProperties.getRadiologyReportEncounterType(), false);
+
+        List<RadiologyReport> radiologyReports = new ArrayList<RadiologyReport>();
+
+        if (radiologyReportEncounters != null) {
+            for (Encounter radiologyReportEncounter : radiologyReportEncounters) {
+                radiologyReports.add(convertEncounterToRadiologyReport(radiologyReportEncounter));
+            }
+        }
+
+
+        Collections.sort(radiologyReports, new RadiologyReportByDataComparator());
+        return radiologyReports;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient) {
 
         // first fetch all the radiology study encounters for this patient
@@ -204,7 +226,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         Set<Provider> technicians = encounter.getProvidersByRole(radiologyProperties.getRadiologyTechnicianEncounterRole());
         if (technicians != null && !technicians.isEmpty()) {
             if (technicians.size() > 1) {
-                log.warn("Multiple technicians listed for radiology encounter encounter " + encounter);
+                log.warn("Multiple technicians listed for radiology study encounter " + encounter);
             }
             radiologyStudy.setTechnician(technicians.iterator().next());
         }
@@ -215,6 +237,31 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         radiologyStudy.setAccessionNumber(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
 
         return radiologyStudy;
+    }
+
+    private RadiologyReport convertEncounterToRadiologyReport(Encounter encounter) {
+
+        RadiologyReport radiologyReport = new RadiologyReport();
+        radiologyReport.setPatient(encounter.getPatient());
+        radiologyReport.setReportDate(encounter.getEncounterDatetime());
+        radiologyReport.setReportLocation(encounter.getLocation());
+
+        Set<Provider> resultsInterpreters = encounter.getProvidersByRole(radiologyProperties.getPrincipalResultsInterpreterEncounterRole());
+        if (resultsInterpreters != null && !resultsInterpreters.isEmpty()) {
+            if (resultsInterpreters.size() > 1) {
+                log.warn("Multiple prinicipal results interpreters listed for radiology report encounter " + encounter);
+            }
+            radiologyReport.setPrincipalResultsInterpreter(resultsInterpreters.iterator().next());
+        }
+
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+        radiologyReport.setReportType(radiologyReportConceptSet.getReportTypeFromEncounter(encounter));
+        radiologyReport.setReportBody(radiologyReportConceptSet.getReportBodyFromEncounter(encounter));
+        radiologyReport.setAccessionNumber(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter));
+        radiologyReport.setProcedure(radiologyReportConceptSet.getProcedureFromEncounter(encounter));
+
+        return radiologyReport;
+
     }
 
     private void validate(RadiologyReport radiologyReport) {
