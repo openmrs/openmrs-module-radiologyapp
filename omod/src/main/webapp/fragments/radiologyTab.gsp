@@ -12,7 +12,18 @@
 
     Accession Number: {{- accessionNumber }}<br/>
     Performed by {{- technician }} on {{- datePerformed }}<br/>
-    Images available: {{- imagesAvailable }}
+    Images available: {{- imagesAvailable }}<br/>
+
+    <br/>
+
+    {{_.each(reports, function(report) { }}
+<pre>
+Reported by {{- report.principalResultsInterpreter }} on {{- report.reportDate }}
+Report type: {{- report.reportType }}
+
+{{- report.reportBody }}
+</pre>
+    {{ }) }}
 
 </script>
 
