@@ -721,6 +721,60 @@ public class RadiologyServiceTest{
         assertTrue(new IsExpectedRadiologyReport(firstExpectedRadiologyReport).matches(radiologyReports.get(1)));
     }
 
+    @Test
+    public void getRadiologyReportsByAccessionNumber_shouldNotFailIfNoObsGroups() {
+
+        Concept prelimReport = new Concept();
+        Concept finalReport = new Concept();
+        Concept procedure = new Concept();
+        procedure.setId(111);
+
+        Date firstReportDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
+        Provider firstReporter = new Provider();
+        Location firstLocation = new Location();
+
+        RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();
+        firstExpectedRadiologyReport.setReportDate(firstReportDate);
+        firstExpectedRadiologyReport.setPatient(patient);
+        firstExpectedRadiologyReport.setPrincipalResultsInterpreter(firstReporter);
+        firstExpectedRadiologyReport.setReportLocation(firstLocation);
+
+        Date secondReportDate = new DateTime(2012, 12, 30, 12, 0, 0, 0).toDate();
+        Provider secondReporter = new Provider();
+        Location secondLocation = new Location();
+
+        RadiologyReport secondExpectedRadiologyReport = new RadiologyReport();
+        secondExpectedRadiologyReport.setReportDate(secondReportDate);
+        secondExpectedRadiologyReport.setPatient(patient);
+        secondExpectedRadiologyReport.setPrincipalResultsInterpreter(secondReporter);
+        secondExpectedRadiologyReport.setReportLocation(secondLocation);
+
+        List<Encounter> encounters = new ArrayList<Encounter>();
+        encounters.add(setupRadiologyReportEncounterWithoutObsGroup(firstExpectedRadiologyReport));
+        encounters.add(setupRadiologyReportEncounterWithoutObsGroup(secondExpectedRadiologyReport));
+
+        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+                .thenReturn(encounters);
+
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
+        assertThat(radiologyReports.size(), is(2));
+
+        // should now be in reverse order since we sort by report date with most recent first
+        assertTrue(new IsExpectedRadiologyReport(secondExpectedRadiologyReport).matches(radiologyReports.get(0)));
+        assertTrue(new IsExpectedRadiologyReport(firstExpectedRadiologyReport).matches(radiologyReports.get(1)));
+    }
+
+    @Test
+    public void getRadiologyReportsByAccessionNumber_shouldReturnEmptyListIfNoMatchingStudies() {
+
+        when(emrApiDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+                .thenReturn(new ArrayList<Encounter>());
+
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
+        assertThat(radiologyReports.size(), is(0));
+
+    }
+
     private Encounter setupRadiologyStudyEncounter(Date datePerformed, Location location, Patient patient,
                                                    Provider provider, String accessionNumber, Concept procedure) {
         Encounter encounter = new Encounter();
@@ -802,6 +856,19 @@ public class RadiologyServiceTest{
 
         return encounter;
     }
+
+    private Encounter setupRadiologyReportEncounterWithoutObsGroup(RadiologyReport report) {
+
+        Encounter encounter = new Encounter();
+        encounter.setEncounterType(radiologyReportEncounterType);
+        encounter.setEncounterDatetime(report.getReportDate());
+        encounter.setLocation(report.getReportLocation());
+        encounter.setPatient(report.getPatient());
+        encounter.setProvider(principalResultsInterpreterEncounterRole, report.getPrincipalResultsInterpreter());
+
+        return encounter;
+    }
+
 
     // TODO: could move the rest of these matchers out into separate classes in matchers package
 

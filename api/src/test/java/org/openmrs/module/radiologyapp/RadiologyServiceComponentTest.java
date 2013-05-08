@@ -37,6 +37,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
+import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -382,7 +383,6 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     public void shouldRetrieveRadiologyStudyByAccessionNumber() {
 
         // first create a study
-
         Date timeOfStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
 
         // use patient demo database
@@ -413,4 +413,55 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         assertTrue(new IsExpectedRadiologyStudy(expectedRadiologyStudy).matches(radiologyStudy));
     }
+
+    @Test
+    public void shouldRetrieveRadiologyReportsByAccessionNumber() {
+
+        Date firstTimeOfStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
+        Date secondTimeOfStudy = new DateTime(2012,1,2,10,10,10,10).toDate();
+
+        // use patient demo database
+        Patient patient = patientService.getPatient(6);
+
+        // from radiologyServiceComponentTestDataset.xml
+        Concept procedure = conceptService.getConcept(1001);
+        Concept reportType = conceptService.getConcept(1009);
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+
+        // first create a couple reports
+        RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();
+        firstExpectedRadiologyReport.setPatient(patient);
+        firstExpectedRadiologyReport.setProcedure(procedure);
+        firstExpectedRadiologyReport.setReportType(reportType);
+        firstExpectedRadiologyReport.setReportBody("Some test report");
+        firstExpectedRadiologyReport.setAccessionNumber("12345");
+        firstExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
+        firstExpectedRadiologyReport.setReportDate(firstTimeOfStudy) ;
+        firstExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
+        firstExpectedRadiologyReport.setReportLocation(emrApiProperties.getUnknownLocation());
+
+        radiologyService.saveRadiologyReport(firstExpectedRadiologyReport);
+
+        RadiologyReport secondExpectedRadiologyReport = new RadiologyReport();
+        secondExpectedRadiologyReport.setPatient(patient);
+        secondExpectedRadiologyReport.setProcedure(procedure);
+        secondExpectedRadiologyReport.setReportType(reportType);
+        secondExpectedRadiologyReport.setReportBody("Another test report");
+        secondExpectedRadiologyReport.setAccessionNumber("12345");
+        secondExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
+        secondExpectedRadiologyReport.setReportDate(secondTimeOfStudy);
+        secondExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
+        secondExpectedRadiologyReport.setReportLocation(emrApiProperties.getUnknownLocation());
+
+        radiologyService.saveRadiologyReport(secondExpectedRadiologyReport);
+
+        // now fetch the reports
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("12345");
+
+        assertThat(radiologyReports.size(), is(2));
+        assertTrue(new IsExpectedRadiologyReport(firstExpectedRadiologyReport).matches(radiologyReports.get(1)));
+        assertTrue(new IsExpectedRadiologyReport(secondExpectedRadiologyReport).matches(radiologyReports.get(0)));
+
+    }
+
 }
