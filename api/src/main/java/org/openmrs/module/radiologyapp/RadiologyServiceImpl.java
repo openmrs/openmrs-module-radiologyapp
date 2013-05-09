@@ -39,7 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class RadiologyServiceImpl  extends BaseOpenmrsService implements RadiologyService {
@@ -209,22 +212,45 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Override
     public List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient) {
 
+        RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
+
         // first fetch all the radiology study encounters for this patient
-        List<Encounter> encounters = encounterService.getEncounters(patient, null, null, null, null,
+        List<Encounter> radiologyStudyEncounters = encounterService.getEncounters(patient, null, null, null, null,
                 Collections.singletonList(radiologyProperties.getRadiologyStudyEncounterType()),
                 null, null, null, false);
 
         List<RadiologyStudy> radiologyStudies = new ArrayList<RadiologyStudy>();
+        Set<String> accessionNumbersOfExistingRadiologyStudyEncounters = new HashSet<String>();
 
-        if (encounters != null) {
-            for (Encounter encounter : encounters) {
-                radiologyStudies.add(convertEncounterToRadiologyStudy(encounter));
+        if (radiologyStudyEncounters != null) {
+            for (Encounter encounter : radiologyStudyEncounters) {
+                RadiologyStudy radiologyStudy = convertEncounterToRadiologyStudy(encounter);
+                radiologyStudies.add(radiologyStudy);
+                accessionNumbersOfExistingRadiologyStudyEncounters.add(radiologyStudy.getAccessionNumber());
             }
         }
 
         // now find any "orphaned" reports" and make transient radiology studies to represent them
-        // List<Encounter> radiologyReportEncounters = emrEncounterDAO.getEncountersByObsValueText()
+        List<Encounter> radiologyReportEncounters = encounterService.getEncounters(patient, null, null, null, null,
+                Collections.singletonList(radiologyProperties.getRadiologyReportEncounterType()),
+                null, null, null, false);
 
+        Map<String, List<RadiologyReport>> radiologyReportsByAccessionNumber = new HashMap<String, List<RadiologyReport>>();
+
+        for (Encounter radiologyReportEncounter : radiologyReportEncounters) {
+            String accessionNumber = radiologyReportConceptSet.getAccessionNumberFromEncounter(radiologyReportEncounter);
+
+            if (!accessionNumbersOfExistingRadiologyStudyEncounters.contains(accessionNumber)) {
+                if (!radiologyReportsByAccessionNumber.containsKey(accessionNumber)) {
+                    radiologyReportsByAccessionNumber.put(accessionNumber, new ArrayList<RadiologyReport>());
+                }
+                radiologyReportsByAccessionNumber.get(accessionNumber).add(convertEncounterToRadiologyReport(radiologyReportEncounter));
+            }
+        }
+
+        for (List<RadiologyReport> radiologyReports : radiologyReportsByAccessionNumber.values()) {
+            radiologyStudies.add(deriveRadiologyStudyFromRadiologyReports(radiologyReports));
+        }
 
         Collections.sort(radiologyStudies, new RadiologyStudyByDateComparator());
         return radiologyStudies;
