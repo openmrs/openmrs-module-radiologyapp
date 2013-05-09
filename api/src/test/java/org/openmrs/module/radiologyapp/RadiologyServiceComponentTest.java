@@ -415,10 +415,10 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     }
 
     @Test
-    public void shouldRetrieveRadiologyReportsByAccessionNumber() {
+    public void shouldDeriveRadiologyStudyFromRadiologyReports() {
 
-        Date firstTimeOfStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
-        Date secondTimeOfStudy = new DateTime(2012,1,2,10,10,10,10).toDate();
+        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
+        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -436,7 +436,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         firstExpectedRadiologyReport.setReportBody("Some test report");
         firstExpectedRadiologyReport.setAccessionNumber("12345");
         firstExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
-        firstExpectedRadiologyReport.setReportDate(firstTimeOfStudy) ;
+        firstExpectedRadiologyReport.setReportDate(firstTimeOfReport) ;
         firstExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
         firstExpectedRadiologyReport.setReportLocation(emrApiProperties.getUnknownLocation());
 
@@ -449,7 +449,59 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         secondExpectedRadiologyReport.setReportBody("Another test report");
         secondExpectedRadiologyReport.setAccessionNumber("12345");
         secondExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
-        secondExpectedRadiologyReport.setReportDate(secondTimeOfStudy);
+        secondExpectedRadiologyReport.setReportDate(secondTimeOfReport);
+        secondExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
+        secondExpectedRadiologyReport.setReportLocation(emrApiProperties.getUnknownLocation());
+
+        radiologyService.saveRadiologyReport(secondExpectedRadiologyReport);
+
+        // create the expected study
+        RadiologyStudy expectedRadiologyStudy = new RadiologyStudy();
+        expectedRadiologyStudy.setDatePerformed(firstTimeOfReport);
+        expectedRadiologyStudy.setAccessionNumber("12345");
+        expectedRadiologyStudy.setProcedure(procedure);
+        expectedRadiologyStudy.setPatient(patient);
+
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("12345");
+        assertTrue(new IsExpectedRadiologyStudy(expectedRadiologyStudy).matches(radiologyStudy));
+    }
+
+    @Test
+    public void shouldRetrieveRadiologyReportsByAccessionNumber() {
+
+        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
+        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
+
+        // use patient demo database
+        Patient patient = patientService.getPatient(6);
+
+        // from radiologyServiceComponentTestDataset.xml
+        Concept procedure = conceptService.getConcept(1001);
+        Concept reportType = conceptService.getConcept(1009);
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+
+        // first create a couple reports
+        RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();
+        firstExpectedRadiologyReport.setPatient(patient);
+        firstExpectedRadiologyReport.setProcedure(procedure);
+        firstExpectedRadiologyReport.setReportType(reportType);
+        firstExpectedRadiologyReport.setReportBody("Some test report");
+        firstExpectedRadiologyReport.setAccessionNumber("12345");
+        firstExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
+        firstExpectedRadiologyReport.setReportDate(firstTimeOfReport) ;
+        firstExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
+        firstExpectedRadiologyReport.setReportLocation(emrApiProperties.getUnknownLocation());
+
+        radiologyService.saveRadiologyReport(firstExpectedRadiologyReport);
+
+        RadiologyReport secondExpectedRadiologyReport = new RadiologyReport();
+        secondExpectedRadiologyReport.setPatient(patient);
+        secondExpectedRadiologyReport.setProcedure(procedure);
+        secondExpectedRadiologyReport.setReportType(reportType);
+        secondExpectedRadiologyReport.setReportBody("Another test report");
+        secondExpectedRadiologyReport.setAccessionNumber("12345");
+        secondExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
+        secondExpectedRadiologyReport.setReportDate(secondTimeOfReport);
         secondExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
         secondExpectedRadiologyReport.setReportLocation(emrApiProperties.getUnknownLocation());
 

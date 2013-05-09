@@ -52,6 +52,8 @@ public interface RadiologyService extends OpenmrsService {
 
     /**
      * Fetches the radiology study with the specified accession number
+     * (If there is no explicit radiology study encounter with this accession number,
+     * it tries to derive this information from any radiology reports with the same accession number)
      *
      * @param accessionNumber
      * @return
@@ -69,6 +71,10 @@ public interface RadiologyService extends OpenmrsService {
 
     /**
      * Returns all the radiology studies for the selected patient, sorted by date, with most recent first
+     * This method determines fetches studies by 1) fetching all Radiology Study encounters, and then
+     * 2) fetching all orphaned Radiology Reports (i.e., Radiology Report encounters where there is no
+     * Radiology Study encounter with the same accession number) and creating transient Radiology Study
+     * objects for these report sets
      *
      * @param patient
      * @return

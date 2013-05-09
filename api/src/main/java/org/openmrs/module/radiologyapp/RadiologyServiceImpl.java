@@ -154,21 +154,35 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Override
     public RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber) {
 
+        RadiologyStudy radiologyStudy = null;
+
+        // first search for any radiology study encounters
         List<Encounter> radiologyStudyEncounters =
                 emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
                 accessionNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
 
-        if (radiologyStudyEncounters == null || radiologyStudyEncounters.size() == 0) {
-            return null;
+        if (radiologyStudyEncounters != null && radiologyStudyEncounters.size() > 0) {
+
+            // note that also the API should prevent two radiology study encounters with the same accession number from being created,
+            // if we do encounter this issue, we log an error, but we don't throw an exception and instead just return the first study
+            if (radiologyStudyEncounters.size() > 1) {
+                log.error("More than one Radiology Study Encounter with accession number " + accessionNumber);
+            }
+
+            radiologyStudy = convertEncounterToRadiologyStudy(radiologyStudyEncounters.get(0));
+        }
+        else {
+
+            // if we don't find an actual radiology study encounter, see if we can derive information from any reports
+            // with the same accession number
+            List<RadiologyReport> radiologyReports = getRadiologyReportsByAccessionNumber(accessionNumber);
+
+            if (radiologyReports != null && radiologyReports.size() > 0) {
+                radiologyStudy = deriveRadiologyStudyFromRadiologyReports(radiologyReports);
+            }
         }
 
-        // note that also the API should prevent two radiology study encounters with the same accession number from being created,
-        // if we do encounter this issue, we log an error, but we don't throw an exception and instead just return the first study
-        if (radiologyStudyEncounters.size() > 1) {
-            log.error("More than one Radiology Study Encounter with accession number " + accessionNumber);
-        }
-
-        return convertEncounterToRadiologyStudy(radiologyStudyEncounters.get(0));
+        return radiologyStudy;
     }
 
     @Transactional(readOnly = true)
@@ -187,7 +201,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
         }
 
-
         Collections.sort(radiologyReports, new RadiologyReportByDataComparator());
         return radiologyReports;
     }
@@ -201,16 +214,17 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
                 Collections.singletonList(radiologyProperties.getRadiologyStudyEncounterType()),
                 null, null, null, false);
 
-        // return an empty list if no matching encounters
-        if (encounters == null || encounters.size() == 0) {
-            return new ArrayList<RadiologyStudy>();
-        }
-
         List<RadiologyStudy> radiologyStudies = new ArrayList<RadiologyStudy>();
 
-        for (Encounter encounter : encounters) {
-            radiologyStudies.add(convertEncounterToRadiologyStudy(encounter));
+        if (encounters != null) {
+            for (Encounter encounter : encounters) {
+                radiologyStudies.add(convertEncounterToRadiologyStudy(encounter));
+            }
         }
+
+        // now find any "orphaned" reports" and make transient radiology studies to represent them
+        // List<Encounter> radiologyReportEncounters = emrEncounterDAO.getEncountersByObsValueText()
+
 
         Collections.sort(radiologyStudies, new RadiologyStudyByDateComparator());
         return radiologyStudies;
@@ -262,6 +276,23 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         return radiologyReport;
 
+    }
+
+    private RadiologyStudy deriveRadiologyStudyFromRadiologyReports(List<RadiologyReport> radiologyReports) {
+
+        RadiologyStudy radiologyStudy = new RadiologyStudy();
+
+        // just pull the data from the most recent report
+        radiologyStudy.setProcedure(radiologyReports.get(0).getProcedure());
+        radiologyStudy.setPatient(radiologyReports.get(0).getPatient());
+        radiologyStudy.setAccessionNumber(radiologyReports.get(0).getAccessionNumber());
+        radiologyStudy.setAssociatedRadiologyOrder(radiologyReports.get(0).getAssociatedRadiologyOrder());
+
+        // set the date performed to the date of the earliest report
+        // TODO: (a bit of a hack, not entirely accurate)
+        radiologyStudy.setDatePerformed(radiologyReports.get(radiologyReports.size() - 1).getReportDate());
+
+        return radiologyStudy;
     }
 
     private void validate(RadiologyReport radiologyReport) {

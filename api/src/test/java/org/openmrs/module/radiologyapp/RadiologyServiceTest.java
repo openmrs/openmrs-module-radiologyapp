@@ -669,6 +669,65 @@ public class RadiologyServiceTest{
         assertNull(radiologyStudy);
     }
 
+    @Test
+    public void getRadiologyStudyByAccessionNumber_shouldDeriveRadiologyStudyFromReports() {
+
+        // first, create a couple reports
+
+        Concept prelimReport = new Concept();
+        Concept finalReport = new Concept();
+        Concept procedure = new Concept();
+        procedure.setId(111);
+
+        Date firstReportDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
+        Provider firstReporter = new Provider();
+        Location firstLocation = new Location();
+
+        RadiologyReport firstRadiologyReport = new RadiologyReport();
+        firstRadiologyReport.setAccessionNumber("123");
+        firstRadiologyReport.setReportDate(firstReportDate);
+        firstRadiologyReport.setProcedure(procedure);
+        firstRadiologyReport.setPatient(patient);
+        firstRadiologyReport.setPrincipalResultsInterpreter(firstReporter);
+        firstRadiologyReport.setReportLocation(firstLocation);
+        firstRadiologyReport.setReportType(prelimReport);
+        firstRadiologyReport.setReportBody("Some prelim report");
+
+        Date secondReportDate = new DateTime(2012, 12, 30, 12, 0, 0, 0).toDate();
+        Provider secondReporter = new Provider();
+        Location secondLocation = new Location();
+
+        RadiologyReport secondRadiologyReport = new RadiologyReport();
+        secondRadiologyReport.setAccessionNumber("123");
+        secondRadiologyReport.setReportDate(secondReportDate);
+        secondRadiologyReport.setProcedure(procedure);
+        secondRadiologyReport.setPatient(patient);
+        secondRadiologyReport.setPrincipalResultsInterpreter(secondReporter);
+        secondRadiologyReport.setReportLocation(secondLocation);
+        secondRadiologyReport.setReportType(finalReport);
+        secondRadiologyReport.setReportBody("Some final report");
+
+        List<Encounter> encounters = new ArrayList<Encounter>();
+        encounters.add(setupRadiologyReportEncounter(firstRadiologyReport));
+        encounters.add(setupRadiologyReportEncounter(secondRadiologyReport));
+
+        // return an empty list when trying to fetch studies
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+                .thenReturn(new ArrayList<Encounter>());
+
+        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+                .thenReturn(encounters);
+
+        RadiologyStudy expectedStudy = new RadiologyStudy();
+        expectedStudy.setDatePerformed(firstReportDate);
+        expectedStudy.setPatient(patient);
+        expectedStudy.setProcedure(procedure);
+        expectedStudy.setAccessionNumber("123");
+
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
+        assertTrue(new IsExpectedRadiologyStudy(expectedStudy).matches(radiologyStudy));
+    }
+
 
     @Test
     public void getRadiologyReportsByAccessionNumber_shouldReturnRadiologyReportsWithAccessionNumber() {
