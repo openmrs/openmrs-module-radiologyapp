@@ -4,23 +4,31 @@
     ui.includeJavascript("radiologyapp", "radiologyTab.js")
 %>
 
+<style>
+    pre {
+        font-size: 14px;
+    }
+</style>
 
+
+<!-- TODO: don't forget to localize all text, including "Yes" and "No" -->
 
 <script type="text/template" id="radiologyStudyDetailsTemplate">
 
-    <h4>{{- procedure}}</h4>
+    <h2>{{- procedure}}</h2>
 
     Accession Number: {{- accessionNumber }}<br/>
     Performed by {{- technician }} on {{- datePerformed }}<br/>
-    Images available: {{- imagesAvailable }}<br/>
+    Images available: {{- imagesAvailable ?  '${ ui.message("emr.yes")}' :  '${ ui.message("emr.no")}' }}<br/>
 
     <br/>
 
     {{_.each(reports, function(report) { }}
-<pre>
-Reported by {{- report.principalResultsInterpreter }} on {{- report.reportDate }}
-Report type: {{- report.reportType }}
+-----------------------------------------------------------------------------------------
+<h6>Reported by {{- report.principalResultsInterpreter }} on {{- report.reportDate }}</h6>
+<h6>Report type: {{- report.reportType }}</h6>
 
+ <pre>
 {{- report.reportBody }}
 </pre>
     {{ }) }}
@@ -54,6 +62,9 @@ Report type: {{- report.reportType }}
     <% } %>
 </ul>
 
-<ul id="study-details">
+<!-- TODO: we can remove this outer div once we set the study-details div to the same styling as the visit-details div -->
+<div id="visit-details">
+<div id="study-details">
 
-</ul>
+</div>
+</div>
