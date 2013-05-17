@@ -26,7 +26,7 @@
     <small>Report type:</small>
     <span class="report-value"> {{- report.reportType }}</span>
 
-    <h6>Report Information:</h6>
+    <h6>Report Content:</h6>
     <pre>{{- report.reportBody }}</pre>
 </span>
     {{ }) }}
