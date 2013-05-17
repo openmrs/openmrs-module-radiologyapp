@@ -23,7 +23,9 @@
     </pre>
 </span>
     {{ }) }}
-<script>
+
+</script>
+<script type="text/javascript">
     jq(function(){
         loadRadiologyTemplates();
     });
