@@ -16,7 +16,7 @@
     <small>Performed by:</small>
     <span class="report-value"> {{- technician }}</span><br/>
     <small>Images available:</small>
-    <span class="report-value"> {{- imagesAvailable ?  '${ ui.message("emr.yes")}' :  '${ ui.message("emr.no")}' }}</span><br/>
+    <span class="report-value"> {{- imagesAvailable ?  '${ ui.message("emr.yes")}' :  '${ ui.message("emr.no")}' }}</span>
     <br/>
 {{_.each(reports, function(report) { }}
 <span class="radiology-report">
