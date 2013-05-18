@@ -21,11 +21,10 @@
 {{_.each(reports, function(report) { }}
 <span class="radiology-report">
     <div class="visit-status">
-        {{- report.reportType }} by {{- report.principalResultsInterpreter }}
+        <span class="report-value">{{- report.reportType }}</span> by <span class="report-value">{{- report.principalResultsInterpreter }}</span>
         <i class="icon-time small"></i>
         {{- report.reportDate }}
     </div>
-    <h6>Content:</h6>
     <pre>{{- report.reportBody }}</pre>
 </span>
     {{ }) }}
