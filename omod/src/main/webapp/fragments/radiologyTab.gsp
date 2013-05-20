@@ -35,16 +35,14 @@
     });
 </script>
 
-<!-- TODO: change so that it doesn't use visits styling! -->
-
-<ul id="visits-list">
+<ul class="left-menu">
     <% studies.each {  %>
-    <li class="viewRadiologyStudyDetails" studyAccessionNumber="${it.accessionNumber}">
-        <span class="visit-date">
+    <li class="menu-item viewRadiologyStudyDetails" studyAccessionNumber="${it.accessionNumber}">
+        <span class="menu-date">
             <i class="icon-time"></i>
             ${dateFormat.format(it.datePerformed)}
         </span>
-        <span class="visit-primary-diagnosis">
+        <span class="menu-title">
             ${ui.format(it.procedure)}
         </span>
         <span class="arrow-border"></span>
@@ -56,9 +54,6 @@
     <% } %>
 </ul>
 
-<!-- TODO: we can remove this outer div once we set the study-details div to the same styling as the visit-details div -->
-<div id="visit-details">
-<div id="study-details">
-
+<div id="study-details" class="main-content">
 </div>
 </div>
