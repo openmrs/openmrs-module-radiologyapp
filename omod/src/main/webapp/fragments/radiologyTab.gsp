@@ -13,15 +13,17 @@
     </div>
     <small>Accession number:</small>
     <span class="report-value"> {{- accessionNumber }}</span><br/>
+    <% if (technician != null) { %>
     <small>Performed by:</small>
     <span class="report-value"> {{- technician }}</span><br/>
+    <% } %>
     <small>Images available:</small>
     <span class="report-value"> {{- imagesAvailable ?  '${ ui.message("emr.yes")}' :  '${ ui.message("emr.no")}' }}</span>
     <br/>
 {{_.each(reports, function(report) { }}
 <span class="radiology-report">
     <div class="visit-status">
-        <span class="report-value">{{- report.reportType }}</span> by <span class="report-value">{{- report.principalResultsInterpreter }}</span>
+        <span class="report-value">{{- report.reportType }} report</span> by <span class="report-value">{{- report.principalResultsInterpreter }}</span>
         <i class="icon-time small"></i>
         {{- report.reportDate }}
     </div>
