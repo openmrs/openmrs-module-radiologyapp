@@ -43,7 +43,7 @@
         <emrVersion>2.0-SNAPSHOT</emrVersion>
         <htmlformentryVersion>2.0.8</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
-        <providerManagementVersion>1.1.3</providerManagementVersion>
+        <providerManagementVersion>1.1.4-SNAPSHOT</providerManagementVersion>
         <reportingVersion>0.7.6</reportingVersion>
         <paperrecordVersion>1.0-SNAPSHOT</paperrecordVersion>
         <calculationVersion>1.0</calculationVersion>
