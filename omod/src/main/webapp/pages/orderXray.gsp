@@ -1,5 +1,5 @@
 <%
-    ui.decorateWith("emr", "standardEmrPage")
+    ui.decorateWith("appui", "standardEmrPage")
 
     ui.includeJavascript("radiologyapp", "knockout-2.1.0.js")
     ui.includeJavascript("radiologyapp", "xrayOrder.js")
@@ -61,7 +61,7 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
 
         <div class="right-column">
             <div class="row">
-                ${ ui.includeFragment("emr", "field/radioButtons", [
+                ${ ui.includeFragment("uicommons", "field/radioButtons", [
                         label: ui.message("radiologyapp.order.timing"),
                         formFieldName: "urgency",
                         options: [
