@@ -7,7 +7,7 @@
 <!-- TODO: don't forget to localize all text, including "Yes" and "No" -->
 <script type="text/template" id="radiologyStudyDetailsTemplate">
     <h2>{{- procedure}}</h2>
-    <div class="visit-status">
+    <div class="status-container">
         <i class="icon-time small"></i>
         {{- datePerformed }}
     </div>
@@ -20,7 +20,7 @@
     <br/>
 {{_.each(reports, function(report) { }}
 <span class="radiology-report">
-    <div class="visit-status">
+    <div class="status-container">
         <span class="report-value">{{- report.reportType }} report</span> by <span class="report-value">{{- report.principalResultsInterpreter }}</span>
         <i class="icon-time small"></i>
         {{- report.reportDate }}
