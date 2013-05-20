@@ -13,10 +13,8 @@
     </div>
     <small>Accession number:</small>
     <span class="report-value"> {{- accessionNumber }}</span><br/>
-    <% if (technician != null) { %>
     <small>Performed by:</small>
     <span class="report-value"> {{- technician }}</span><br/>
-    <% } %>
     <small>Images available:</small>
     <span class="report-value"> {{- imagesAvailable ?  '${ ui.message("emr.yes")}' :  '${ ui.message("emr.no")}' }}</span>
     <br/>
