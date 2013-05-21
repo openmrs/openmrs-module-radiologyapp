@@ -4,24 +4,23 @@
     ui.includeJavascript("radiologyapp", "radiologyTab.js")
 %>
 
-<!-- TODO: don't forget to localize all text, including "Yes" and "No" -->
 <script type="text/template" id="radiologyStudyDetailsTemplate">
     <h2>{{- procedure}}</h2>
     <div class="status-container">
         <i class="icon-time small"></i>
         {{- datePerformed }}
     </div>
-    <small>Accession number:</small>
+    <small>${ ui.message('radiologyapp.accessionNumber.label') }:</small>
     <span class="report-value"> {{- accessionNumber }}</span><br/>
-    <small>Performed by:</small>
+    <small>${ ui.message('radiologyapp.performedBy.label') }:</small>
     <span class="report-value"> {{- technician }}</span><br/>
-    <small>Images available:</small>
+    <small>${ ui.message('radiologyapp.imagesAvailable.label') }:</small>
     <span class="report-value"> {{- imagesAvailable ?  '${ ui.message("emr.yes")}' :  '${ ui.message("emr.no")}' }}</span>
     <br/>
 {{_.each(reports, function(report) { }}
 <span class="radiology-report">
     <div class="status-container">
-        <span class="report-value">{{- report.reportType }} report</span> by <span class="report-value">{{- report.principalResultsInterpreter }}</span>
+        <span class="report-value">{{- report.reportType }} ${ ui.message('radiologyapp.report.text') }</span> ${ ui.message('radiologyapp.by.text') } <span class="report-value">{{- report.principalResultsInterpreter }}</span>
         <i class="icon-time small"></i>
         {{- report.reportDate }}
     </div>
