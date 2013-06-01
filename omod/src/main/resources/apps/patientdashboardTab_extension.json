@@ -1,0 +1,13 @@
+[
+    {
+        "id": "org.openmrs.module.radiologyapp.tab",
+        "extensionPointId": "patientDashboard.tabs",
+        "type": "link",
+        "label": "radiologyapp.radiology.label",
+        "requiredPrivilege": "Task: org.openmrs.module.radiologyapp.tab",
+        "extensionParams": {
+            "provider": "radiologyapp",
+            "fragment": "radiologyTab"
+        }
+    }
+]
