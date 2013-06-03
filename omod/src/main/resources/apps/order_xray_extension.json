@@ -6,7 +6,7 @@
         "label": "radiologyapp.task.orderXray.label",
         "url": "radiologyapp/orderXray.page?patientId={{patientId}}",
         "icon": "icon-x-ray",
-        "order": 20,
+        "order": 32,
         "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderXray"
     }
 ]
