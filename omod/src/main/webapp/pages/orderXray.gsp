@@ -35,7 +35,7 @@
 <script type="text/javascript">
     var breadcrumbs = [
         { icon: "icon-home", link: '/' + OPENMRS_CONTEXT_PATH + '/index.htm' },
-        { label: "${ ui.format(patient.familyName) }, ${ ui.format(patient.givenName) }", link:'${ui.pageLink("emr", "patient", [patientId: patient.id])}' },
+        { label: "${ ui.format(patient.familyName) }, ${ ui.format(patient.givenName) }", link:'${ui.pageLink("coreapps", "patientdashboard/patientDashboard", [patientId: patient.id])}' },
         { label: "${ui.message("radiologyapp.task.orderXray.label")}" }
     ];
 </script>
@@ -46,7 +46,7 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
 <div id="contentForm">
     <h1>${ ui.message("radiologyapp.orderXray.title") }</h1>
     <form action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderXray") }" data-bind="submit: isValid">
-        <input type="hidden" name="successUrl" value="${ ui.pageLink("emr", "patient", [ patientId: patient.id ]) }"/>
+        <input type="hidden" name="successUrl" value="${ ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id ]) }"/>
         <input type="hidden" name="patient" value="${ patient.id }"/>
         <input type="hidden" name="requestedBy" value="${ currentProvider.id }"/>
 
@@ -102,7 +102,7 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
         </div>
 
         <div id="bottom">
-            <button id="cancel" class="cancel" onclick="location.href = emr.pageLink('emr', 'patient', { patientId: <%= patient.id %> })">
+            <button id="cancel" class="cancel" onclick="location.href = emr.pageLink('coreapps', 'patientdashboard/patientDashboard', { patientId: <%= patient.id %> })">
                 ${ ui.message("radiologyapp.cancel") }
             </button>
             <button type="submit" class="confirm" id="next" data-bind="css: { disabled: !isValid() }, enable: isValid()">
