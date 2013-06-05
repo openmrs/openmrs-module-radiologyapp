@@ -4,7 +4,7 @@
     ui.includeJavascript("radiologyapp", "knockout-2.1.0.js")
     ui.includeJavascript("radiologyapp", "xrayOrder.js")
 
-    ui.includeCss("radiologyapp", "orderXray.css")
+    ui.includeCss("radiologyapp", "xrayOrder.css")
 %>
 
 <script type="text/javascript" xmlns="http://www.w3.org/1999/html">
