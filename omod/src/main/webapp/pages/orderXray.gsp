@@ -52,11 +52,12 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
 
 
         <div class="left-column">
-            <label for="study-search"><strong>${ ui.message("radiologyapp.orderXray.studySearchInstructions") }</strong></label><br/>
+            <label for="study-search">${ ui.message("radiologyapp.orderXray.studySearchInstructions") }</label>
             <input id="study-search" type="text"
                    autofocus="autofocus"
                    data-bind="autocomplete:searchTerm, search:convertedStudies, select:selectStudy, clearValue:function() { return true; }"
                    placeholder="${ ui.message("radiologyapp.orderXray.studySearchPlaceholder") }"/>
+            ${ ui.includeFragment("emr", "field/textarea", [ label:"<label>" + ui.message("radiologyapp.order.indication") + "</label>", formFieldName: "clinicalHistory", labelPosition: "top", rows: 5, cols: 35 ]) }
         </div>
 
         <div class="right-column">
@@ -71,7 +72,7 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
                 ]) }
             </div>
             <div class="row">
-                <p><strong>${ ui.message("radiologyapp.orderXray.portableQuestion") }</strong></p>
+                <p><label>${ ui.message("radiologyapp.orderXray.portableQuestion") }</label></p>
                 <p>
                     <input type="checkbox" class="field-value" value="portable" data-bind="checked: portable"/>
                     <span>${ ui.message("radiologyapp.yes") }</span>
@@ -79,14 +80,8 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
                     </select>
                 </p>
             </div>
-        </div>
 
-        <div class="left-column">
-            ${ ui.includeFragment("emr", "field/textarea", [ label:"<strong>" + ui.message("radiologyapp.order.indication") + "</strong>", formFieldName: "clinicalHistory", labelPosition: "top", rows: 5, cols: 35 ]) }
-        </div>
-
-        <div class="right-column">
-            <div data-bind="visible: selectedStudies().length == 0">
+             <div data-bind="visible: selectedStudies().length == 0">
                 <span style="color: blue;">${ ui.message("radiologyapp.orderXray.noStudiesSelected") }</span>
             </div>
             <div data-bind="visible: selectedStudies().length > 0">
