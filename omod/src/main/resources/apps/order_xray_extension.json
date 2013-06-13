@@ -4,9 +4,10 @@
         "extensionPointId": "patientDashboard.visitActions",
         "type": "link",
         "label": "radiologyapp.task.orderXray.label",
-        "url": "radiologyapp/orderXray.page?patientId={{patientId}}",
+        "url": "radiologyapp/orderXray.page?patientId={{patientId}}&visitId={{visit.id}}",
         "icon": "icon-x-ray",
         "order": 32,
-        "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderXray"
+        "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderXray",
+        "require": "visit.active"
     }
 ]
