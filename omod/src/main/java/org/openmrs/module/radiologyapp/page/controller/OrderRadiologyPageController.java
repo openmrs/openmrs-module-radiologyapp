@@ -7,6 +7,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.api.EmrService;
+import org.openmrs.module.radiologyapp.RadiologyConstants;
 import org.openmrs.module.radiologyapp.RadiologyProperties;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
@@ -32,7 +33,7 @@ public class OrderRadiologyPageController {
 
         // default to
         if (StringUtils.isBlank(modality)) {
-            modality = "CR";
+            modality = RadiologyConstants.XRAY_MODALITY_CODE;
         }
 
         Collection<Provider> providers = Context.getProviderService().getProvidersByPerson(Context.getAuthenticatedUser().getPerson());
@@ -42,10 +43,10 @@ public class OrderRadiologyPageController {
         model.addAttribute("patient", patient);
         model.addAttribute("modality", modality);
 
-        if (modality.equalsIgnoreCase("CR")) {
+        if (modality.equalsIgnoreCase(RadiologyConstants.XRAY_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getXrayOrderablesConcept(), Context.getLocale())));
         }
-        else if (modality.equalsIgnoreCase("CT")) {
+        else if (modality.equalsIgnoreCase(RadiologyConstants.CT_SCAN_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getCTScanOrderablesConcept(), Context.getLocale())));
 
         }

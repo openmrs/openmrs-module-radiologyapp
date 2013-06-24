@@ -16,7 +16,9 @@ package org.openmrs.module.radiologyapp;
 
 public class RadiologyConstants {
 
-    // radiology global properties (will be most likely to be refactored into radiology module)
+    public static final String XRAY_MODALITY_CODE = "CR";
+
+    public static final String CT_SCAN_MODALITY_CODE = "CT";
 
     public final static String GP_RADIOLOGY_ORDER_ENCOUNTER_TYPE = "emr.radiologyOrderEncounterType";
 

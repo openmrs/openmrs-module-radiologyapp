@@ -72,7 +72,7 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
                 ]) }
             </div>
 
-            <% if (modality.equalsIgnoreCase('CR')) { %>
+            <% if (modality.equalsIgnoreCase(org.openmrs.module.radiologyapp.RadiologyConstants.XRAY_MODALITY_CODE)) { %>
                 <!-- for now, only x-ray (CR) orders can be portable -->
                 <div class="row">
                     <p><label>${ ui.message("radiologyapp.order.portableQuestion") }</label></p>
