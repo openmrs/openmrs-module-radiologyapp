@@ -2,9 +2,9 @@
     ui.decorateWith("appui", "standardEmrPage")
 
     ui.includeJavascript("radiologyapp", "knockout-2.1.0.js")
-    ui.includeJavascript("radiologyapp", "xrayOrder.js")
+    ui.includeJavascript("radiologyapp", "radiologyOrder.js")
 
-    ui.includeCss("radiologyapp", "xrayOrder.css")
+    ui.includeCss("radiologyapp", "radiologyOrder.css")
 %>
 
 <script type="text/javascript" xmlns="http://www.w3.org/1999/html">
@@ -20,7 +20,7 @@
 
         });
 
-        ko.applyBindings( new StudiesViewModel(${xrayOrderables}, ${portableLocations}), jq('#contentForm').get(0) );
+        ko.applyBindings( new StudiesViewModel(${orderables}, ${portableLocations}), jq('#contentForm').get(0) );
 
         // Preventing form submission when pressing enter on study-search input field
         jq('#study-search').bind('keypress', function(eventKey) {
@@ -36,7 +36,7 @@
     var breadcrumbs = [
         { icon: "icon-home", link: '/' + OPENMRS_CONTEXT_PATH + '/index.htm' },
         { label: "${ ui.format(patient.familyName) }, ${ ui.format(patient.givenName) }", link:'${ui.pageLink("coreapps", "patientdashboard/patientDashboard", [patientId: patient.id])}' },
-        { label: "${ui.message("radiologyapp.task.orderXray.label")}" }
+        { label: "${ui.message("radiologyapp.task.order." + modality + ".label")}" }
     ];
 </script>
 
@@ -44,19 +44,19 @@
 ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
 
 <div id="contentForm">
-    <h1>${ ui.message("radiologyapp.orderXray.title") }</h1>
-    <form action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderXray") }" data-bind="submit: isValid">
+    <h1>${ ui.message("radiologyapp.order." + modality + ".title") }</h1>
+    <form action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderRadiology") }" data-bind="submit: isValid">
         <input type="hidden" name="successUrl" value="${ ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id ]) }"/>
         <input type="hidden" name="patient" value="${ patient.id }"/>
         <input type="hidden" name="requestedBy" value="${ currentProvider.id }"/>
 
 
         <div class="left-column">
-            <label for="study-search">${ ui.message("radiologyapp.orderXray.studySearchInstructions") }</label>
+            <label for="study-search">${ ui.message("radiologyapp.order.studySearchInstructions") }</label>
             <input id="study-search" type="text"
                    autofocus="autofocus"
                    data-bind="autocomplete:searchTerm, search:convertedStudies, select:selectStudy, clearValue:function() { return true; }"
-                   placeholder="${ ui.message("radiologyapp.orderXray.studySearchPlaceholder") }"/>
+                   placeholder="${ ui.message("radiologyapp.order." + modality + ".studySearchPlaceholder") }"/>
             ${ ui.includeFragment("emr", "field/textarea", [ label:"<label>" + ui.message("radiologyapp.order.indication") + "</label>", formFieldName: "clinicalHistory", labelPosition: "top", rows: 5, cols: 35 ]) }
         </div>
 
@@ -71,21 +71,26 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
                         ]
                 ]) }
             </div>
-            <div class="row">
-                <p><label>${ ui.message("radiologyapp.orderXray.portableQuestion") }</label></p>
-                <p>
-                    <input type="checkbox" class="field-value" value="portable" data-bind="checked: portable"/>
-                    <span>${ ui.message("radiologyapp.yes") }</span>
-                    <select name="examLocation" data-bind="enable:portable, options:locations, optionsText:'name', optionsValue:'id', optionsCaption:'${ ui.escapeJs(ui.message("radiologyapp.orderXray.examLocationQuestion")) }', value:portableLocation">
-                    </select>
-                </p>
-            </div>
+
+            <% if (modality.equalsIgnoreCase('CR')) { %>
+                <!-- for now, only x-ray (CR) orders can be portable -->
+                <div class="row">
+                    <p><label>${ ui.message("radiologyapp.order.portableQuestion") }</label></p>
+                    <p>
+                        <input type="checkbox" class="field-value" value="portable" data-bind="checked: portable"/>
+                        <span>${ ui.message("radiologyapp.yes") }</span>
+                        <select name="examLocation" data-bind="enable:portable, options:locations, optionsText:'name', optionsValue:'id', optionsCaption:'${ ui.escapeJs(ui.message("radiologyapp.order.examLocationQuestion")) }', value:portableLocation">
+                        </select>
+                    </p>
+                </div>
+            <% } %>
+
 
              <div data-bind="visible: selectedStudies().length == 0">
-                <span style="color: blue;">${ ui.message("radiologyapp.orderXray.noStudiesSelected") }</span>
+                <span style="color: blue;">${ ui.message("radiologyapp.order.noStudiesSelected") }</span>
             </div>
             <div data-bind="visible: selectedStudies().length > 0">
-                <label>${ ui.message("radiologyapp.orderXray.selectedStudies") }</label>
+                <label>${ ui.message("radiologyapp.order.selectedStudies") }</label>
                 <ul id="selected-studies" data-bind="foreach: selectedStudies">
                     <li>
                         <input type="hidden" data-bind="value: id" name="studies" />

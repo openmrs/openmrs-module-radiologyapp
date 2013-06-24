@@ -1,13 +1,12 @@
 package org.openmrs.module.radiologyapp.page.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
-import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.api.EmrService;
-import org.openmrs.module.radiologyapp.RadiologyConstants;
 import org.openmrs.module.radiologyapp.RadiologyProperties;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
@@ -22,20 +21,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class OrderXrayPageController {
+public class OrderRadiologyPageController {
 
     public void controller(@RequestParam("patientId") Patient patient,
+                           @RequestParam("modality") String modality,
                            @SpringBean("radiologyProperties") RadiologyProperties radiologyProperties,
                            @SpringBean("emrService") EmrService emrService,
                            UiUtils ui,
                            PageModel model) {
 
+        // default to
+        if (StringUtils.isBlank(modality)) {
+            modality = "CR";
+        }
+
         Collection<Provider> providers = Context.getProviderService().getProvidersByPerson(Context.getAuthenticatedUser().getPerson());
         model.addAttribute("currentProvider", providers.iterator().next());
 
-        model.addAttribute("xrayOrderables", ui.toJson(getXrayOrderables(radiologyProperties, Context.getLocale())));
         model.addAttribute("portableLocations", ui.toJson(getPortableLocations(emrService, ui)));
         model.addAttribute("patient", patient);
+        model.addAttribute("modality", modality);
+
+        if (modality.equalsIgnoreCase("CR")) {
+            model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getXrayOrderablesConcept(), Context.getLocale())));
+        }
+        else if (modality.equalsIgnoreCase("CT")) {
+            model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getCTScanOrderablesConcept(), Context.getLocale())));
+
+        }
+        else {
+            throw new IllegalArgumentException("Invalid Modality: " + modality);
+        }
     }
 
     private List<SimpleObject> getPortableLocations(EmrService emrService, final UiUtils ui) {
@@ -55,10 +71,9 @@ public class OrderXrayPageController {
 
     }
 
-    private List<SimpleObject> getXrayOrderables(RadiologyProperties radiologyProperties, Locale locale) {
+    private List<SimpleObject> getOrderables(Concept orderablesSet, Locale locale) {
         List<SimpleObject> items = new ArrayList<SimpleObject>();
-        Concept xrayOrderable = radiologyProperties.getXrayOrderablesConcept();
-        for (Concept concept : xrayOrderable.getSetMembers()) {
+        for (Concept concept : orderablesSet.getSetMembers()) {
             SimpleObject item = new SimpleObject();
             item.put("value", concept.getId());
 
