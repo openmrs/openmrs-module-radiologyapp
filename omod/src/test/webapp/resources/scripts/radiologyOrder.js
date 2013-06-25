@@ -11,7 +11,7 @@ describe("X-ray studies selection", function() {
         {"value": 2, "label": "Clinics"},
         {"value": 3, "label": "Sant Femme"}];
 
-    var viewModel = StudiesViewModel(studies, locations);
+    var viewModel = StudiesViewModel(studies, locations, []);
 
 
     it("should initialize correctly", function() {
@@ -41,28 +41,44 @@ describe("X-ray studies selection", function() {
         expect(viewModel.portableLocation()).toBe(null);
     });
 
-    it("should asses that the viewModel without selected studies is not valid", function() {
+    it("should assess that the viewModel without selected studies is not valid", function() {
         expect(viewModel.selectedStudies().length).toBe(0);
         expect(viewModel.isValid()).toBe(false);
     });
 
-    it("should asses that viewModel with selected study, marked as portable without a location is not valid", function() {
+    it("should assess that viewModel with selected study, marked as portable without a location is not valid", function() {
         viewModel.selectStudy(firstStudy);
         viewModel.portable(true);
         expect(viewModel.isValid()).toBe(false);
     });
 
-    it("should asses that viewModel with selected study, marked as portable with a location is valid", function() {
+    it("should assess that viewModel with selected study, marked as portable with a location is valid", function() {
         viewModel.selectStudy(firstStudy);
         viewModel.portable(true);
         viewModel.portableLocation(emergencyLocation);
         expect(viewModel.isValid()).toBe(true);
     });
 
-    it("should asses that viewModel not portable is valid", function() {
+    it("should assess that viewModel not portable is valid", function() {
         viewModel.selectStudy(firstStudy);
         viewModel.portable(false);
         expect(viewModel.isValid()).toBe(true);
     });
+
+    it("should assess that viewModel without clinical history is not valid if clinical history marked required", function() {
+        viewModel.requiredFields = ['clinicalHistory'];
+        viewModel.selectStudy(firstStudy);
+        viewModel.portable(false);
+        expect(viewModel.isValid()).toBe(false);
+    });
+
+    it("should assess that viewModel clinical history is valid", function() {
+        viewModel.requiredFields = ['clinicalHistory'];
+        viewModel.clinicalHistory("some history");
+        viewModel.selectStudy(firstStudy);
+        viewModel.portable(false);
+        expect(viewModel.isValid()).toBe(true);
+    });
+
 
 })

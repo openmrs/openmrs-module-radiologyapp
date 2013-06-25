@@ -20,7 +20,9 @@
 
         });
 
-        ko.applyBindings( new StudiesViewModel(${orderables}, ${portableLocations}), jq('#contentForm').get(0) );
+        ko.applyBindings( new StudiesViewModel(${orderables}, ${portableLocations},
+                 [ ${ modality.equalsIgnoreCase(ctScanModalityCode) ? '\'clinicalHistory\'' :'' } ]),  // clinicial history only mandatory for CT scans
+                 jq('#contentForm').get(0) );
 
         // Preventing form submission when pressing enter on study-search input field
         jq('#study-search').bind('keypress', function(eventKey) {
@@ -49,6 +51,7 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
         <input type="hidden" name="successUrl" value="${ ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id ]) }"/>
         <input type="hidden" name="patient" value="${ patient.id }"/>
         <input type="hidden" name="requestedBy" value="${ currentProvider.id }"/>
+        <input type="hidden" name="modality" value="${ modality }"/>
 
 
         <div class="left-column">
@@ -57,7 +60,17 @@ ${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
                    autofocus="autofocus"
                    data-bind="autocomplete:searchTerm, search:convertedStudies, select:selectStudy, clearValue:function() { return true; }"
                    placeholder="${ ui.message("radiologyapp.order." + modality + ".studySearchPlaceholder") }"/>
-            ${ ui.includeFragment("emr", "field/textarea", [ label:"<label>" + ui.message("radiologyapp.order.indication") + "</label>", formFieldName: "clinicalHistory", labelPosition: "top", rows: 5, cols: 35 ]) }
+
+            <label for="clinical-history-field">
+                <label>${ ui.message("radiologyapp.order.indication") }
+                    ${ (modality.equalsIgnoreCase(ctScanModalityCode) ? '(' + ui.message("emr.formValidation.messages.requiredField.label") + ')': '') }</label>
+            </label>
+
+            <div id="clinical-history-field">
+                <textarea class="field-value" rows="5" cols="35" name="clinicalHistory" data-bind="value: clinicalHistory"></textarea>
+                <span class="field-error"  style="display: none" ></span>
+            </div>
+
         </div>
 
         <div class="right-column">

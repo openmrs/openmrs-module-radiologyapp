@@ -6,7 +6,7 @@ function AutocompleteItem(id, name) {
     return api;
 }
 
-function StudiesViewModel(studies, locations) {
+function StudiesViewModel(studies, locations, requiredFields) {    // currently, we only support marking the "clinicalHistory" field as required
     var api = {};
     api.searchTerm = ko.observable(true);
     api.selectedStudies = ko.observableArray([]);
@@ -15,11 +15,17 @@ function StudiesViewModel(studies, locations) {
     api.portable = ko.observable(false);
     api.locations = ko.observableArray([])
     api.portableLocation = ko.observable();
+    api.clinicalHistory = ko.observable();
+
+    api.requiredFields = requiredFields;
 
     api.isValid = function() {
         var studiesAreValid = api.selectedStudies().length > 0;
         var portableIsValid = api.portable() ? api.portableLocation() != null : true;
-        return studiesAreValid && portableIsValid;
+        var clinicalHistoryValid =  api.requiredFields.indexOf('clinicalHistory') == -1   // always valid if not specified in the required array
+            ||  api.clinicalHistory() != null && (api.clinicalHistory().match(/\w+/) != null);
+
+        return studiesAreValid && portableIsValid && clinicalHistoryValid;
     };
 
     /* Function related to studies selection */

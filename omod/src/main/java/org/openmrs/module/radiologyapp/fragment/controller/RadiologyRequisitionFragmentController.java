@@ -24,16 +24,19 @@ import org.openmrs.ui.framework.annotation.BindParams;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class RadiologyRequisitionFragmentController {
 
     public FragmentActionResult orderRadiology(@BindParams RadiologyRequisition requisition,
+                                               @RequestParam("modality") String modality,
                                                EmrContext emrContext,
                                                @SpringBean RadiologyService radiologyService,
                                                @SpringBean("messageSourceService") MessageSourceService messageSourceService,
                                                UiUtils ui, HttpServletRequest request) {
+
         if (requisition.getStudies().size() == 0) {
             throw new IllegalArgumentException(ui.message("radiologyapp.order.noStudiesSelected"));
         }
@@ -41,7 +44,7 @@ public class RadiologyRequisitionFragmentController {
         radiologyService.placeRadiologyRequisition(emrContext, requisition);
 
         request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_INFO_MESSAGE,
-                messageSourceService.getMessage("radiologyapp.task.order.success"));
+                messageSourceService.getMessage("radiologyapp.task.order." + modality.toUpperCase() + ".success"));
 
         request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_TOAST_MESSAGE, "true");
 

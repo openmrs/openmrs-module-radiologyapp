@@ -40,10 +40,11 @@ public class OrderRadiologyPageController {
         model.addAttribute("currentProvider", providers.iterator().next());
 
         model.addAttribute("xrayModalityCode", RadiologyConstants.XRAY_MODALITY_CODE);
+        model.addAttribute("ctScanModalityCode", RadiologyConstants.CT_SCAN_MODALITY_CODE);
 
         model.addAttribute("portableLocations", ui.toJson(getPortableLocations(emrService, ui)));
         model.addAttribute("patient", patient);
-        model.addAttribute("modality", modality);
+        model.addAttribute("modality", modality.toUpperCase());
 
         if (modality.equalsIgnoreCase(RadiologyConstants.XRAY_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getXrayOrderablesConcept(), Context.getLocale())));
