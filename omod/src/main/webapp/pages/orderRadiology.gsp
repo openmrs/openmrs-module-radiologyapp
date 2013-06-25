@@ -115,7 +115,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
         </div>
 
         <div id="bottom">
-            <button id="cancel" class="cancel" onclick="location.href = emr.pageLink('coreapps', 'patientdashboard/patientDashboard', { patientId: <%= patient.id %> })">
+            <button type="reset" id="cancel" class="cancel" onclick="location.href = '${ui.pageLink("coreapps", "patientdashboard/patientDashboard", [patientId: patient.id])}'">
                 ${ ui.message("radiologyapp.cancel") }
             </button>
             <button type="submit" class="confirm" id="next" data-bind="css: { disabled: !isValid() }, enable: isValid()">
