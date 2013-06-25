@@ -39,6 +39,8 @@ public class OrderRadiologyPageController {
         Collection<Provider> providers = Context.getProviderService().getProvidersByPerson(Context.getAuthenticatedUser().getPerson());
         model.addAttribute("currentProvider", providers.iterator().next());
 
+        model.addAttribute("xrayModalityCode", RadiologyConstants.XRAY_MODALITY_CODE);
+
         model.addAttribute("portableLocations", ui.toJson(getPortableLocations(emrService, ui)));
         model.addAttribute("patient", patient);
         model.addAttribute("modality", modality);
