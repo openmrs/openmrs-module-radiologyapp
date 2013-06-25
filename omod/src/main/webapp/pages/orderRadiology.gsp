@@ -43,7 +43,7 @@
 </script>
 
 
-${ ui.includeFragment("emr", "patientHeader", [ patient: patient ]) }
+${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
 
 <div id="contentForm">
     <h1>${ ui.message("radiologyapp.order." + modality + ".title") }</h1>
