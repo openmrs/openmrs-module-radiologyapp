@@ -115,6 +115,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
         </div>
 
         <div id="bottom">
+            <!-- note that setting type="reset" is necessary here to prevent the cancel buttom from actually submitting the form! -->
             <button type="reset" id="cancel" class="cancel" onclick="location.href = '${ui.pageLink("coreapps", "patientdashboard/patientDashboard", [patientId: patient.id])}'">
                 ${ ui.message("radiologyapp.cancel") }
             </button>
