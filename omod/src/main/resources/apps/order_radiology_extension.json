@@ -6,7 +6,7 @@
         "label": "radiologyapp.task.order.CR.label",
         "url": "radiologyapp/orderRadiology.page?patientId={{patientId}}&visitId={{visit.id}}&modality=CR",
         "icon": "icon-x-ray",
-        "order": 32,
+        "order": 36,
         "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderXray",
         "require": "visit.active"
     } ,
@@ -18,7 +18,7 @@
         "label": "radiologyapp.task.order.CT.label",
         "url": "radiologyapp/orderRadiology.page?patientId={{patientId}}&visitId={{visit.id}}&modality=CT",
         "icon": "icon-x-ray",
-        "order": 32,
+        "order": 37,
         "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderCT",
         "require": "visit.active"
     }
