@@ -17,7 +17,7 @@
         "type": "link",
         "label": "radiologyapp.task.order.CT.label",
         "url": "radiologyapp/orderRadiology.page?patientId={{patientId}}&visitId={{visit.id}}&modality=CT",
-        "icon": "icon-tomo",
+        "icon": "icon-x-ray",
         "order": 37,
         "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderCT",
         "require": "visit.active"
