@@ -125,5 +125,28 @@
         </description>
     </globalProperty>
 
+
+    <!-- Privileges -->
+    <privilege>
+        <name>Task: org.openmrs.module.radiologyapp.orderXray</name>
+        <description>Rights to order an x-ray via the x-ray app</description>
+    </privilege>
+
+    <privilege>
+        <name>Task: org.openmrs.module.radiologyapp.orderCT</name>
+        <description>Rights to order a CT Scan via the radiology app</description>
+    </privilege>
+
+    <privilege>
+        <name>Task: org.openmrs.module.radiologyapp.tab</name>
+        <description>Ability to view the Radiology tab for patient</description>
+    </privilege>
+
+    <privilege>
+        <name>Task: org.openmrs.module.radiologyapp.retroOrder</name>
+        <description>Ability to retrospectively order a radiology study</description>
+    </privilege>
+
 </module>
+
 

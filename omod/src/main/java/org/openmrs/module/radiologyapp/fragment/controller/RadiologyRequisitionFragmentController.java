@@ -22,6 +22,7 @@ import org.openmrs.module.radiologyapp.RadiologyService;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.BindParams;
 import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.fragment.action.FailureResult;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +42,13 @@ public class RadiologyRequisitionFragmentController {
             throw new IllegalArgumentException(ui.message("radiologyapp.order.noStudiesSelected"));
         }
 
-        radiologyService.placeRadiologyRequisition(emrContext, requisition);
+        try {
+            radiologyService.placeRadiologyRequisition(emrContext, requisition);
+        }
+        catch (Exception e) {
+            // TODO make this more user-friendly (but we never should get here)
+            return new FailureResult(e.getLocalizedMessage());
+        }
 
         request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_INFO_MESSAGE,
                 messageSourceService.getMessage("radiologyapp.task.order." + modality.toUpperCase() + ".success"));

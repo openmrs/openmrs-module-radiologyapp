@@ -22,14 +22,19 @@ import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.User;
+import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.UserService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
+import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
+import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
-import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
+import org.openmrs.module.emrapi.encounter.EncounterDomainWrapper;
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
@@ -59,36 +64,50 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private ConceptService conceptService;
 
+    private UserService userService;
+
     private RadiologyOrderDAO radiologyOrderDAO;
 
     private EmrEncounterDAO emrEncounterDAO;
 
     @Transactional
     @Override
-    public Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition) {
+    public Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition)
+        throws EncounterDateBeforeVisitStartDateException, EncounterDateAfterVisitStopDateException {
+
+        Provider requestedBy = requisition.getRequestedBy() != null ? requisition.getRequestedBy() : emrContext.getCurrentProvider();
+
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyOrderEncounterType());
-        encounter.setProvider(emrApiProperties.getOrderingProviderEncounterRole(), requisition.getRequestedBy());
+        encounter.setProvider(emrApiProperties.getOrderingProviderEncounterRole(), requestedBy);
         encounter.setPatient(requisition.getPatient());
-        encounter.setLocation(emrContext.getSessionLocation());
-        VisitDomainWrapper activeVisitSummary = emrContext.getActiveVisit();
-        if (activeVisitSummary != null) {
-            encounter.setVisit(activeVisitSummary.getVisit());
+        encounter.setLocation(requisition.getRequestedFrom() != null ? requisition.getRequestedFrom() : emrContext.getSessionLocation());
+        encounter.setEncounterDatetime(requisition.getRequestedOn() != null ? requisition.getRequestedOn() : new Date());
+
+        Visit visit = requisition.getVisit() != null ? requisition.getVisit() :
+                (emrContext.getActiveVisit() != null ? emrContext.getActiveVisit().getVisit() : null);
+        if (visit != null) {
+            new EncounterDomainWrapper(encounter).attachToVisit(visit);
         }
 
-        Date currentDatetime = new Date();
-        encounter.setEncounterDatetime(currentDatetime);
-        encounter.setDateCreated(currentDatetime);
-
         for (Concept study : requisition.getStudies()) {
+
             RadiologyOrder order = new RadiologyOrder();
             order.setExamLocation(requisition.getExamLocation());
             order.setClinicalHistory(requisition.getClinicalHistory());
             order.setConcept(study);
             order.setUrgency(requisition.getUrgency());
-            order.setStartDate(new Date());
+            order.setStartDate(encounter.getEncounterDatetime());  // note that the attachToVisit method may have altered this date to match the visit
             order.setOrderType(radiologyProperties.getRadiologyTestOrderType());
             order.setPatient(requisition.getPatient());
+
+            // TODO: change this to just use the provider once orderer gets refactored (in core) to be a provider
+            // TODO: also note that a provider is not guaranteed to have a user account, so we have to allow that orderer might never be set
+            List<User> providerUsers = userService.getUsersByPerson(requestedBy.getPerson(), false);
+            if (providerUsers != null && providerUsers.size() > 0) {
+                order.setOrderer(providerUsers.get(0));
+            }
+
             encounter.addOrder(order);
         }
 
@@ -389,6 +408,10 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     public void setConceptService(ConceptService conceptService) {
         this.conceptService = conceptService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
     public void setRadiologyOrderDAO(RadiologyOrderDAO radiologyOrderDAO) {

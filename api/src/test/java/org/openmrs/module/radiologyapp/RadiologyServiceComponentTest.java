@@ -14,12 +14,10 @@
 
 package org.openmrs.module.radiologyapp;
 
-import org.hamcrest.CoreMatchers;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
@@ -104,7 +102,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     }
 
     @Test
-    public void placeRadiologyRequistion_shouldPlaceARadiologyRequisition() {
+    public void placeRadiologyRequistion_shouldPlaceARadiologyRequisition()
+        throws Exception {
 
         Patient patient = patientService.getPatient(6);
 
@@ -120,6 +119,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setPatient(patient);
         requisition.setStudies(Collections.singleton(conceptService.getConcept(18)));
         requisition.setUrgency(Order.Urgency.STAT);
+        requisition.setRequestedBy(providerService.getProvider(1));
+        requisition.setRequestedOn(new Date());
+        requisition.setRequestedFrom(locationService.getLocation(1));
 
         radiologyService.placeRadiologyRequisition(emrContext, requisition);
 
@@ -132,7 +134,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     }
 
     @Test
-    public void getRadiologyOrderByAccessionNumber_shouldRetrieveOrderByAccessionNumber() {
+    public void getRadiologyOrderByAccessionNumber_shouldRetrieveOrderByAccessionNumber()
+        throws Exception {
 
         Patient patient = patientService.getPatient(6);
 
@@ -145,6 +148,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setPatient(patient);
         requisition.setStudies(Collections.singleton(conceptService.getConcept(18)));
         requisition.setUrgency(Order.Urgency.STAT);
+        requisition.setRequestedBy(providerService.getProvider(1));
+        requisition.setRequestedOn(new Date());
+        requisition.setRequestedFrom(locationService.getLocation(1));
 
         radiologyService.placeRadiologyRequisition(emrContext, requisition);
 

@@ -19,7 +19,9 @@ import org.openmrs.Location;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,6 +34,10 @@ public class RadiologyRequisition {
 
     private Provider requestedBy;
 
+    private Location requestedFrom;
+
+    private Date requestedOn;
+
     private String clinicalHistory;
 
     private Order.Urgency urgency;
@@ -40,12 +46,22 @@ public class RadiologyRequisition {
 
     private Set<Concept> studies = new LinkedHashSet<Concept>();
 
+    private Visit visit;
+
     public Patient getPatient() {
         return patient;
     }
 
     public Provider getRequestedBy() {
         return requestedBy;
+    }
+
+    public Location getRequestedFrom() {
+        return requestedFrom;
+    }
+
+    public Date getRequestedOn() {
+        return requestedOn;
     }
 
     public String getClinicalHistory() {
@@ -64,12 +80,24 @@ public class RadiologyRequisition {
         return studies;
     }
 
+    public Visit getVisit() {
+        return visit;
+    }
+
     public void setStudies(Set<Concept> studies) {
         this.studies = studies;
     }
 
     public void setRequestedBy(Provider requestedBy) {
         this.requestedBy = requestedBy;
+    }
+
+    public void setRequestedFrom(Location requestedFrom) {
+        this.requestedFrom = requestedFrom;
+    }
+
+    public void setRequestedOn(Date requestedOn) {
+        this.requestedOn = requestedOn;
     }
 
     public void setClinicalHistory(String clinicalHistory) {
@@ -90,5 +118,9 @@ public class RadiologyRequisition {
 
     public void setPatient(Patient patient) {
         this.patient = patient;
+    }
+
+    public void setVisit(Visit visit) {
+        this.visit = visit;
     }
 }

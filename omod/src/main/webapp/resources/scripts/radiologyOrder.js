@@ -6,7 +6,7 @@ function AutocompleteItem(id, name) {
     return api;
 }
 
-function StudiesViewModel(studies, locations, requiredFields) {    // currently, we only support marking the "clinicalHistory" field as required
+function StudiesViewModel(studies, locations, requiredFields) {
     var api = {};
     api.searchTerm = ko.observable(true);
     api.selectedStudies = ko.observableArray([]);
@@ -16,16 +16,29 @@ function StudiesViewModel(studies, locations, requiredFields) {    // currently,
     api.locations = ko.observableArray([])
     api.portableLocation = ko.observable();
     api.clinicalHistory = ko.observable();
+    api.requestedBy = ko.observable();
+    api.requestedFrom = ko.observable();
+    api.requestedOn = ko.observable();
 
     api.requiredFields = requiredFields;
 
     api.isValid = function() {
         var studiesAreValid = api.selectedStudies().length > 0;
         var portableIsValid = api.portable() ? api.portableLocation() != null : true;
+
         var clinicalHistoryValid =  api.requiredFields.indexOf('clinicalHistory') == -1   // always valid if not specified in the required array
             ||  api.clinicalHistory() != null && (api.clinicalHistory().match(/\w+/) != null);
 
-        return studiesAreValid && portableIsValid && clinicalHistoryValid;
+        var requestedByValid = api.requiredFields.indexOf('requestedBy') == -1   // always valid if not specified in the required array
+            || (api.requestedBy() != null && (api.requestedBy().match(/\w+/) != null));
+
+        var requestedFromValid = api.requiredFields.indexOf('requestedFrom') == -1   // always valid if not specified in the required array
+            || (api.requestedFrom() != null && (api.requestedFrom().match(/\w+/) != null));
+
+        var requestedOnValid = api.requiredFields.indexOf('requestedOn') == -1   // always valid if not specified in the required array
+            || (api.requestedOn() != null && (api.requestedOn ().match(/\w+/) != null));
+
+        return studiesAreValid && portableIsValid && clinicalHistoryValid && requestedByValid && requestedFromValid && requestedOnValid;
     };
 
     /* Function related to studies selection */

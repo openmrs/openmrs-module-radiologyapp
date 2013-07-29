@@ -206,6 +206,12 @@
             <scope>provided</scope>   <!-- provided by emr-api module -->
         </dependency>
 
+        <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>compass</artifactId>
+            <version>0.11.7</version>
+            <type>gem</type>
+        </dependency>
         <!-- end other dependencies -->
 
     </dependencies>
@@ -219,6 +225,7 @@
 					<configuration>
 						<target>1.6</target>
 						<source>1.6</source>
+                        <encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -231,6 +238,22 @@
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.4</version>
 				</plugin>
+                <plugin>
+                    <groupId>org.jasig.maven</groupId>
+                    <artifactId>sass-maven-plugin</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <sassSourceDirectory>${basedir}/src/main/webapp</sassSourceDirectory>
+                        <outputDirectory>${basedir}/src/main/webapp/resources/styles</outputDirectory>
+                        <baseOutputDirectory>${basedir}/src/main/webapp/resources/styles</baseOutputDirectory>
+                        <skin>scss</skin>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>de.saumya.mojo</groupId>
+                    <artifactId>gem-maven-plugin</artifactId>
+                    <version>0.28.6</version>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

@@ -5,9 +5,17 @@
     ui.includeJavascript("radiologyapp", "radiologyOrder.js")
 
     ui.includeCss("radiologyapp", "radiologyOrder.css")
+
+    def isThisVisitActive = emrContext.activeVisit && emrContext.activeVisit.visit == visit
+
 %>
 
 <script type="text/javascript" xmlns="http://www.w3.org/1999/html">
+
+    var viewModel =   new StudiesViewModel(${orderables}, ${portableLocations},
+            [ ${ modality.equalsIgnoreCase(ctScanModalityCode) ? '\'clinicalHistory\',' :'' }
+              ${ !isThisVisitActive || emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder") ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}] )   // clinicial history only mandatory for CT scans, provider/location/date information only mandatory for retrospective entry
+
     jQuery(function() {
         jq('button.confirm').click(function(){
 
@@ -20,9 +28,7 @@
 
         });
 
-        ko.applyBindings( new StudiesViewModel(${orderables}, ${portableLocations},
-                 [ ${ modality.equalsIgnoreCase(ctScanModalityCode) ? '\'clinicalHistory\'' :'' } ]),  // clinicial history only mandatory for CT scans
-                 jq('#contentForm').get(0) );
+        ko.applyBindings(viewModel, jq('#contentForm').get(0) );
 
         // Preventing form submission when pressing enter on study-search input field
         jq('#study-search').bind('keypress', function(eventKey) {
@@ -47,12 +53,55 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
 
 <div id="contentForm">
     <h1>${ ui.message("radiologyapp.order." + modality + ".title") }</h1>
-    <form action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderRadiology") }" data-bind="submit: isValid">
-        <input type="hidden" name="successUrl" value="${ ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id ]) }"/>
+    <form action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderRadiology",
+            [ successUrl: ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id, visitId: visit.id ]) ]) }" data-bind="submit: isValid" method="post">
         <input type="hidden" name="patient" value="${ patient.id }"/>
-        <input type="hidden" name="requestedBy" value="${ currentProvider.id }"/>
         <input type="hidden" name="modality" value="${ modality }"/>
+        <input type="hidden" name="visit" value="${ visit.id }" />
 
+        <table id="who-where-when-view"<% if (!isThisVisitActive || emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")) { %>  class="hidden" <% } %> ><tr>
+            <td>
+                <label>${ ui.message("radiologyapp.order.requestedBy") }</label>
+                <span>${ ui.format(emrContext.currentProvider) }</span>
+            </td>
+            <td>
+                <label>${ ui.message("radiologyapp.order.requestedFrom") }</label>
+                <span>${ ui.format(sessionContext.sessionLocation) }</span>
+            </td>
+            <td>
+                <label>${ ui.message("radiologyapp.order.requestedOn") }</label>
+                <span>${ ui.format(defaultOrderDate) }</span>
+            </td>
+        </tr></table>
+
+        <div id="who-where-when-edit"<% if (isThisVisitActive && !emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")) { %>  class="hidden" <% } %> >
+            ${ ui.includeFragment("uicommons", "field/dropDown", [
+                    id: "requestedBy",
+                    label: "radiologyapp.order.requestedBy",
+                    formFieldName: "requestedBy",
+                    options: providers,
+                    classes: ['required'],
+            ])}
+
+            ${ ui.includeFragment("emr", "field/location", [
+                    id: "requestedFrom",
+                    label: "radiologyapp.order.requestedFrom",
+                    formFieldName: "requestedLocation",
+                    classes: ['required'],
+                    withTag: "Login Location",
+            ])}
+
+            ${ ui.includeFragment("uicommons", "field/datetimepicker", [
+                    id: "requestedOn",
+                    label: "radiologyapp.order.requestedOn",
+                    formFieldName: "requestedOn",
+                    useTime: false,
+                    defaultDate: defaultOrderDate,
+                    startDate:minOrderDate,
+                    endDate: maxOrderDate,
+                    classes: ['required']
+            ])}
+        </div>
 
         <div class="left-column">
             <label for="study-search">${ ui.message("radiologyapp.order.studySearchInstructions") }</label>
@@ -115,7 +164,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
         </div>
 
         <div id="bottom">
-            <!-- note that setting type="reset" is necessary here to prevent the cancel buttom from actually submitting the form! -->
+            <!-- note that setting type="reset" is necessary here to prevent the cancel button from actually submitting the form! -->
             <button type="reset" id="cancel" class="cancel" onclick="location.href = '${ui.pageLink("coreapps", "patientdashboard/patientDashboard", [patientId: patient.id])}'">
                 ${ ui.message("radiologyapp.cancel") }
             </button>
