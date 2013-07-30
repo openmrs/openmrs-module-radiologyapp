@@ -7,6 +7,7 @@
     ui.includeCss("radiologyapp", "radiologyOrder.css")
 
     def isThisVisitActive = emrContext.activeVisit && emrContext.activeVisit.visit == visit
+    def areProviderLocationAndDateEditable = !isThisVisitActive || emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")
 
 %>
 
@@ -59,7 +60,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
         <input type="hidden" name="modality" value="${ modality }"/>
         <input type="hidden" name="visit" value="${ visit.id }" />
 
-        <table id="who-where-when-view"<% if (!isThisVisitActive || emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")) { %>  class="hidden" <% } %> ><tr>
+        <table id="who-where-when-view"<% if (areProviderLocationAndDateEditable) { %>  class="hidden" <% } %> ><tr>
             <td>
                 <label>${ ui.message("radiologyapp.order.requestedBy") }</label>
                 <span>${ ui.format(emrContext.currentProvider) }</span>
@@ -74,21 +75,23 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
             </td>
         </tr></table>
 
-        <div id="who-where-when-edit"<% if (isThisVisitActive && !emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")) { %>  class="hidden" <% } %> >
+        <div id="who-where-when-edit"<% if (!areProviderLocationAndDateEditable) { %>  class="hidden" <% } %> >
             ${ ui.includeFragment("uicommons", "field/dropDown", [
                     id: "requestedBy",
                     label: "radiologyapp.order.requestedBy",
                     formFieldName: "requestedBy",
                     options: providers,
                     classes: ['required'],
+                    initialValue: areProviderLocationAndDateEditable ? null : emrContext.currentProvider.providerId
             ])}
 
             ${ ui.includeFragment("emr", "field/location", [
                     id: "requestedFrom",
                     label: "radiologyapp.order.requestedFrom",
-                    formFieldName: "requestedLocation",
+                    formFieldName: "requestedFrom",
                     classes: ['required'],
                     withTag: "Login Location",
+                    initialValue: areProviderLocationAndDateEditable ? null : sessionContext.sessionLocationId
             ])}
 
             ${ ui.includeFragment("uicommons", "field/datetimepicker", [
