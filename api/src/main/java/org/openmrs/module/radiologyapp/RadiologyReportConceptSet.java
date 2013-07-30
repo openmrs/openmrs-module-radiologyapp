@@ -52,16 +52,12 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
         radiologyReportSet.setOrder(radiologyReport.getAssociatedRadiologyOrder());
 
         if (StringUtils.isNotBlank(radiologyReport.getAccessionNumber())) {
-            Obs accessionNumber = new Obs();
-            accessionNumber.setConcept(accessionNumberConcept);
-            accessionNumber.setValueText(radiologyReport.getAccessionNumber());
+            Obs accessionNumber = buildObsFor(accessionNumberConcept, radiologyReport.getAccessionNumber());
             radiologyReportSet.addGroupMember(accessionNumber);
         }
 
         if (StringUtils.isNotBlank(radiologyReport.getReportBody())) {
-            Obs reportBody = new Obs();
-            reportBody.setConcept(reportBodyConcept);
-            reportBody.setValueText(radiologyReport.getReportBody());
+            Obs reportBody = buildObsFor(reportBodyConcept, radiologyReport.getReportBody());
             radiologyReportSet.addGroupMember(reportBody);
         }
 

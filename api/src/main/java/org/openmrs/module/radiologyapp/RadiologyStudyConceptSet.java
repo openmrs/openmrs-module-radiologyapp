@@ -49,9 +49,7 @@ public class RadiologyStudyConceptSet extends ConceptSetDescriptor {
         radiologyStudySet.setOrder(radiologyStudy.getAssociatedRadiologyOrder());
 
         if (StringUtils.isNotBlank(radiologyStudy.getAccessionNumber())) {
-            Obs accessionNumber = new Obs();
-            accessionNumber.setConcept(accessionNumberConcept);
-            accessionNumber.setValueText(radiologyStudy.getAccessionNumber());
+            Obs accessionNumber = buildObsFor(accessionNumberConcept, radiologyStudy.getAccessionNumber());
             radiologyStudySet.addGroupMember(accessionNumber);
         }
 
