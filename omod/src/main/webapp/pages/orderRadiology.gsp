@@ -15,7 +15,7 @@
 
     var viewModel =   new StudiesViewModel(${orderables}, ${portableLocations},
             [ ${ modality.equalsIgnoreCase(ctScanModalityCode) ? '\'clinicalHistory\',' :'' }
-              ${ !isThisVisitActive || emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder") ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}] )   // clinicial history only mandatory for CT scans, provider/location/date information only mandatory for retrospective entry
+              ${ areProviderLocationAndDateEditable ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}] )   // clinicial history only mandatory for CT scans, provider/location/date information only mandatory for retrospective entry
 
     jQuery(function() {
         jq('button.confirm').click(function(){
