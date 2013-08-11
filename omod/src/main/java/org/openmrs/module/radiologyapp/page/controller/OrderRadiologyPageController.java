@@ -71,7 +71,9 @@ public class OrderRadiologyPageController {
         }
         else if (modality.equalsIgnoreCase(RadiologyConstants.CT_SCAN_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getCTScanOrderablesConcept(), Context.getLocale())));
-
+        }
+        else if (modality.equalsIgnoreCase(RadiologyConstants.ULTRASOUND_MODALITY_CODE)) {
+            model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getUltrasoundOrderablesConcept(), Context.getLocale())));
         }
         else {
             throw new IllegalArgumentException("Invalid Modality: " + modality);

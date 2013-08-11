@@ -32,6 +32,10 @@ public class RadiologyProperties extends ModuleProperties {
         return getConceptByGlobalProperty(RadiologyConstants.GP_CT_SCAN_ORDERABLES_CONCEPT);
     }
 
+    public Concept getUltrasoundOrderablesConcept() {
+        return getConceptByGlobalProperty(RadiologyConstants.GP_ULTRASOUND_ORDERABLES_CONCEPT);
+    }
+
     public EncounterType getRadiologyOrderEncounterType() {
         return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_ORDER_ENCOUNTER_TYPE);
     }

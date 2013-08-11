@@ -20,6 +20,8 @@ public class RadiologyConstants {
 
     public static final String CT_SCAN_MODALITY_CODE = "CT";
 
+    public static final String ULTRASOUND_MODALITY_CODE = "US";
+
     public final static String GP_RADIOLOGY_ORDER_ENCOUNTER_TYPE = "emr.radiologyOrderEncounterType";
 
     public final static String GP_RADIOLOGY_STUDY_ENCOUNTER_TYPE = "emr.radiologyStudyEncounterType";

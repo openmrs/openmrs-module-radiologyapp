@@ -19,5 +19,16 @@
         "icon": "icon-x-ray",
         "order": 37,
         "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderCT"
+    } ,
+
+    {
+        "id": "org.openmrs.module.radiologyapp.orderUS",
+        "extensionPointId": "patientDashboard.visitActions",
+        "type": "link",
+        "label": "radiologyapp.task.order.US.label",
+        "url": "radiologyapp/orderRadiology.page?patientId={{patientId}}&visitId={{visit.id}}&modality=US",
+        "icon": "icon-x-ray",
+        "order": 38,
+        "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderUltrasound"
     }
 ]
