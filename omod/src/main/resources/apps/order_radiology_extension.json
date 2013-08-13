@@ -29,6 +29,6 @@
         "url": "radiologyapp/orderRadiology.page?patientId={{patientId}}&visitId={{visit.id}}&modality=US",
         "icon": "icon-x-ray",
         "order": 38,
-        "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderUltrasound"
+        "requiredPrivilege":"Task: org.openmrs.module.radiologyapp.orderUS"
     }
 ]
