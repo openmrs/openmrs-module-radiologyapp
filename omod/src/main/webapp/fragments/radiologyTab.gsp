@@ -2,6 +2,8 @@
 <%
     def dateFormat = new java.text.SimpleDateFormat("dd MMM yyyy")
     ui.includeJavascript("radiologyapp", "radiologyTab.js")
+    ui.includeCss("radiologyapp", "radiologyTab.css")
+
 %>
 
 <script type="text/template" id="radiologyStudyDetailsTemplate">
@@ -24,7 +26,7 @@
         <i class="icon-time small"></i>
         {{- report.reportDate }}
     </div>
-    <pre>{{- report.reportBody }}</pre>
+    <pre class="report-body">{{- report.reportBody }}</pre>
 </span>
     {{ }) }}
 </script>

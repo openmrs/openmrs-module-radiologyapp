@@ -12,6 +12,5 @@ target
 *.war
 *.ear
 
-*.css
 omod/src/main/compass/sass-external/*
 
