@@ -63,7 +63,7 @@ public class OrderRadiologyPageController {
         // note that the underlying date widget takes care of stripping out the time component for us
         model.addAttribute("minOrderDate", visitWrapper.getStartDatetime());
         model.addAttribute("maxOrderDate", visitWrapper.getEncounterStopDateRange());
-        model.addAttribute("defaultOrderDate", emrContext.getActiveVisit() != null && emrContext.getActiveVisit().equals(visitWrapper.getVisit()) ?
+        model.addAttribute("defaultOrderDate", emrContext.getActiveVisit() != null && emrContext.getActiveVisit().getVisit().equals(visitWrapper.getVisit()) ?
                         new Date() : visitWrapper.getStartDatetime());
 
         if (modality.equalsIgnoreCase(RadiologyConstants.XRAY_MODALITY_CODE)) {
