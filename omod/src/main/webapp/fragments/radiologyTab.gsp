@@ -3,7 +3,6 @@
     def dateFormat = new java.text.SimpleDateFormat("dd MMM yyyy")
     ui.includeJavascript("radiologyapp", "radiologyTab.js")
     ui.includeCss("radiologyapp", "radiologyTab.css")
-
 %>
 
 <script type="text/template" id="radiologyStudyDetailsTemplate">
@@ -50,11 +49,11 @@
         <span class="arrow"></span>
     </li>
     <% } %>
-    <% if(studies.size == 0) { %>
-    ${ ui.message("radiologyapp.noStudies.label")}
-    <% } %>
 </ul>
-
-<div id="study-details" class="main-content">
-</div>
+<% if(studies.size == 0) { %>
+    ${ ui.message("radiologyapp.noStudies.label")}
+<% } %>
+<% if(studies.size != 0) { %>
+<div id="study-details" class="main-content"></div>
+<% } %>
 </div>
