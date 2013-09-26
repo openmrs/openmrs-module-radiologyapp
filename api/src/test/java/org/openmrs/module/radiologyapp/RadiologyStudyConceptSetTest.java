@@ -25,7 +25,7 @@ import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.emr.EmrConstants;
+import org.openmrs.module.emrapi.EmrApiConstants;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -65,7 +65,7 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
         sameAs = new ConceptMapType();
         emrConceptSource = new ConceptSource();
-        emrConceptSource.setName(EmrConstants.EMR_CONCEPT_SOURCE_NAME);
+        emrConceptSource.setName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
 
         booleanType = mock(ConceptDatatype.class);
         when(booleanType.isBoolean()).thenReturn(true);

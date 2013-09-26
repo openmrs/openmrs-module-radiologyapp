@@ -16,7 +16,7 @@
     <encounter_role encounter_role_id="1001" name="Radiology Technician" description="Radiology Technician" creator="1" retired="false" date_created="2011-08-18 14:00:00.0" uuid="a0b03050-c99b-22e0-9572-0800200c9a66" />
     <global_property property="emr.radiologyTechnicianEncounterRole" property_value="a0b03050-c99b-22e0-9572-0800200c9a66" uuid="6988b3c3-9236-42c6-8f03-2a0c1e9ca2a8"/>
 
-    <concept_reference_source concept_source_id="1001" name="org.openmrs.module.emr" description="org.openmrs.module.emr" hl7_code="org.openmrs.module.emr" creator="1" date_created="2005-02-24 00:00:00.0" uuid="00001827-639f-4cb4-961f-1e025bf80ff0" retired="false"/>
+    <concept_reference_source concept_source_id="1001" name="org.openmrs.module.emrapi" description="org.openmrs.module.emrapi" hl7_code="org.openmrs.module.emrapi" creator="1" date_created="2005-02-24 00:00:00.0" uuid="00001827-639f-4cb4-961f-1e025bf80ff0" retired="false"/>
 
     <concept concept_id="1001" retired="false" datatype_id="4" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="0cbe2ed3-dd5f-4f46-9459-26127c9265ab"/>
     <concept_name concept_id="1001" name="Chest X-ray" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1001" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f558-40c9-8177-145dfe119ca7"/>

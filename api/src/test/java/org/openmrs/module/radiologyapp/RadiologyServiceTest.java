@@ -48,6 +48,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.emr.EmrConstants;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.order.EmrOrderService;
+import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
@@ -187,7 +188,7 @@ public class RadiologyServiceTest{
 
         sameAs = new ConceptMapType();
         emrConceptSource = new ConceptSource();
-        emrConceptSource.setName(EmrConstants.EMR_CONCEPT_SOURCE_NAME);
+        emrConceptSource.setName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
 
         patient = new Patient();
         orderType = new OrderType();

@@ -22,12 +22,12 @@ import org.openmrs.ConceptSource;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.emr.EmrConstants;
+import org.openmrs.module.emrapi.EmrApiConstants;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
@@ -49,7 +49,7 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
 
         sameAs = new ConceptMapType();
         emrConceptSource = new ConceptSource();
-        emrConceptSource.setName(EmrConstants.EMR_CONCEPT_SOURCE_NAME);
+        emrConceptSource.setName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
 
         radiologyReportSetConcept = setupConcept(conceptService, "Radiology Report Set", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_SET);
         accessionNumberConcept = setupConcept(conceptService, "Accession Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER);
