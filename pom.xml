@@ -37,7 +37,7 @@
 		<openMRSVersion>1.9.4-SNAPSHOT</openMRSVersion>
         <uiframeworkVersion>2.5.2-SNAPSHOT</uiframeworkVersion>
         <emrapiVersion>1.0-SNAPSHOT</emrapiVersion>
-        <appframeworkVersion>2.0-SNAPSHOT</appframeworkVersion>
+        <appframeworkVersion>2.0</appframeworkVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
         <uicommonsVersion>1.0-SNAPSHOT</uicommonsVersion>
         <emrVersion>2.0-SNAPSHOT</emrVersion>
