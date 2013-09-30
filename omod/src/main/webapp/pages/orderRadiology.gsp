@@ -26,6 +26,7 @@
 
             jq(this).attr('disabled', 'disabled');
             jq(this).addClass("disabled");
+            jq(this).find('.icon-spin').css('display', 'inline-block');
 
         });
 
@@ -173,6 +174,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
             </button>
             <button type="submit" class="confirm" id="next" data-bind="css: { disabled: !isValid() }, enable: isValid()">
                 ${ ui.message("radiologyapp.save") }
+                <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i>
             </button>
         </div>
     </form>
