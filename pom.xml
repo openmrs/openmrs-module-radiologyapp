@@ -39,7 +39,7 @@
         <emrapiVersion>1.0-SNAPSHOT</emrapiVersion>
         <appframeworkVersion>2.0</appframeworkVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
-        <uicommonsVersion>1.0-SNAPSHOT</uicommonsVersion>
+        <uicommonsVersion>1.0</uicommonsVersion>
         <emrVersion>2.0-SNAPSHOT</emrVersion>
         <htmlformentryVersion>2.1.4</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
