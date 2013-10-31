@@ -14,8 +14,8 @@
 <script type="text/javascript" xmlns="http://www.w3.org/1999/html">
 
     var viewModel =   new StudiesViewModel(${orderables}, ${portableLocations},
-            [ ${ modality.equalsIgnoreCase(ctScanModalityCode) ? '\'clinicalHistory\',' :'' }
-              ${ areProviderLocationAndDateEditable ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}] )   // clinicial history only mandatory for CT scans, provider/location/date information only mandatory for retrospective entry
+            [ 'clinicalHistory',
+              ${ areProviderLocationAndDateEditable ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}] )   // provider/location/date information only mandatory for retrospective entry
 
     jQuery(function() {
         jq('button.confirm').click(function(){
