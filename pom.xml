@@ -35,16 +35,16 @@
 	
 	<properties>
 		<openMRSVersion>1.9.4</openMRSVersion>
-        <uiframeworkVersion>3.1</uiframeworkVersion>
-        <emrapiVersion>1.1-SNAPSHOT</emrapiVersion>
-        <appframeworkVersion>2.0</appframeworkVersion>
+        <uiframeworkVersion>3.2.1</uiframeworkVersion>
+        <emrapiVersion>1.2-SNAPSHOT</emrapiVersion>
+        <appframeworkVersion>2.1</appframeworkVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
-        <uicommonsVersion>1.0</uicommonsVersion>
+        <uicommonsVersion>1.2</uicommonsVersion>
         <emrVersion>2.0-SNAPSHOT</emrVersion>
         <htmlformentryVersion>2.1.4</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
         <providerManagementVersion>2.0</providerManagementVersion>
-        <reportingVersion>0.7.6</reportingVersion>
+        <reportingVersion>0.8.1</reportingVersion>
         <paperrecordVersion>1.0-SNAPSHOT</paperrecordVersion>
         <calculationVersion>1.0</calculationVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
