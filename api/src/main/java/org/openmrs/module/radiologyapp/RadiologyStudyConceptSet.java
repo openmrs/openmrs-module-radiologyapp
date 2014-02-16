@@ -21,6 +21,7 @@ import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.descriptor.ConceptSetDescriptor;
+import org.openmrs.module.emrapi.descriptor.ConceptSetDescriptorField;
 
 public class RadiologyStudyConceptSet extends ConceptSetDescriptor {
 
@@ -35,11 +36,10 @@ public class RadiologyStudyConceptSet extends ConceptSetDescriptor {
     public RadiologyStudyConceptSet(ConceptService conceptService) {
 
         setup(conceptService, EmrApiConstants.EMR_CONCEPT_SOURCE_NAME,
-                "radiologyStudySetConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_STUDY_SET,
-                "accessionNumberConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER,
-                "imagesAvailableConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_IMAGES_AVAILABLE,
-                "procedureConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE);
-
+                ConceptSetDescriptorField.required("radiologyStudySetConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_STUDY_SET),
+                ConceptSetDescriptorField.required("accessionNumberConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER),
+                ConceptSetDescriptorField.required("imagesAvailableConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_IMAGES_AVAILABLE),
+                ConceptSetDescriptorField.required("procedureConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE));
     }
 
     public Obs buildRadiologyStudyObsGroup(RadiologyStudy radiologyStudy) {

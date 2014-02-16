@@ -21,6 +21,7 @@ import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.descriptor.ConceptSetDescriptor;
+import org.openmrs.module.emrapi.descriptor.ConceptSetDescriptorField;
 
 public class RadiologyReportConceptSet extends ConceptSetDescriptor {
 
@@ -37,12 +38,11 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
     public RadiologyReportConceptSet(ConceptService conceptService) {
 
         setup(conceptService, EmrApiConstants.EMR_CONCEPT_SOURCE_NAME,
-                "radiologyReportSetConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_SET,
-                "accessionNumberConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER,
-                "reportBodyConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_BODY,
-                "reportTypeConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_TYPE,
-                "procedureConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE);
-
+                ConceptSetDescriptorField.required("radiologyReportSetConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_SET),
+                ConceptSetDescriptorField.required("accessionNumberConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER),
+                ConceptSetDescriptorField.required("reportBodyConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_BODY),
+                ConceptSetDescriptorField.required("reportTypeConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_TYPE),
+                ConceptSetDescriptorField.required("procedureConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE));
     }
 
     public Obs buildRadiologyReportObsGroup(RadiologyReport radiologyReport) {
