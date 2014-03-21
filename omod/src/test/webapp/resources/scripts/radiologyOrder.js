@@ -1,5 +1,6 @@
 describe("X-ray studies selection", function() {
     var firstStudy = AutocompleteItem(1, "First Study");
+    var secondStudy = AutocompleteItem(2, "First Study");
     var studies = [
         {"value": 1, "label": "First Study"},
         {"value": 2, "label": "Second Study"},
@@ -11,8 +12,13 @@ describe("X-ray studies selection", function() {
         {"value": 2, "label": "Clinics"},
         {"value": 3, "label": "Sant Femme"}];
 
-    var viewModel = StudiesViewModel(studies, locations, []);
+    var contrastStudies = [ 2 ];
+    var viewModel;
 
+
+    beforeEach(function() {
+        viewModel = StudiesViewModel(studies, locations, [], contrastStudies);
+    })
 
     it("should initialize correctly", function() {
         expect(viewModel.studies().length).toBe(3);
@@ -20,6 +26,7 @@ describe("X-ray studies selection", function() {
 
         expect(viewModel.portable(), false);
         expect(viewModel.portableLocation()).toBe(undefined);
+        expect(viewModel.selectedStudiesIncludeContrastStudy()).toBe(false);
     });
 
     it("should select and deselect a study", function() {
@@ -80,5 +87,24 @@ describe("X-ray studies selection", function() {
         expect(viewModel.isValid()).toBe(true);
     });
 
+    it("should select set selected studies include contrast study if contrast study selected", function() {
+        viewModel.selectStudy(secondStudy);
+        expect(viewModel.selectedStudiesIncludeContrastStudy()).toBe(true);
+
+        viewModel.unselectStudy(secondStudy);
+        expect(viewModel.selectedStudiesIncludeContrastStudy()).toBe(false);
+    });
+
+    it("should assess that viewModel is not valid if study includes contrast but creatinine fields not entered", function() {
+        viewModel.selectStudy(secondStudy);
+        expect(viewModel.isValid()).toBe(false);
+    })
+
+    it("should assess that viewModel is valid if study includes contrast an creatinine fields not entered", function() {
+        viewModel.selectStudy(secondStudy);
+        viewModel.creatinineLevel("1")
+        viewModel.creatinineTestDate("some date");
+        expect(viewModel.isValid()).toBe(true);
+    })
 
 })

@@ -1,7 +1,7 @@
 <%
     ui.decorateWith("appui", "standardEmrPage")
 
-    ui.includeJavascript("radiologyapp", "knockout-2.1.0.js")
+    ui.includeJavascript("uicommons", "knockout-2.1.0.js")
     ui.includeJavascript("radiologyapp", "radiologyOrder.js")
 
     ui.includeCss("radiologyapp", "radiologyOrder.css")
@@ -124,6 +124,27 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                 <span class="field-error"  style="display: none" ></span>
             </div>
 
+            <span data-bind="visible: selectedStudiesIncludeContrastStudy()">
+                <label for="creatinine-level-field">
+                    <label>${ ui.message("radiologyapp.order.creatinineLevel") }</label>
+                </label>
+
+                <div id="creatinine-level-field">
+                    <input class="field-value" data-bind="value: creatinineLevel"/> mg/dL
+                </div>
+
+                ${ ui.includeFragment("uicommons", "field/datetimepicker", [
+                        id: "creatinineTestDate",
+                        label: "radiologyapp.order.creatinineTestDate",
+                        formFieldName: "creatinineTestDate",
+                        useTime: false,
+                        defaultDate: defaultCreatinineTestDate,
+                        startDate:minCreatinineTestDate,
+                        endDate: maxCreatinineTestDate,
+                        classes: ['required']
+                ])}
+            </span>
+
         </div>
 
         <div class="right-column">
@@ -176,6 +197,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                 ${ ui.message("radiologyapp.save") }
                 <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i>
             </button>
+            <br/><br/><br/>
         </div>
     </form>
 </div>

@@ -40,6 +40,12 @@ public class RadiologyConstants {
 
     public static final String GP_RADIOLOGY_TEST_ORDER_TYPE = "emr.radiologyTestOrderType";
 
+    // used to specify the orderables that require constrast; not mandatory, but if this concept is set
+    // then went ordering an study the procedure ordered will be tested against this set if it is a member
+    // of the set specific constrast-related questions will be asked (currently just the creatinine level of the patient)
+    public static final String GP_CONTRAST_ORDERABLES_CONCEPT = "emr.constrastOrderablesConcept";
+
+
     // concept codes used by radiology
 
     public static final String CONCEPT_CODE_RADIOLOGY_STUDY_SET = "Radiology study construct";

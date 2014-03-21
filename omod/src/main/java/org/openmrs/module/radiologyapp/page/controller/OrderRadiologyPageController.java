@@ -1,6 +1,14 @@
 package org.openmrs.module.radiologyapp.page.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -20,13 +28,6 @@ import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.ui.util.ByFormattedObjectComparator;
 import org.openmrs.util.ProviderByPersonNameComparator;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 public class OrderRadiologyPageController {
 
@@ -60,11 +61,17 @@ public class OrderRadiologyPageController {
         model.addAttribute("providers", getProviders(providerService));
         model.addAttribute("visit", visitWrapper.getVisit());
 
+        Date defaultOrderDate =  emrContext.getActiveVisit() != null && emrContext.getActiveVisit().getVisit().equals(visitWrapper.getVisit()) ?
+                new Date() : visitWrapper.getStartDatetime();
+
         // note that the underlying date widget takes care of stripping out the time component for us
         model.addAttribute("minOrderDate", visitWrapper.getStartDatetime());
         model.addAttribute("maxOrderDate", visitWrapper.getEncounterStopDateRange());
-        model.addAttribute("defaultOrderDate", emrContext.getActiveVisit() != null && emrContext.getActiveVisit().getVisit().equals(visitWrapper.getVisit()) ?
-                        new Date() : visitWrapper.getStartDatetime());
+        model.addAttribute("defaultOrderDate",defaultOrderDate);
+
+        model.addAttribute("minCreatinineTestDate", new DateTime(defaultOrderDate).minusMonths(1).toDate());
+        model.addAttribute("maxCreatinineTestDate", defaultOrderDate);
+        model.addAttribute("defaultCreatinineTestDate", defaultOrderDate);
 
         if (modality.equalsIgnoreCase(RadiologyConstants.XRAY_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getXrayOrderablesConcept(), Context.getLocale())));
