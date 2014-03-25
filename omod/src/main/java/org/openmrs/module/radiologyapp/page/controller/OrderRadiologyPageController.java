@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,6 +17,7 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appframework.feature.FeatureToggleProperties;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.api.EmrService;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
@@ -37,6 +39,7 @@ public class OrderRadiologyPageController {
                            @SpringBean("radiologyProperties") RadiologyProperties radiologyProperties,
                            @SpringBean("emrService") EmrService emrService,
                            @SpringBean("providerService") ProviderService providerService,
+                           @SpringBean("featureToggles") FeatureToggleProperties featureToggles,
                            EmrContext emrContext,
                            UiUtils ui,
                            PageModel model) {
@@ -73,11 +76,32 @@ public class OrderRadiologyPageController {
         model.addAttribute("maxCreatinineTestDate", defaultOrderDate);
         model.addAttribute("defaultCreatinineTestDate", defaultOrderDate);
 
+        model.addAttribute("leadRadiologyTechName", radiologyProperties.getLeadRadiologyTechName());
+        model.addAttribute("leadRadiologyTechContactInfo", radiologyProperties.getLeadRadiologyTechContactInfo());
+
+        // used to determine if we need to collect creatinine level
+        List<Integer> contrastOrderables = getConstrastOrderables(radiologyProperties.getContrastOrderablesConcept());
+
+        if (radiologyProperties.getContrastOrderablesConcept() != null) {
+            model.addAttribute("contrastStudies", ui.toJson(contrastOrderables));
+        }
+        else {
+            model.addAttribute("contrastStudies","");
+        }
+
         if (modality.equalsIgnoreCase(RadiologyConstants.XRAY_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getXrayOrderablesConcept(), Context.getLocale())));
         }
         else if (modality.equalsIgnoreCase(RadiologyConstants.CT_SCAN_MODALITY_CODE)) {
-            model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getCTScanOrderablesConcept(), Context.getLocale())));
+
+            List<SimpleObject> ctScanOrderables = getOrderables(radiologyProperties.getCTScanOrderablesConcept(), Context.getLocale());
+
+            // remove this block once radiology contrasts have been toggled on
+            if (!featureToggles.isFeatureEnabled("radiologyContrastStudies"))  {
+                removeContrastOrderables(ctScanOrderables, contrastOrderables);
+            }
+
+            model.addAttribute("orderables", ui.toJson(ctScanOrderables));
         }
         else if (modality.equalsIgnoreCase(RadiologyConstants.ULTRASOUND_MODALITY_CODE)) {
             model.addAttribute("orderables", ui.toJson(getOrderables(radiologyProperties.getUltrasoundOrderablesConcept(), Context.getLocale())));
@@ -85,6 +109,8 @@ public class OrderRadiologyPageController {
         else {
             throw new IllegalArgumentException("Invalid Modality: " + modality);
         }
+
+
     }
 
     private List<SimpleObject> getPortableLocations(EmrService emrService, final UiUtils ui) {
@@ -117,6 +143,15 @@ public class OrderRadiologyPageController {
         return items;
     }
 
+    private List<Integer> getConstrastOrderables(Concept contrastOrderablesSet)  {
+        // we only need concept ids for the contrast set
+        List<Integer> items = new ArrayList<Integer>();
+        for (Concept concept : contrastOrderablesSet.getSetMembers()) {
+            items.add(concept.getId());
+        }
+        return items;
+    }
+
     private List<SimpleObject> getProviders(ProviderService providerService) {
         List<SimpleObject> items = new ArrayList<SimpleObject>();
         List<Provider> providers = providerService.getAllProviders(false);
@@ -131,5 +166,19 @@ public class OrderRadiologyPageController {
         }
 
         return items;
+    }
+
+    // temporary feature toggle method to remove contrast orderables as an option
+    private void removeContrastOrderables(List<SimpleObject> ctScanOrderables, List<Integer> contrastOrderables) {
+
+        Iterator<SimpleObject> i = ctScanOrderables.iterator();
+
+        while (i.hasNext()) {
+            SimpleObject ctScanOrderable = i.next();
+            if (contrastOrderables.contains(Integer.valueOf(ctScanOrderable.get("value").toString()))) {
+                i.remove();
+            }
+        }
+
     }
 }

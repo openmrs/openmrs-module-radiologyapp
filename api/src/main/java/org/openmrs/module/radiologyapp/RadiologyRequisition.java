@@ -14,16 +14,16 @@
 
 package org.openmrs.module.radiologyapp;
 
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
-
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Requisition of one or more radiology studies (XRay, CT, Ultrasound), with associated metadata about the entire group
@@ -47,6 +47,10 @@ public class RadiologyRequisition {
     private Set<Concept> studies = new LinkedHashSet<Concept>();
 
     private Visit visit;
+
+    private Double creatinineLevel;
+
+    private Date creatinineTestDate;
 
     public Patient getPatient() {
         return patient;
@@ -122,5 +126,21 @@ public class RadiologyRequisition {
 
     public void setVisit(Visit visit) {
         this.visit = visit;
+    }
+
+    public Double getCreatinineLevel() {
+        return creatinineLevel;
+    }
+
+    public void setCreatinineLevel(Double creatinineLevel) {
+        this.creatinineLevel = creatinineLevel;
+    }
+
+    public Date getCreatinineTestDate() {
+        return creatinineTestDate;
+    }
+
+    public void setCreatinineTestDate(Date creatinineTestDate) {
+        this.creatinineTestDate = creatinineTestDate;
     }
 }

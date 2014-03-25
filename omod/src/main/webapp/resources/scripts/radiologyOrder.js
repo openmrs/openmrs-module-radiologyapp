@@ -6,19 +6,52 @@ function AutocompleteItem(id, name) {
     return api;
 }
 
-// TODOS:
-// creatinine level must be a number
-// make the dialog box appear if creatinine is over 1.5
-// handle customizing the error message
-// handle getting the orderables into the view and setting the global properties
-// handle submitting and saving the values
-
 function StudiesViewModel(studies, locations, requiredFields, contrastStudies) {
 
     // private variables
 
     // array of concept id of studies that require contrast
     var contrastStudies = contrastStudies;
+
+    // just to allow recursive call of confirmCreatinineLevel message
+    var creatinineLevelWarningIssued = false;
+
+    // private methods
+
+    // used to confirm an acceptable creatinine level when performing contrast studies
+    var confirmCreatinineLevel = function() {
+
+        // make sure the creatinine reading is above 1.5 and display confirmation message is not
+        // TODO creatinine level value should really be a global property
+        if (api.selectedStudiesIncludeContrastStudy() && api.creatinineLevel() > 1.5
+            && !creatinineLevelWarningIssued) {
+
+            var creatinineLevelWarning = emr.setupConfirmationDialog({
+                selector: '#creatinine-level-warning',
+                actions: {
+                    confirm: function() {
+                        creatinineLevelWarningIssued = true;  // to avoid recursive call when we re-submit
+                        $('#radiology-order').submit();
+                    },
+                    cancel: function() {
+                        reenableSubmitButton();
+                    }
+
+                }
+            });
+
+            creatinineLevelWarning.show();
+        }
+        else {
+            return true;
+        }
+    }
+
+    var reenableSubmitButton = function() {
+        $('#radiology-order .icon-spin').css('display','none');
+        $('#radiology-order .confirm').removeClass('disabled');
+        $('#radiology-order .confirm').removeAttr('disabled');
+    }
 
     // api
     var api = {};
@@ -56,17 +89,20 @@ function StudiesViewModel(studies, locations, requiredFields, contrastStudies) {
         var requestedOnValid = api.requiredFields.indexOf('requestedOn') == -1   // always valid if not specified in the required array
             || (api.requestedOn() != null && (api.requestedOn ().match(/\w+/) != null));
 
-        // creatinine fields are mandatory if a constrast study has been requested
+        // creatinine fields are mandatory if a contrast study has been requested
         var creatinineFieldsValid = !api.selectedStudiesIncludeContrastStudy()
-            || ((api.creatinineLevel() != null && (api.creatinineLevel().match(/\w+/) != null))
+            || ((api.creatinineLevel() != null && (api.creatinineLevel().match(/\w+/) != null) && !isNaN(api.creatinineLevel()))
             && (api.creatinineTestDate() != null && (api.creatinineTestDate ().match(/\w+/) != null)));
 
         return studiesAreValid && portableIsValid && clinicalHistoryValid && requestedByValid
             && requestedFromValid && requestedOnValid && creatinineFieldsValid;
     };
 
-    api.submit = function() {
-        $.submit();
+    api.handleSubmit = function() {
+        if (api.isValid()) {
+            return confirmCreatinineLevel();
+        }
+        return false;
     }
 
     /* Function related to studies selection */
@@ -87,6 +123,7 @@ function StudiesViewModel(studies, locations, requiredFields, contrastStudies) {
             return { "label": element.name, "value": element.id };
         });
     };
+
     /* Functions related to portable */
     api.portable.subscribe(function(value) {
         if( !value ) {
@@ -96,12 +133,11 @@ function StudiesViewModel(studies, locations, requiredFields, contrastStudies) {
 
     /* Functions related to contrast studies */
     api.selectedStudiesIncludeContrastStudy = function() {
-//        for(var i = 0; i < api.selectedStudies().length; i++) {
-//            if (contrastStudies.indexOf(api.selectedStudies()[i]["id"]) != -1) {
-//                return true;
-//            }
-//        }
-//        return false;
+        for(var i = 0; i < api.selectedStudies().length; i++) {
+            if (contrastStudies.indexOf(api.selectedStudies()[i]["id"]) != -1) {
+                return true;
+            }
+        }
         return false;
     }
 

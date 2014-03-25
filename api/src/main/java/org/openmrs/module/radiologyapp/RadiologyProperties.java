@@ -14,6 +14,7 @@
 
 package org.openmrs.module.radiologyapp;
 
+import org.apache.commons.lang.StringUtils;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
@@ -58,6 +59,34 @@ public class RadiologyProperties extends ModuleProperties {
 
     public OrderType getRadiologyTestOrderType() {
         return getOrderTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_TEST_ORDER_TYPE);
+    }
+
+    // used to specify the orderables that require contrast; not mandatory, but if this concept is set
+    // then went ordering an study the procedure ordered will be tested against this set if it is a member
+    // of the set specific contrast-related questions will be asked (currently just the creatinine level of the patient)
+    public Concept getContrastOrderablesConcept() {
+        if (StringUtils.isNotBlank(administrationService.getGlobalProperty(RadiologyConstants.GP_CONTRAST_ORDERABLES_CONCEPT))) {
+            return getConceptByGlobalProperty(RadiologyConstants.GP_CONTRAST_ORDERABLES_CONCEPT);
+        }
+        else {
+            // allowed to be null
+            return null;
+        }
+    }
+
+    // only mandatory when specifying contrast orderables
+    public Concept getCreatinineLevelConcept() {
+       return getConceptByGlobalProperty(RadiologyConstants.GP_CREATININE_LEVEL_CONCEPT);
+    }
+
+    // not mandatory, only used to display contact info on some error messages
+    public String getLeadRadiologyTechName() {
+        return administrationService.getGlobalProperty(RadiologyConstants.GP_LEAD_RADIOLOGY_TECH_NAME);
+    }
+
+    // not mandatory, only used to display contact info on some error messages
+    public String getLeadRadiologyTechContactInfo() {
+        return administrationService.getGlobalProperty(RadiologyConstants.GP_LEAD_RADIOLOGY_TECH_CONTACT_INFO);
     }
 
 }

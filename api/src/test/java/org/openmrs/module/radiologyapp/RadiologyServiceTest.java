@@ -14,6 +14,15 @@
 
 package org.openmrs.module.radiologyapp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -45,7 +54,6 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.emr.EmrConstants;
 import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiConstants;
@@ -61,21 +69,13 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import uk.co.it.modular.hamcrest.date.DateMatchers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
@@ -168,6 +168,8 @@ public class RadiologyServiceTest{
 
     private Concept reportTypeConcept;
 
+    private Concept creatinineLevelConcept;
+
     private Concept trueConcept = new Concept();
 
     private Concept falseConcept = new Concept();
@@ -216,6 +218,7 @@ public class RadiologyServiceTest{
         clinicianEncounterRole = new EncounterRole();
         radiologyTechnicianEncounterRole = new EncounterRole();
         principalResultsInterpreterEncounterRole = new EncounterRole();
+        creatinineLevelConcept = new Concept();
 
         prepareMocks();
         setupRadiologyStudyAndRadiologyReportsConceptSets();
@@ -252,6 +255,7 @@ public class RadiologyServiceTest{
         when(radiologyProperties.getRadiologyReportEncounterType()).thenReturn(radiologyReportEncounterType);
         when(radiologyProperties.getRadiologyTechnicianEncounterRole()).thenReturn(radiologyTechnicianEncounterRole);
         when(radiologyProperties.getPrincipalResultsInterpreterEncounterRole()).thenReturn(principalResultsInterpreterEncounterRole);
+        when(radiologyProperties.getCreatinineLevelConcept()).thenReturn(creatinineLevelConcept);
         when(emrApiProperties.getOrderingProviderEncounterRole()).thenReturn(clinicianEncounterRole);
         when(emrApiProperties.getUnknownLocation()).thenReturn(unknownLocation);
         when(emrApiProperties.getUnknownProvider()).thenReturn(unknownProvider);
@@ -315,7 +319,7 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(emrContext, radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, providerUserAccount, null, study)));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, providerUserAccount, null, null, null, study)));
     }
 
     @Test
@@ -335,7 +339,7 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(emrContext, radiologyRequisition);
 
-        assertThat(encounter, new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider,  providerUserAccount, null, study, secondStudy));
+        assertThat(encounter, new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider,  providerUserAccount, null, null, null, study, secondStudy));
     }
 
     @Test
@@ -371,7 +375,7 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(emrContext, radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, anotherProvider,  anotherProviderUserAccount, orderDate, study)));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, anotherProvider,  anotherProviderUserAccount, orderDate, null, null, study)));
     }
 
     @Test
@@ -397,7 +401,25 @@ public class RadiologyServiceTest{
         Encounter encounter = radiologyService.placeRadiologyRequisition(emrContext, radiologyRequisition);
 
         // note that since the visit started *after* the order, the orderDate should be visit startdate
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, provider,  providerUserAccount, currentVisit.getStartDatetime(), study)));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, provider,  providerUserAccount, currentVisit.getStartDatetime(), null, null, study)));
+    }
+
+    @Test
+    public void placeRadiologyRequisition_shouldStoreCreatinineValue()
+            throws Exception {
+        Concept study = new Concept();
+        RadiologyRequisition radiologyRequisition = new RadiologyRequisition();
+        radiologyRequisition.setPatient(patient);
+        radiologyRequisition.setClinicalHistory(clinicalHistory);
+        radiologyRequisition.addStudy(study);
+        radiologyRequisition.setUrgency(Order.Urgency.STAT);
+        radiologyRequisition.setCreatinineLevel(1.8);
+        Date creatinineTestDate = new DateTime(2014, 01, 20, 0, 0, 0).toDate();
+        radiologyRequisition.setCreatinineTestDate(creatinineTestDate);
+
+        Encounter encounter = radiologyService.placeRadiologyRequisition(emrContext, radiologyRequisition);
+
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, providerUserAccount, null, 1.8, creatinineTestDate, study)));
     }
 
 
@@ -1132,15 +1154,20 @@ public class RadiologyServiceTest{
         private Date expectedOrderDate;
         private Location expectedOrderLocation;
         private User expectedOrderedUserAccount;
+        private Double expectedCreatinineLevel;
+        private Date expectedCreatinineTestDate;
 
         public IsExpectedRadiologyOrderEncounter(Location expectedLocation, Location expectedOrderLocation,
-                                                 Provider expectedOrderer, User expectedOrdererUserAccount, Date expectedOrderDate, Concept... expectedStudies) {
+                                                 Provider expectedOrderer, User expectedOrdererUserAccount, Date expectedOrderDate,
+                                                 Double expectedCreatinineLevel, Date expectedCreatinineTestDate, Concept... expectedStudies) {
 
             this.expectedStudies = expectedStudies;
             this.expectedOrderer = expectedOrderer;
             this.expectedOrderDate = expectedOrderDate;
             this.expectedOrderLocation = expectedOrderLocation;
             this.expectedOrderedUserAccount = expectedOrdererUserAccount;
+            this.expectedCreatinineLevel = expectedCreatinineLevel;
+            this.expectedCreatinineTestDate = expectedCreatinineTestDate;
 
             for (Concept expectedStudy : expectedStudies) {
                 expectedOrders.add(new IsExpectedOrder(expectedLocation, expectedOrderDate, expectedOrdererUserAccount, expectedStudy));
@@ -1169,6 +1196,18 @@ public class RadiologyServiceTest{
             }
 
             assertTrue(new IsIterableContainingInAnyOrder(expectedOrders).matches(encounter.getOrders()));
+
+            if (expectedCreatinineLevel != null) {
+                assertFalse(encounter.getObs().isEmpty());
+                // will need to fix this once/if we have multiple obs on this encounter
+                Obs creatinineObs = encounter.getObs().iterator().next();
+                assertThat(creatinineObs.getValueNumeric(), is (expectedCreatinineLevel));
+                assertThat(creatinineObs.getObsDatetime(), is(expectedCreatinineTestDate));
+            }
+            else {
+                // will need to fix this once/if we have multiple obs on this encounter
+                assertTrue(encounter.getObs().isEmpty());
+            }
 
             return true;
         }

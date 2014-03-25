@@ -14,6 +14,11 @@
 
 package org.openmrs.module.radiologyapp;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,11 +45,6 @@ import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
@@ -122,6 +122,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setRequestedBy(providerService.getProvider(1));
         requisition.setRequestedOn(new Date());
         requisition.setRequestedFrom(locationService.getLocation(1));
+        requisition.setCreatinineLevel(1.8);
+        requisition.setCreatinineTestDate(new DateTime(2014,1,1,20,0,0,0).toDate());
 
         radiologyService.placeRadiologyRequisition(emrContext, requisition);
 
@@ -130,6 +132,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         Set<Order> orders = encounters.get(0).getOrders();
         Assert.assertEquals(1, orders.size());
+
+        Set<Obs> obs = encounters.get(0).getObs();
+        Assert.assertEquals(1, obs.size());
 
     }
 

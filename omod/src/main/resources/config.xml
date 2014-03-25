@@ -125,6 +125,39 @@
         </description>
     </globalProperty>
 
+    <globalProperty>
+        <property>radiologyapp.contrastOrderablesConcept</property>
+        <defaultValue></defaultValue>
+        <description>
+            Used to specify the orderables that require constrast; not mandatory, but if this concept is set then went ordering an study the procedure ordered will be tested against this set if it is a member of the set specific contrast-related questions will be asked (currently just the creatinine level of the patient)
+        </description>
+    </globalProperty>
+
+
+    <globalProperty>
+        <property>radiologyapp.creatinineLevelConcept</property>
+        <defaultValue></defaultValue>
+        <description>
+            Used to specify the creatinine level test result of the patient (only used in conjunction with contrast orderables)
+        </description>
+    </globalProperty>
+
+
+    <globalProperty>
+        <property>radiologyapp.leadRadiologyTechName</property>
+        <defaultValue></defaultValue>
+        <description>
+            Name of Lead Radiology Tech (not mandatory, only used for warning messages)
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>radiologyapp.leadRadiologyTechContactInfo</property>
+        <defaultValue></defaultValue>
+        <description>
+            Contact Info of Lead Radiology Tech (not mandatory, only used for warning messages)
+        </description>
+    </globalProperty>
 
     <!-- Privileges -->
     <privilege>

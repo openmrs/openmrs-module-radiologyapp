@@ -15,7 +15,8 @@
 
     var viewModel =   new StudiesViewModel(${orderables}, ${portableLocations},
             [ 'clinicalHistory',
-              ${ areProviderLocationAndDateEditable ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}] )   // provider/location/date information only mandatory for retrospective entry
+              ${ areProviderLocationAndDateEditable ? '\'requestedBy\',\'requestedFrom\',\'requestedOn\'' : ''}], // provider/location/date information only mandatory for retrospective entry
+            ${ contrastStudies ?: '[]'});
 
     jQuery(function() {
         jq('button.confirm').click(function(){
@@ -55,8 +56,8 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
 
 <div id="contentForm">
     <h1>${ ui.message("radiologyapp.order." + modality + ".title") }</h1>
-    <form action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderRadiology",
-            [ successUrl: ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id, visitId: visit.id ]) ]) }" data-bind="submit: isValid" method="post">
+    <form id="radiology-order" data-bind="submit: handleSubmit" action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderRadiology",
+            [ successUrl: ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id, visitId: visit.id ]) ]) }" method="post">
         <input type="hidden" name="patient" value="${ patient.id }"/>
         <input type="hidden" name="modality" value="${ modality }"/>
         <input type="hidden" name="visit" value="${ visit.id }" />
@@ -115,8 +116,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                    placeholder="${ ui.message("radiologyapp.order." + modality + ".studySearchPlaceholder") }"/>
 
             <label for="clinical-history-field">
-                <label>${ ui.message("radiologyapp.order.indication") }
-                    ${ (modality.equalsIgnoreCase(ctScanModalityCode) ? '(' + ui.message("emr.formValidation.messages.requiredField.label") + ')': '') }</label>
+                <label>${ ui.message("radiologyapp.order.indication") } (${ ui.message("emr.formValidation.messages.requiredField.label") })</label>
             </label>
 
             <div id="clinical-history-field">
@@ -124,13 +124,15 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                 <span class="field-error"  style="display: none" ></span>
             </div>
 
+            <!-- fields to collection creatinine level, only used in contrast exams -->
             <span data-bind="visible: selectedStudiesIncludeContrastStudy()">
                 <label for="creatinine-level-field">
-                    <label>${ ui.message("radiologyapp.order.creatinineLevel") }</label>
+                    <label>${ ui.message("radiologyapp.order.creatinineLevel") }(${ ui.message("emr.formValidation.messages.requiredField.label") })</label>
                 </label>
 
                 <div id="creatinine-level-field">
-                    <input class="field-value" data-bind="value: creatinineLevel"/> mg/dL
+                    <input id="creatinine-level-field-input" name="creatinineLevel" class="field-value inline" style="width:50px;" size="10" data-bind="value: creatinineLevel"/>
+                    <span class="inline">${ ui.message("radiologyapp.order.creatinineUnits") }</span>
                 </div>
 
                 ${ ui.includeFragment("uicommons", "field/datetimepicker", [
@@ -197,8 +199,22 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                 ${ ui.message("radiologyapp.save") }
                 <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i>
             </button>
-            <br/><br/><br/>
+            <br/><br/><br/><br/><br/><br/><br/><br/>
         </div>
     </form>
+</div>
+
+<div id="creatinine-level-warning" class="dialog" style="display: none">
+    <div class="dialog-header">
+        <i class="icon-info-sign"></i>
+        <h3>${ ui.message("radiologyapp.order.creatinineLevel") }</h3>
+    </div>
+    <div class="dialog-content">
+        <p class="dialog-instructions">${ leadRadiologyTechName ? ui.message("radiologyapp.order.creatinineWarningWithContactInfo",
+                leadRadiologyTechName, leadRadiologyTechContactInfo) : ui.message("radiologyapp.order.creatinineWarning") }</p>
+
+        <button class="confirm right">${ ui.message("emr.confirm") }</button>
+        <button class="cancel">${ ui.message("emr.cancel") }</button>
+    </div>
 </div>
 

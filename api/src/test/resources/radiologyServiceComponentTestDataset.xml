@@ -9,6 +9,12 @@
     <global_property property="emr.unknownLocation" property_value="dc5c1fcc-0459-4201-bf70-0b90535ba362" uuid="6977b3c3-9e66-42c6-8f03-2a0c1e9ca2a8"/>
     <global_property property="emr.unknownProvider" property_value="c2299800-cca9-11e0-9572-0800200c9a66" uuid="6988b3c3-9e66-42c6-8f03-2a0c1e9ca2a8"/>
 
+    <!-- define metadata for the Radiology Requisiton -->
+    <concept concept_id="2001" retired="false" datatype_id="1" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="999e2ed3-dd5f-4f46-9459-26127c9265ab"/>
+    <concept_name concept_id="2001" name="Creatinine Level" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="2001" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9995693a-f558-40c9-8177-145dfe119ca7"/>
+    <concept_description concept_description_id="2001" concept_id="2001" locale="en" description="Creatinine Level" creator="1" date_created="2004-08-12 00:00:00.0" uuid="999d710b-d444-40b7-b449-6e0e739dedd0"/>
+    <global_property property="radiologyapp.creatinineLevelConcept" property_value="999e2ed3-dd5f-4f46-9459-26127c9265ab" uuid="9998b3c3-9e66-42c6-8f03-2a0c1e9ca2a8"/>
+
     <!-- define the metadata for the Radiology Study -->
     <encounter_type encounter_type_id="1001" name="Radiology Study" description="Radiology Study" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="77ae96f4-6afe-4351-b6f8-cd4fc383cce1"/>
     <global_property property="emr.radiologyStudyEncounterType" property_value="77ae96f4-6afe-4351-b6f8-cd4fc383cce1" uuid="6988b3c3-9776-42c6-8f03-2a0c1e9ca2a8"/>

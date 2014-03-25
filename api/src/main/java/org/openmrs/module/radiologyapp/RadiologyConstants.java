@@ -43,7 +43,13 @@ public class RadiologyConstants {
     // used to specify the orderables that require constrast; not mandatory, but if this concept is set
     // then went ordering an study the procedure ordered will be tested against this set if it is a member
     // of the set specific constrast-related questions will be asked (currently just the creatinine level of the patient)
-    public static final String GP_CONTRAST_ORDERABLES_CONCEPT = "emr.constrastOrderablesConcept";
+    public static final String GP_CONTRAST_ORDERABLES_CONCEPT = "radiologyapp.contrastOrderablesConcept";
+
+    public static final String GP_LEAD_RADIOLOGY_TECH_NAME = "radiologyapp.leadRadiologyTechName";
+
+    public static final String GP_LEAD_RADIOLOGY_TECH_CONTACT_INFO = "radiologyapp.leadRadiologyTechContactInfo";
+
+    public static final String GP_CREATININE_LEVEL_CONCEPT = "radiologyapp.creatinineLevelConcept";
 
 
     // concept codes used by radiology

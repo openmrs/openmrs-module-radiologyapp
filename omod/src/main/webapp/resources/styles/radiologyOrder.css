@@ -9,6 +9,10 @@
   clear: left;
 }
 
+.inline {
+    display: inline;
+}
+
 #study-search {
   width: 330px;
   height: 2em;

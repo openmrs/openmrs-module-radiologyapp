@@ -14,11 +14,21 @@
 
 package org.openmrs.module.radiologyapp;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
+import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -40,15 +50,6 @@ import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class RadiologyServiceImpl  extends BaseOpenmrsService implements RadiologyService {
 
@@ -109,6 +110,17 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
 
             encounter.addOrder(order);
+        }
+
+        // add creatinine level if it has been specified
+        if (requisition.getCreatinineLevel() != null) {
+            Obs creatinineLevel = new Obs();
+            creatinineLevel.setConcept(radiologyProperties.getCreatinineLevelConcept());
+            creatinineLevel.setValueNumeric(requisition.getCreatinineLevel());
+            if (requisition.getCreatinineTestDate() != null) {
+                creatinineLevel.setObsDatetime(requisition.getCreatinineTestDate());
+            }
+            encounter.addObs(creatinineLevel);
         }
 
         // since accession numbers are determined by primary key, we need to first save the encounter
