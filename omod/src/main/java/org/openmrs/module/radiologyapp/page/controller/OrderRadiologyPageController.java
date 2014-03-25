@@ -80,9 +80,9 @@ public class OrderRadiologyPageController {
         model.addAttribute("leadRadiologyTechContactInfo", radiologyProperties.getLeadRadiologyTechContactInfo());
 
         // used to determine if we need to collect creatinine level
-        List<Integer> contrastOrderables = getConstrastOrderables(radiologyProperties.getContrastOrderablesConcept());
-
+        List<Integer> contrastOrderables = null; // don't need separate this out once we remove feature toggle
         if (radiologyProperties.getContrastOrderablesConcept() != null) {
+            contrastOrderables = getContrastOrderables(radiologyProperties.getContrastOrderablesConcept());
             model.addAttribute("contrastStudies", ui.toJson(contrastOrderables));
         }
         else {
@@ -143,7 +143,7 @@ public class OrderRadiologyPageController {
         return items;
     }
 
-    private List<Integer> getConstrastOrderables(Concept contrastOrderablesSet)  {
+    private List<Integer> getContrastOrderables(Concept contrastOrderablesSet)  {
         // we only need concept ids for the contrast set
         List<Integer> items = new ArrayList<Integer>();
         for (Concept concept : contrastOrderablesSet.getSetMembers()) {
@@ -170,6 +170,10 @@ public class OrderRadiologyPageController {
 
     // temporary feature toggle method to remove contrast orderables as an option
     private void removeContrastOrderables(List<SimpleObject> ctScanOrderables, List<Integer> contrastOrderables) {
+
+        if (contrastOrderables == null) {
+            return;
+        }
 
         Iterator<SimpleObject> i = ctScanOrderables.iterator();
 
