@@ -30,6 +30,7 @@ function StudiesViewModel(studies, locations, requiredFields, contrastStudies) {
                 selector: '#creatinine-level-warning',
                 actions: {
                     confirm: function() {
+                        creatinineLevelWarning.close();
                         creatinineLevelWarningIssued = true;  // to avoid recursive call when we re-submit
                         $('#radiology-order').submit();
                     },
