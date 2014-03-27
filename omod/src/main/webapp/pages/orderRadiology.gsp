@@ -213,7 +213,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
         <p class="dialog-instructions">${ leadRadiologyTechName ? ui.message("radiologyapp.order.creatinineWarningWithContactInfo",
                 leadRadiologyTechName, leadRadiologyTechContactInfo) : ui.message("radiologyapp.order.creatinineWarning") }</p>
 
-        <button class="confirm right">${ ui.message("uiconmmons.confirm") }</button>
+        <button class="confirm right">${ ui.message("uicommons.confirm") }</button>
         <button class="cancel">${ ui.message("uicommons.cancel") }</button>
     </div>
 </div>
