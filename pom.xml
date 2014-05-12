@@ -44,7 +44,7 @@
         <htmlformentryVersion>2.1.4</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
         <providerManagementVersion>2.0</providerManagementVersion>
-        <reportingVersion>0.8.1</reportingVersion>
+        <reportingVersion>0.9.1-SNAPSHOT</reportingVersion>
         <paperrecordVersion>1.0-SNAPSHOT</paperrecordVersion>
         <calculationVersion>1.0</calculationVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
@@ -140,7 +140,6 @@
             <version>${emrVersion}</version>
             <scope>provided</scope>
         </dependency>
-
 
         <!-- OpenMRS modules simply required to fire up the application context when running component tests -->
 
