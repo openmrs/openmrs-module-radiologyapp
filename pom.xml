@@ -40,7 +40,7 @@
         <appframeworkVersion>2.1</appframeworkVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
         <uicommonsVersion>1.2</uicommonsVersion>
-        <emrVersion>2.0-SNAPSHOT</emrVersion>
+        <appuiVersion>1.2-SNAPSHOT</appuiVersion>
         <htmlformentryVersion>2.1.4</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
         <providerManagementVersion>2.0</providerManagementVersion>
@@ -122,22 +122,6 @@
             <groupId>org.openmrs.module</groupId>
             <artifactId>emrapi-api</artifactId>
             <version>${emrapiVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>emr-api</artifactId>
-            <version>${emrVersion}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>emr-api</artifactId>
-            <version>${emrVersion}</version>
             <scope>provided</scope>
         </dependency>
 

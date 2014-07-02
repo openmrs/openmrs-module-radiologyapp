@@ -17,7 +17,6 @@ package org.openmrs.module.radiologyapp;
 import org.openmrs.Encounter;
 import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 
@@ -25,7 +24,7 @@ import java.util.List;
 
 public interface RadiologyService extends OpenmrsService {
 
-    Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition)
+    Encounter placeRadiologyRequisition(RadiologyRequisition requisition)
             throws EncounterDateBeforeVisitStartDateException, EncounterDateAfterVisitStopDateException;
 
     /**

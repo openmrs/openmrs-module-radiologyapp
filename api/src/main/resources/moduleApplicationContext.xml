@@ -17,7 +17,6 @@
                 <property name="encounterService" ref="encounterService"/>
                 <property name="conceptService" ref="conceptService"/>
                 <property name="userService" ref="userService"/>
-                <property name="emrOrderService" ref="emrOrderService"/>
                 <property name="radiologyOrderDAO">
                     <bean class="${project.parent.groupId}.${project.parent.artifactId}.db.HibernateRadiologyOrderDAO">
                         <property name="sessionFactory">

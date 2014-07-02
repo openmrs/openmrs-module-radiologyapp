@@ -14,15 +14,6 @@
 
 package org.openmrs.module.radiologyapp;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,23 +24,30 @@ import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
-import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.UserService;
 import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.emr.EmrContext;
-import org.openmrs.module.emr.order.EmrOrderService;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.encounter.EncounterDomainWrapper;
+import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RadiologyServiceImpl  extends BaseOpenmrsService implements RadiologyService {
 
@@ -58,8 +56,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     private EmrApiProperties emrApiProperties;
 
     private RadiologyProperties radiologyProperties;
-
-    private EmrOrderService emrOrderService;
 
     private EncounterService encounterService;
 
@@ -73,22 +69,18 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional
     @Override
-    public Encounter placeRadiologyRequisition(EmrContext emrContext, RadiologyRequisition requisition)
+    public Encounter placeRadiologyRequisition(RadiologyRequisition requisition)
         throws EncounterDateBeforeVisitStartDateException, EncounterDateAfterVisitStopDateException {
-
-        Provider requestedBy = requisition.getRequestedBy() != null ? requisition.getRequestedBy() : emrContext.getCurrentProvider();
 
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyOrderEncounterType());
-        encounter.setProvider(emrApiProperties.getOrderingProviderEncounterRole(), requestedBy);
+        encounter.setProvider(emrApiProperties.getOrderingProviderEncounterRole(), requisition.getRequestedBy());
         encounter.setPatient(requisition.getPatient());
-        encounter.setLocation(requisition.getRequestedFrom() != null ? requisition.getRequestedFrom() : emrContext.getSessionLocation());
+        encounter.setLocation(requisition.getRequestedFrom());
         encounter.setEncounterDatetime(requisition.getRequestedOn() != null ? requisition.getRequestedOn() : new Date());
 
-        Visit visit = requisition.getVisit() != null ? requisition.getVisit() :
-                (emrContext.getActiveVisit() != null ? emrContext.getActiveVisit().getVisit() : null);
-        if (visit != null) {
-            new EncounterDomainWrapper(encounter).attachToVisit(visit);
+        if (requisition.getVisit() != null) {
+            new EncounterDomainWrapper(encounter).attachToVisit(requisition.getVisit());
         }
 
         for (Concept study : requisition.getStudies()) {
@@ -104,7 +96,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
             // TODO: change this to just use the provider once orderer gets refactored (in core) to be a provider
             // TODO: also note that a provider is not guaranteed to have a user account, so we have to allow that orderer might never be set
-            List<User> providerUsers = userService.getUsersByPerson(requestedBy.getPerson(), false);
+            List<User> providerUsers = userService.getUsersByPerson(requisition.getRequestedBy().getPerson(), false);
             if (providerUsers != null && providerUsers.size() > 0) {
                 order.setOrderer(providerUsers.get(0));
             }
@@ -131,7 +123,11 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private void assignAccessionNumbersToOrders(Encounter encounter) {
         for (Order order : encounter.getOrders()) {
-            emrOrderService.ensureAccessionNumberAssignedTo(order);
+            if (order.getAccessionNumber() == null) {
+                String accessionNumber = new LuhnMod10IdentifierValidator().getValidIdentifier(order.getOrderId().toString());
+                accessionNumber = StringUtils.leftPad(accessionNumber, 10, "0"); // pad the accession number to 10 digits
+                order.setAccessionNumber(accessionNumber);
+            }
         }
     }
 
@@ -412,10 +408,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     public void setEncounterService(EncounterService encounterService) {
         this.encounterService = encounterService;
-    }
-
-    public void setEmrOrderService(EmrOrderService emrOrderService) {
-        this.emrOrderService = emrOrderService;
     }
 
     public void setConceptService(ConceptService conceptService) {

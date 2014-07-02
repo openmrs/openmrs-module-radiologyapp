@@ -15,8 +15,8 @@
 package org.openmrs.module.radiologyapp.fragment.controller;
 
 import org.openmrs.messagesource.MessageSourceService;
-import org.openmrs.module.emr.EmrConstants;
-import org.openmrs.module.emr.EmrContext;
+import org.openmrs.module.appui.AppUiConstants;
+import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.radiologyapp.RadiologyRequisition;
 import org.openmrs.module.radiologyapp.RadiologyService;
 import org.openmrs.ui.framework.UiUtils;
@@ -33,7 +33,7 @@ public class RadiologyRequisitionFragmentController {
 
     public FragmentActionResult orderRadiology(@BindParams RadiologyRequisition requisition,
                                                @RequestParam("modality") String modality,
-                                               EmrContext emrContext,
+                                               UiSessionContext uiSessionContext,
                                                @SpringBean RadiologyService radiologyService,
                                                @SpringBean("messageSourceService") MessageSourceService messageSourceService,
                                                UiUtils ui, HttpServletRequest request) {
@@ -42,18 +42,26 @@ public class RadiologyRequisitionFragmentController {
             throw new IllegalArgumentException(ui.message("radiologyapp.order.noStudiesSelected"));
         }
 
+        // set provider and location if not specified
+        if (requisition.getRequestedBy() == null) {
+            requisition.setRequestedBy(uiSessionContext.getCurrentProvider());
+        }
+        if (requisition.getRequestedFrom() == null) {
+            requisition.setRequestedFrom(uiSessionContext.getSessionLocation());
+        }
+
         try {
-            radiologyService.placeRadiologyRequisition(emrContext, requisition);
+            radiologyService.placeRadiologyRequisition(requisition);
         }
         catch (Exception e) {
             // TODO make this more user-friendly (but we never should get here)
             return new FailureResult(e.getLocalizedMessage());
         }
 
-        request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_INFO_MESSAGE,
+        request.getSession().setAttribute(AppUiConstants.SESSION_ATTRIBUTE_INFO_MESSAGE,
                 messageSourceService.getMessage("radiologyapp.task.order." + modality.toUpperCase() + ".success"));
 
-        request.getSession().setAttribute(EmrConstants.SESSION_ATTRIBUTE_TOAST_MESSAGE, "true");
+        request.getSession().setAttribute(AppUiConstants.SESSION_ATTRIBUTE_TOAST_MESSAGE, "true");
 
         return new SuccessResult();
     }

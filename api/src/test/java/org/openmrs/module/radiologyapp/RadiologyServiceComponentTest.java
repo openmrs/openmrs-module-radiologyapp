@@ -14,11 +14,6 @@
 
 package org.openmrs.module.radiologyapp;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,14 +25,15 @@ import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.emr.EmrContext;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
@@ -46,12 +42,15 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTest {
 
@@ -79,8 +78,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     private LocationService locationService;
 
     @Autowired
+    @Qualifier("visitService")
+    private VisitService visitService;
+
+    @Autowired
     @Qualifier("encounterService")
     private EncounterService encounterService;
+
 
     @Autowired
     @Qualifier("emrApiProperties")
@@ -106,13 +110,10 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         throws Exception {
 
         Patient patient = patientService.getPatient(6);
+        Visit visit = visitService.getVisit(4);
 
         // sanity check
         Assert.assertEquals(0, encounterService.getEncountersByPatient(patient).size());
-
-        EmrContext emrContext = mock(EmrContext.class);
-        when(emrContext.getSessionLocation()).thenReturn(locationService.getLocation(1));
-        when(emrContext.getActiveVisit()).thenReturn(null);
 
         RadiologyRequisition requisition = new RadiologyRequisition();
 
@@ -122,13 +123,15 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setRequestedBy(providerService.getProvider(1));
         requisition.setRequestedOn(new Date());
         requisition.setRequestedFrom(locationService.getLocation(1));
+        requisition.setVisit(visit);
         requisition.setCreatinineLevel(1.8);
         requisition.setCreatinineTestDate(new DateTime(2014,1,1,20,0,0,0).toDate());
 
-        radiologyService.placeRadiologyRequisition(emrContext, requisition);
+        radiologyService.placeRadiologyRequisition(requisition);
 
         List<Encounter> encounters = encounterService.getEncountersByPatient(patient);
         Assert.assertEquals(1, encounters.size());
+        Assert.assertEquals(visit, encounters.get(0).getVisit());
 
         Set<Order> orders = encounters.get(0).getOrders();
         Assert.assertEquals(1, orders.size());
@@ -144,10 +147,6 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         Patient patient = patientService.getPatient(6);
 
-        EmrContext emrContext = mock(EmrContext.class);
-        when(emrContext.getSessionLocation()).thenReturn(locationService.getLocation(1));
-        when(emrContext.getActiveVisit()).thenReturn(null);
-
         RadiologyRequisition requisition = new RadiologyRequisition();
 
         requisition.setPatient(patient);
@@ -157,7 +156,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setRequestedOn(new Date());
         requisition.setRequestedFrom(locationService.getLocation(1));
 
-        radiologyService.placeRadiologyRequisition(emrContext, requisition);
+        radiologyService.placeRadiologyRequisition(requisition);
 
         List<Encounter> encounters = encounterService.getEncountersByPatient(patient);
         Set<Order> orders = encounters.get(0).getOrders();
