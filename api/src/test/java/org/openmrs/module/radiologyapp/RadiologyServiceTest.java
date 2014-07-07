@@ -1123,12 +1123,11 @@ public class RadiologyServiceTest{
         private User expectedOrderer;
         private String expectedAccessionNumber;
 
-        public IsExpectedOrder(Location expectedLocation, Date expectedOrderDate, User expectedOrderer, Concept expectedStudy, Integer expectedId) {
+        public IsExpectedOrder(Location expectedLocation, Date expectedOrderDate, User expectedOrderer, Concept expectedStudy) {
             this.expectedLocation = expectedLocation;
             this.expectedStudy = expectedStudy;
             this.expectedOrderDate = expectedOrderDate;
             this.expectedOrderer = expectedOrderer;
-            this.expectedAccessionNumber = (StringUtils.leftPad(new LuhnMod10IdentifierValidator().getValidIdentifier(expectedId.toString()), 10, "0"));
         }
 
         @Override
@@ -1143,7 +1142,7 @@ public class RadiologyServiceTest{
                 assertThat(actual.getClinicalHistory(), is(clinicalHistory));
                 assertThat(actual.getExamLocation(), is(expectedLocation));
                 assertThat(actual.getOrderer(), is(expectedOrderer));
-                assertThat(actual.getAccessionNumber(), is(expectedAccessionNumber));
+                assertThat(actual.getAccessionNumber(), is(StringUtils.leftPad(new LuhnMod10IdentifierValidator().getValidIdentifier(actual.getId().toString()), 10, "0")));
 
                 if (expectedOrderDate != null) {
                     assertThat(actual.getStartDate(), is(expectedOrderDate));
@@ -1185,7 +1184,7 @@ public class RadiologyServiceTest{
 
             int expectedId = 1;
             for (Concept expectedStudy : expectedStudies) {
-                expectedOrders.add(new IsExpectedOrder(expectedLocation, expectedOrderDate, expectedOrdererUserAccount, expectedStudy, expectedId));
+                expectedOrders.add(new IsExpectedOrder(expectedLocation, expectedOrderDate, expectedOrdererUserAccount, expectedStudy));
                 expectedId++;
             }
 
