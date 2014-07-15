@@ -1152,6 +1152,7 @@ public class RadiologyServiceTest{
                 }
             }
             catch (AssertionError e) {
+                System.out.println("Asertion Failure:" + e.getMessage());
                 return false;
             }
 
@@ -1210,8 +1211,6 @@ public class RadiologyServiceTest{
                 assertThat(encounter.getEncounterDatetime(), notNullValue());
             }
 
-            System.out.println(expectedOrders.get(0));
-            System.out.println(encounter.getOrders().iterator().next());
             assertTrue(new IsIterableContainingInAnyOrder(expectedOrders).matches(encounter.getOrders()));
 
             if (expectedCreatinineLevel != null) {
