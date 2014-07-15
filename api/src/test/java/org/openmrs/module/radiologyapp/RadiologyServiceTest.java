@@ -1148,7 +1148,7 @@ public class RadiologyServiceTest{
                     assertThat(actual.getStartDate(), is(expectedOrderDate));
                 }
                 else {
-                    assertThat(actual.getStartDate(), DateMatchers.within(1, TimeUnit.SECONDS, new Date()));
+                    assertThat(actual.getStartDate(), DateMatchers.within(2, TimeUnit.SECONDS, new Date()));
                 }
             }
             catch (AssertionError e) {
