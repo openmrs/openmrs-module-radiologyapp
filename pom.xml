@@ -124,6 +124,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>idgen-api</artifactId>
+            <version>${idgenVersion}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- OpenMRS modules simply required to fire up the application context when running component tests -->
 
         <dependency>
@@ -160,15 +168,6 @@
             <version>${providerManagementVersion}</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>idgen-api</artifactId>
-            <version>${idgenVersion}</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-
 
         <!-- End OpenMRS modules -->
 
