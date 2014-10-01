@@ -1019,6 +1019,22 @@ public class RadiologyServiceTest{
 
     }
 
+    @Test
+    public void ensureAccessionNumberAssignedToOrder_shouldAssignAccessionNumberToOrder() {
+        Order order = new Order(2);
+        radiologyService.ensureAccessionNumberAssignedToOrder(order);
+        assertThat(order.getAccessionNumber(), is("0000000026"));
+    }
+
+    @Test
+    public void ensureAccessionNumberAssignedToOrder_shouldNotOverrideExistingAccessionNumber() {
+        Order order = new Order(2);
+        order.setAccessionNumber("test123");
+        radiologyService.ensureAccessionNumberAssignedToOrder(order);
+        assertThat(order.getAccessionNumber(), is("test123"));
+    }
+
+
     private Encounter setupRadiologyStudyEncounter(Date datePerformed, Location location, Patient patient,
                                                    Provider provider, String accessionNumber, Concept procedure) {
         Encounter encounter = new Encounter();

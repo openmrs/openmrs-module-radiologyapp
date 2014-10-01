@@ -123,11 +123,16 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private void assignAccessionNumbersToOrders(Encounter encounter) {
         for (Order order : encounter.getOrders()) {
-            if (order.getAccessionNumber() == null) {
-                String accessionNumber = new LuhnMod10IdentifierValidator().getValidIdentifier(order.getOrderId().toString());
-                accessionNumber = StringUtils.leftPad(accessionNumber, 10, "0"); // pad the accession number to 10 digits
-                order.setAccessionNumber(accessionNumber);
-            }
+            ensureAccessionNumberAssignedToOrder(order);
+        }
+    }
+
+    @Override
+    public void ensureAccessionNumberAssignedToOrder(Order order) {
+        if (order.getAccessionNumber() == null) {
+            String accessionNumber = new LuhnMod10IdentifierValidator().getValidIdentifier(order.getOrderId().toString());
+            accessionNumber = StringUtils.leftPad(accessionNumber, 10, "0"); // pad the accession number to 10 digits
+            order.setAccessionNumber(accessionNumber);
         }
     }
 

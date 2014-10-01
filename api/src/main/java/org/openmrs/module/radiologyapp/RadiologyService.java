@@ -15,6 +15,7 @@
 package org.openmrs.module.radiologyapp;
 
 import org.openmrs.Encounter;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
@@ -26,6 +27,13 @@ public interface RadiologyService extends OpenmrsService {
 
     Encounter placeRadiologyRequisition(RadiologyRequisition requisition)
             throws EncounterDateBeforeVisitStartDateException, EncounterDateAfterVisitStopDateException;
+
+    /**
+     * Ensures that the accession number field has been set on the appropriate order
+     * If necessary, generates accession number by padding order id with zeros and adding check digit
+     * @param order
+     */
+    void ensureAccessionNumberAssignedToOrder(Order order);
 
     /**
      * Converts a radiology report to an encounter and saves it
