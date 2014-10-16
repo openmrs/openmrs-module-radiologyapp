@@ -6,7 +6,7 @@
 %>
 
 <script type="text/template" id="radiologyStudyDetailsTemplate">
-    <h2>{{- procedure}}</h2>
+    <h2>{{- procedure ? procedure : '${ ui.message("radiologyapp.procedure.unknown")}' }}</h2>
     <div class="status-container">
         <i class="icon-time small"></i>
         {{- datePerformed }}
@@ -43,7 +43,7 @@
             ${dateFormat.format(it.datePerformed)}
         </span>
         <span class="menu-title">
-            ${ui.format(it.procedure)}
+            ${ it.procedure ? ui.format(it.procedure) :  ui.message("radiologyapp.procedure.unknown") }
         </span>
         <span class="arrow-border"></span>
         <span class="arrow"></span>
