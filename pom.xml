@@ -7,7 +7,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Radiology App Module</name>
-	<description>Registration App for the Reference Application</description>
+	<description>Radiology App</description>
 	<url>https://wiki.openmrs.org/display/docs/Radiology+App+Module</url>
 	
 	<developers>
