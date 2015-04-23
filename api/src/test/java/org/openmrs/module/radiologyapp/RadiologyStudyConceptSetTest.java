@@ -42,7 +42,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
     private Concept radiologyStudySetConcept;
-    private Concept accessionNumberConcept;
+    private Concept orderNumberConcept;
     private Concept imagesAvailableConcept;
     private Concept procedureConcept;
 
@@ -71,12 +71,12 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
         when(booleanType.isBoolean()).thenReturn(true);
 
         radiologyStudySetConcept = setupConcept(conceptService, "Radiology Study Set", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_STUDY_SET);
-        accessionNumberConcept = setupConcept(conceptService, "Accession Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER);
+        orderNumberConcept = setupConcept(conceptService, "Order Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ORDER_NUMBER);
         imagesAvailableConcept = setupConcept(conceptService, "Images Available", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_IMAGES_AVAILABLE);
         imagesAvailableConcept.setDatatype(booleanType);
         procedureConcept = setupConcept(conceptService, "Procedure", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE);
 
-        radiologyStudySetConcept.addSetMember(accessionNumberConcept);
+        radiologyStudySetConcept.addSetMember(orderNumberConcept);
         radiologyStudySetConcept.addSetMember(imagesAvailableConcept);
         radiologyStudySetConcept.addSetMember(procedureConcept);
 
@@ -87,7 +87,7 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         assertThat(radiologyStudyConceptSet.getRadiologyStudySetConcept(), is(radiologyStudySetConcept));
-        assertThat(radiologyStudyConceptSet.getAccessionNumberConcept(), is(accessionNumberConcept));
+        assertThat(radiologyStudyConceptSet.getOrderNumberConcept(), is(orderNumberConcept));
         assertThat(radiologyStudyConceptSet.getImagesAvailableConcept(), is(imagesAvailableConcept));
         assertThat(radiologyStudyConceptSet.getProcedureConcept(), is(procedureConcept));
 
@@ -96,14 +96,16 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
     @Test
     public void shouldCreateObsGroupFromRadiologyStudy() {
 
-        RadiologyOrder radiologyOrder = new RadiologyOrder();
-        String accessionNumber = "12345";
-        radiologyOrder.setAccessionNumber(accessionNumber);
+        String orderNumber = "12345";
+
+        RadiologyOrder radiologyOrder = mock(RadiologyOrder.class);
+        when(radiologyOrder.getOrderNumber()).thenReturn(orderNumber);
+
         Concept procedure = new Concept();
 
         RadiologyStudy radiologyStudy = new RadiologyStudy();
         radiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
-        radiologyStudy.setAccessionNumber(accessionNumber);
+        radiologyStudy.setOrderNumber(orderNumber);
         radiologyStudy.setImagesAvailable(true);
         radiologyStudy.setProcedure(procedure);
 
@@ -111,15 +113,15 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
         Obs radiologyStudyObsSet = radiologyStudyConceptSet.buildRadiologyStudyObsGroup(radiologyStudy);
 
         assertThat(radiologyStudyObsSet.getGroupMembers().size(), is(3));
-        assertThat(radiologyStudyObsSet.getOrder().getAccessionNumber(), is(accessionNumber));
+        assertThat(radiologyStudyObsSet.getOrder().getOrderNumber(), is(orderNumber));
 
-        Obs accessionNumberObs = null;
+        Obs orderNumberObs = null;
         Obs procedureObs = null;
         Obs imagesAvailableObs = null;
 
         for (Obs obs : radiologyStudyObsSet.getGroupMembers()) {
-            if (obs.getConcept().equals(accessionNumberConcept)) {
-                accessionNumberObs = obs;
+            if (obs.getConcept().equals(orderNumberConcept)) {
+                orderNumberObs = obs;
             }
             if (obs.getConcept().equals(procedureConcept)) {
                 procedureObs  = obs;
@@ -129,18 +131,18 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
             }
         }
 
-        assertNotNull(accessionNumberObs);
+        assertNotNull(orderNumberObs);
         assertNotNull(procedureObs);
         assertNotNull(imagesAvailableObs);
 
-        assertThat(accessionNumberObs.getValueText(), is("12345"));
+        assertThat(orderNumberObs.getValueText(), is("12345"));
         assertThat(procedureObs.getValueCoded(), is(procedure));
         assertThat(imagesAvailableObs.getValueAsBoolean(), is(true));
 
     }
 
     @Test
-    public void shouldNotCreateObsForAccessionNumberAndImagesAvailableIfNoValue() {
+    public void shouldNotCreateObsForOrderNumberAndImagesAvailableIfNoValue() {
 
         Concept procedure = new Concept();
 
@@ -160,10 +162,10 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
 
     @Test
-    public void shouldFetchAccessionNumberFromObsGroup() {
+    public void shouldFetchOrderNumberFromObsGroup() {
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         Obs obsGroup = createObsGroup();
-        assertThat(radiologyStudyConceptSet.getAccessionNumberFromObsGroup(obsGroup), is("123"));
+        assertThat(radiologyStudyConceptSet.getOrderNumberFromObsGroup(obsGroup), is("123"));
     }
 
     @Test
@@ -188,10 +190,10 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
     }
 
     @Test
-    public void shouldFetchAccessionNumberFromEncounter() {
+    public void shouldFetchOrderNumberFromEncounter() {
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         Encounter encounter = createEncounter();
-        assertThat(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter), is("123"));
+        assertThat(radiologyStudyConceptSet.getOrderNumberFromEncounter(encounter), is("123"));
     }
 
     @Test
@@ -209,16 +211,16 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
     }
 
     @Test
-    public void shouldReturnNullIfNoAccessionNumberObs() {
+    public void shouldReturnNullIfNoOrderNumberObs() {
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
-        Encounter encounter = createEncounterWithoutAccessionNumberAndImagesAvailable();
-        assertNull(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
+        Encounter encounter = createEncounterWithoutOrderNumberAndImagesAvailable();
+        assertNull(radiologyStudyConceptSet.getOrderNumberFromEncounter(encounter));
     }
 
     @Test
     public void shouldReturnNullIfNoImagesAvailableObs() {
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
-        Encounter encounter = createEncounterWithoutAccessionNumberAndImagesAvailable();
+        Encounter encounter = createEncounterWithoutOrderNumberAndImagesAvailable();
         assertNull(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter));
     }
 
@@ -226,7 +228,7 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
     public void shouldReturnNullIfNoObsGroup() {
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         Encounter encounter = new Encounter();
-        assertNull(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
+        assertNull(radiologyStudyConceptSet.getOrderNumberFromEncounter(encounter));
         assertNull(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter));
         assertNull(radiologyStudyConceptSet.getProcedureFromEncounter(encounter));
     }
@@ -243,10 +245,10 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
         obsGroup.setId(222);
         obsGroup.setConcept(radiologyStudySetConcept);
 
-        Obs accessionNumber = new Obs();
-        accessionNumber.setConcept(accessionNumberConcept);
-        accessionNumber.setValueText("123");
-        obsGroup.addGroupMember(accessionNumber);
+        Obs orderNumber = new Obs();
+        orderNumber.setConcept(orderNumberConcept);
+        orderNumber.setValueText("123");
+        obsGroup.addGroupMember(orderNumber);
 
         Obs imagesAvailable = new Obs();
         imagesAvailable.setConcept(imagesAvailableConcept);
@@ -264,13 +266,13 @@ public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
     }
 
-    private Encounter createEncounterWithoutAccessionNumberAndImagesAvailable() {
+    private Encounter createEncounterWithoutOrderNumberAndImagesAvailable() {
         Encounter encounter = new Encounter();
-        encounter.addObs(createObsGroupWithoutAccessionNumberAndImagesAvailable());
+        encounter.addObs(createObsGroupWithoutOrderNumberAndImagesAvailable());
         return encounter;
     }
 
-    private Obs createObsGroupWithoutAccessionNumberAndImagesAvailable() {
+    private Obs createObsGroupWithoutOrderNumberAndImagesAvailable() {
 
         Obs obsGroup = new Obs();
         obsGroup.setId(222);

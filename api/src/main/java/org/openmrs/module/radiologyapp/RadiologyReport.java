@@ -25,7 +25,7 @@ public class RadiologyReport {
 
     private RadiologyOrder associatedRadiologyOrder;
 
-    private String accessionNumber;
+    private String orderNumber;
 
     private Provider principalResultsInterpreter;
 
@@ -50,12 +50,12 @@ public class RadiologyReport {
         this.associatedRadiologyOrder = associatedRadiologyOrder;
     }
 
-    public String getAccessionNumber() {
-        return accessionNumber;
+    public String getOrderNumber() {
+        return orderNumber;
     }
 
-    public void setAccessionNumber(String accessionNumber) {
-        this.accessionNumber = accessionNumber;
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public Provider getPrincipalResultsInterpreter() {

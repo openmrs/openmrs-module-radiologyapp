@@ -26,6 +26,7 @@ import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
@@ -66,6 +67,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Qualifier("providerService")
     private ProviderService providerService;
 
+    @Autowired
     @Qualifier("orderService")
     private OrderService orderService;
 
@@ -94,6 +96,10 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Qualifier("radiologyProperties")
     private RadiologyProperties radiologyProperties;
 
+    @Autowired
+    @Qualifier("adminService")
+    private AdministrationService administrationService;
+
     @Before
     public void beforeAllTests() throws Exception {
         executeDataSet("radiologyServiceComponentTestDataset.xml");
@@ -106,7 +112,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     }
 
     @Test
-    public void placeRadiologyRequistion_shouldPlaceARadiologyRequisition()
+    public void placeRadiologyRequisition_shouldPlaceARadiologyRequisition()
         throws Exception {
 
         Patient patient = patientService.getPatient(6);
@@ -136,13 +142,15 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         Set<Order> orders = encounters.get(0).getOrders();
         Assert.assertEquals(1, orders.size());
 
+        assertThat(orders.iterator().next().getOrderNumber(), is("ORD-1"));
+
         Set<Obs> obs = encounters.get(0).getObs();
         Assert.assertEquals(1, obs.size());
 
     }
 
     @Test
-    public void getRadiologyOrderByAccessionNumber_shouldRetrieveOrderByAccessionNumber()
+    public void getRadiologyOrderByOrderNumber_shouldRetrieveOrderByOrderNumber()
         throws Exception {
 
         Patient patient = patientService.getPatient(6);
@@ -161,9 +169,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         List<Encounter> encounters = encounterService.getEncountersByPatient(patient);
         Set<Order> orders = encounters.get(0).getOrders();
 
-        String accessionNumber = orders.iterator().next().getAccessionNumber();
+        String orderNumber = orders.iterator().next().getOrderNumber();
 
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber(accessionNumber);
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber(orderNumber);
         Assert.assertNotNull(radiologyOrder);
         Assert.assertEquals(conceptService.getConcept(18), radiologyOrder.getConcept());
         Assert.assertEquals(Order.Urgency.STAT, radiologyOrder.getUrgency());
@@ -179,13 +187,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         RadiologyStudy radiologyStudy = new RadiologyStudy();
         radiologyStudy.setPatient(patient);
         radiologyStudy.setProcedure(procedure);
         radiologyStudy.setImagesAvailable(true);
-        radiologyStudy.setAccessionNumber("12345");
+        radiologyStudy.setOrderNumber("12345");
         radiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
         radiologyStudy.setDatePerformed(timeOfStudy);
 
@@ -203,16 +211,16 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         Obs radiologyStudyObsSet = encounter.getObsAtTopLevel(false).iterator().next();
 
         assertThat(radiologyStudyObsSet.getGroupMembers().size(), is(3));
-        assertThat(radiologyStudyObsSet.getOrder().getAccessionNumber(), is("12345"));
+        assertThat(radiologyStudyObsSet.getOrder().getOrderNumber(), is("12345"));
 
-        Obs accessionNumberObs = null;
+        Obs orderNumberObs = null;
         Obs procedureObs = null;
         Obs imagesAvailableObs = null;
 
         // hack, just reference the concepts by their ids in the test dataset
         for (Obs obs : radiologyStudyObsSet.getGroupMembers()) {
             if (obs.getConcept().getId() == 1004) {
-                accessionNumberObs = obs;
+                orderNumberObs = obs;
             }
             if (obs.getConcept().getId() == 1003) {
                 procedureObs  = obs;
@@ -222,18 +230,18 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
             }
         }
 
-        assertNotNull(accessionNumberObs);
+        assertNotNull(orderNumberObs);
         assertNotNull(procedureObs);
         assertNotNull(imagesAvailableObs);
 
-        assertThat(accessionNumberObs.getValueText(), is("12345"));
+        assertThat(orderNumberObs.getValueText(), is("12345"));
         assertThat(procedureObs.getValueCoded(), is(procedure));
         assertThat(imagesAvailableObs.getValueAsBoolean(), is(true));
 
     }
 
     @Test(expected = RadiologyAPIException.class)
-    public void saveRadiologyStudy_shouldFailIfAttemptingToSaveRadiologyStudyWithSameAccessionNumberAsExistingStudy() {
+    public void saveRadiologyStudy_shouldFailIfAttemptingToSaveRadiologyStudyWithSameOrderNumberAsExistingStudy() {
 
         Date timeOfStudy = new Date();
 
@@ -242,13 +250,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         RadiologyStudy firstRadiologyStudy = new RadiologyStudy();
         firstRadiologyStudy.setPatient(patient);
         firstRadiologyStudy.setProcedure(procedure);
         firstRadiologyStudy.setImagesAvailable(true);
-        firstRadiologyStudy.setAccessionNumber("12345");
+        firstRadiologyStudy.setOrderNumber("12345");
         firstRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
         firstRadiologyStudy.setDatePerformed(timeOfStudy);
 
@@ -256,7 +264,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         secondRadiologyStudy.setPatient(patient);
         secondRadiologyStudy.setProcedure(procedure);
         secondRadiologyStudy.setImagesAvailable(true);
-        secondRadiologyStudy.setAccessionNumber("12345");
+        secondRadiologyStudy.setOrderNumber("12345");
         secondRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
         secondRadiologyStudy.setDatePerformed(timeOfStudy);
 
@@ -276,14 +284,14 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         RadiologyReport radiologyReport = new RadiologyReport();
         radiologyReport.setPatient(patient);
         radiologyReport.setProcedure(procedure);
         radiologyReport.setReportType(reportType);
         radiologyReport.setReportBody("Some test report");
-        radiologyReport.setAccessionNumber("12345");
+        radiologyReport.setOrderNumber("12345");
         radiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         radiologyReport.setReportDate(timeOfStudy) ;
 
@@ -302,9 +310,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
 
         assertThat(radiologyStudyObsSet.getGroupMembers().size(), is(4));
-        assertThat(radiologyStudyObsSet.getOrder().getAccessionNumber(), is("12345"));
+        assertThat(radiologyStudyObsSet.getOrder().getOrderNumber(), is("12345"));
 
-        Obs accessionNumberObs = null;
+        Obs orderNumberObs = null;
         Obs procedureObs = null;
         Obs reportBodyObs = null;
         Obs reportTypeObs = null;
@@ -312,7 +320,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // hack, just reference the concepts by their ids in the test dataset
         for (Obs obs : radiologyStudyObsSet.getGroupMembers()) {
             if (obs.getConcept().getId() == 1004) {
-                accessionNumberObs = obs;
+                orderNumberObs = obs;
             }
             if (obs.getConcept().getId() == 1003) {
                 procedureObs  = obs;
@@ -325,12 +333,12 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
             }
         }
 
-        assertNotNull(accessionNumberObs);
+        assertNotNull(orderNumberObs);
         assertNotNull(procedureObs);
         assertNotNull(reportTypeObs);
         assertNotNull(reportBodyObs);
 
-        assertThat(accessionNumberObs.getValueText(), is("12345"));
+        assertThat(orderNumberObs.getValueText(), is("12345"));
         assertThat(procedureObs.getValueCoded(), is(procedure));
         assertThat(reportBodyObs.getValueText(), is("Some test report"));
         assertThat(reportTypeObs.getValueCoded(), is(reportType));
@@ -350,7 +358,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // location and provider from test database
         Location location = locationService.getLocation(2);
@@ -360,7 +368,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         firstRadiologyStudy.setPatient(patient);
         firstRadiologyStudy.setProcedure(procedure);
         firstRadiologyStudy.setImagesAvailable(true);
-        firstRadiologyStudy.setAccessionNumber("12345");
+        firstRadiologyStudy.setOrderNumber("12345");
         firstRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
         firstRadiologyStudy.setDatePerformed(timeOfFirstStudy);
         firstRadiologyStudy.setStudyLocation(emrApiProperties.getUnknownLocation());
@@ -372,7 +380,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         secondRadiologyStudy.setPatient(patient);
         secondRadiologyStudy.setProcedure(procedure);
         secondRadiologyStudy.setImagesAvailable(false);
-        secondRadiologyStudy.setAccessionNumber("678910");
+        secondRadiologyStudy.setOrderNumber("678910");
         secondRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
         secondRadiologyStudy.setDatePerformed(timeOfSecondStudy);
         secondRadiologyStudy.setStudyLocation(location);
@@ -400,7 +408,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // first create a couple reports
         RadiologyReport firstRadiologyReport = new RadiologyReport();
@@ -408,7 +416,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         firstRadiologyReport.setProcedure(procedure);
         firstRadiologyReport.setReportType(reportType);
         firstRadiologyReport.setReportBody("Some test report");
-        firstRadiologyReport.setAccessionNumber("12345");
+        firstRadiologyReport.setOrderNumber("12345");
         firstRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         firstRadiologyReport.setReportDate(firstTimeOfReport) ;
         firstRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
@@ -421,7 +429,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         secondRadiologyReport.setProcedure(procedure);
         secondRadiologyReport.setReportType(reportType);
         secondRadiologyReport.setReportBody("Another test report");
-        secondRadiologyReport.setAccessionNumber("67890");
+        secondRadiologyReport.setOrderNumber("67890");
         secondRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         secondRadiologyReport.setReportDate(secondTimeOfReport);
         secondRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
@@ -432,13 +440,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // create the expected studies
         RadiologyStudy firstExpectedRadiologyStudy = new RadiologyStudy();
         firstExpectedRadiologyStudy.setDatePerformed(firstTimeOfReport);
-        firstExpectedRadiologyStudy.setAccessionNumber("12345");
+        firstExpectedRadiologyStudy.setOrderNumber("12345");
         firstExpectedRadiologyStudy.setProcedure(procedure);
         firstExpectedRadiologyStudy.setPatient(patient);
 
         RadiologyStudy secondExpectedRadiologyStudy = new RadiologyStudy();
         secondExpectedRadiologyStudy.setDatePerformed(secondTimeOfReport);
-        secondExpectedRadiologyStudy.setAccessionNumber("67890");
+        secondExpectedRadiologyStudy.setOrderNumber("67890");
         secondExpectedRadiologyStudy.setProcedure(procedure);
         secondExpectedRadiologyStudy.setPatient(patient);
 
@@ -449,7 +457,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumber_shouldRetrieveRadiologyStudyByAccessionNumber() {
+    public void getRadiologyStudyByOrderNumber_shouldRetrieveRadiologyStudyByOrderNumber() {
 
         // first create a study
         Date timeOfStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
@@ -459,7 +467,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // location and provider from test database
         Location location = locationService.getLocation(2);
@@ -469,7 +477,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         expectedRadiologyStudy.setPatient(patient);
         expectedRadiologyStudy.setProcedure(procedure);
         expectedRadiologyStudy.setImagesAvailable(true);
-        expectedRadiologyStudy.setAccessionNumber("12345");
+        expectedRadiologyStudy.setOrderNumber("12345");
         expectedRadiologyStudy.setAssociatedRadiologyOrder(radiologyOrder);
         expectedRadiologyStudy.setDatePerformed(timeOfStudy);
         expectedRadiologyStudy.setStudyLocation(emrApiProperties.getUnknownLocation());
@@ -478,13 +486,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         radiologyService.saveRadiologyStudy(expectedRadiologyStudy);
 
         // fetch the study
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("12345");
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("12345");
 
         assertTrue(new IsExpectedRadiologyStudy(expectedRadiologyStudy).matches(radiologyStudy));
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumber_shouldDeriveRadiologyStudyFromRadiologyReports() {
+    public void getRadiologyStudyByOrderNumber_shouldDeriveRadiologyStudyFromRadiologyReports() {
 
         Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
         Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
@@ -495,7 +503,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // first create a couple reports
         RadiologyReport firstRadiologyReport = new RadiologyReport();
@@ -503,7 +511,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         firstRadiologyReport.setProcedure(procedure);
         firstRadiologyReport.setReportType(reportType);
         firstRadiologyReport.setReportBody("Some test report");
-        firstRadiologyReport.setAccessionNumber("12345");
+        firstRadiologyReport.setOrderNumber("12345");
         firstRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         firstRadiologyReport.setReportDate(firstTimeOfReport) ;
         firstRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
@@ -516,7 +524,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         secondRadiologyReport.setProcedure(procedure);
         secondRadiologyReport.setReportType(reportType);
         secondRadiologyReport.setReportBody("Another test report");
-        secondRadiologyReport.setAccessionNumber("12345");
+        secondRadiologyReport.setOrderNumber("12345");
         secondRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         secondRadiologyReport.setReportDate(secondTimeOfReport);
         secondRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
@@ -527,16 +535,16 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // create the expected study
         RadiologyStudy expectedRadiologyStudy = new RadiologyStudy();
         expectedRadiologyStudy.setDatePerformed(firstTimeOfReport);
-        expectedRadiologyStudy.setAccessionNumber("12345");
+        expectedRadiologyStudy.setOrderNumber("12345");
         expectedRadiologyStudy.setProcedure(procedure);
         expectedRadiologyStudy.setPatient(patient);
 
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("12345");
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("12345");
         assertTrue(new IsExpectedRadiologyStudy(expectedRadiologyStudy).matches(radiologyStudy));
     }
 
     @Test
-    public void getRadiologyReportsByAccessionNumber_shouldRetrieveRadiologyReportsByAccessionNumber() {
+    public void getRadiologyReportsByOrderNumber_shouldRetrieveRadiologyReportsByOrderNumber() {
 
         Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
         Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
@@ -547,7 +555,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByAccessionNumber("12345");
+        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // first create a couple reports
         RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();
@@ -555,7 +563,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         firstExpectedRadiologyReport.setProcedure(procedure);
         firstExpectedRadiologyReport.setReportType(reportType);
         firstExpectedRadiologyReport.setReportBody("Some test report");
-        firstExpectedRadiologyReport.setAccessionNumber("12345");
+        firstExpectedRadiologyReport.setOrderNumber("12345");
         firstExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         firstExpectedRadiologyReport.setReportDate(firstTimeOfReport) ;
         firstExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
@@ -568,7 +576,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         secondExpectedRadiologyReport.setProcedure(procedure);
         secondExpectedRadiologyReport.setReportType(reportType);
         secondExpectedRadiologyReport.setReportBody("Another test report");
-        secondExpectedRadiologyReport.setAccessionNumber("12345");
+        secondExpectedRadiologyReport.setOrderNumber("12345");
         secondExpectedRadiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
         secondExpectedRadiologyReport.setReportDate(secondTimeOfReport);
         secondExpectedRadiologyReport.setPrincipalResultsInterpreter(emrApiProperties.getUnknownProvider());
@@ -577,7 +585,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         radiologyService.saveRadiologyReport(secondExpectedRadiologyReport);
 
         // now fetch the reports
-        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("12345");
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("12345");
 
         assertThat(radiologyReports.size(), is(2));
         assertTrue(new IsExpectedRadiologyReport(firstExpectedRadiologyReport).matches(radiologyReports.get(1)));

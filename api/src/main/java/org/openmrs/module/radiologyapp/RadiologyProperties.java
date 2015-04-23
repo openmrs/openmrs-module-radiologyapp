@@ -15,6 +15,7 @@
 package org.openmrs.module.radiologyapp;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.CareSetting;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
@@ -59,6 +60,15 @@ public class RadiologyProperties extends ModuleProperties {
 
     public OrderType getRadiologyTestOrderType() {
         return getOrderTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_TEST_ORDER_TYPE);
+    }
+
+    public CareSetting getRadiologyCareSetting() {
+        String globalProperty = administrationService.getGlobalProperty(RadiologyConstants.GP_RADIOLOGY_CARE_SETTING);
+        CareSetting careSetting = orderService.getCareSettingByUuid(globalProperty);
+        if (careSetting == null) {
+            throw new IllegalStateException("Configuration required: " + RadiologyConstants.GP_RADIOLOGY_CARE_SETTING);
+        }
+        return careSetting;
     }
 
     // used to specify the orderables that require contrast; not mandatory, but if this concept is set

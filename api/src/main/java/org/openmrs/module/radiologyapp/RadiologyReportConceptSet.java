@@ -27,7 +27,7 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
 
     private Concept radiologyReportSetConcept;
 
-    private Concept accessionNumberConcept;
+    private Concept orderNumberConcept;
 
     private Concept reportBodyConcept;
 
@@ -39,7 +39,7 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
 
         setup(conceptService, EmrApiConstants.EMR_CONCEPT_SOURCE_NAME,
                 ConceptSetDescriptorField.required("radiologyReportSetConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_SET),
-                ConceptSetDescriptorField.required("accessionNumberConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER),
+                ConceptSetDescriptorField.required("orderNumberConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ORDER_NUMBER),
                 ConceptSetDescriptorField.required("reportBodyConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_BODY),
                 ConceptSetDescriptorField.required("reportTypeConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_TYPE),
                 ConceptSetDescriptorField.required("procedureConcept", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE));
@@ -51,9 +51,9 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
         radiologyReportSet.setConcept(radiologyReportSetConcept);
         radiologyReportSet.setOrder(radiologyReport.getAssociatedRadiologyOrder());
 
-        if (StringUtils.isNotBlank(radiologyReport.getAccessionNumber())) {
-            Obs accessionNumber = buildObsFor(accessionNumberConcept, radiologyReport.getAccessionNumber());
-            radiologyReportSet.addGroupMember(accessionNumber);
+        if (StringUtils.isNotBlank(radiologyReport.getOrderNumber())) {
+            Obs orderNumber = buildObsFor(orderNumberConcept, radiologyReport.getOrderNumber());
+            radiologyReportSet.addGroupMember(orderNumber);
         }
 
         if (StringUtils.isNotBlank(radiologyReport.getReportBody())) {
@@ -78,9 +78,9 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
         return radiologyReportSet;
     }
 
-    public String getAccessionNumberFromObsGroup(Obs obsGroup) {
-        Obs accessionNumberObs = getMemberObsByConcept(obsGroup, getAccessionNumberConcept());
-        return accessionNumberObs != null ? accessionNumberObs.getValueText() : null;
+    public String getOrderNumberFromObsGroup(Obs obsGroup) {
+        Obs orderNumberObs = getMemberObsByConcept(obsGroup, getOrderNumberConcept());
+        return orderNumberObs != null ? orderNumberObs.getValueText() : null;
     }
 
     public String getReportBodyFromObsGroup(Obs obsGroup) {
@@ -98,9 +98,9 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
         return procedureObs != null ? procedureObs.getValueCoded() : null;
     }
 
-    public String getAccessionNumberFromEncounter(Encounter encounter) {
+    public String getOrderNumberFromEncounter(Encounter encounter) {
         Obs obsGroup = getObsGroupFromEncounter(encounter);
-        return obsGroup != null && obsGroup.getGroupMembers() != null ? getAccessionNumberFromObsGroup(obsGroup) : null;
+        return obsGroup != null && obsGroup.getGroupMembers() != null ? getOrderNumberFromObsGroup(obsGroup) : null;
     }
 
     public String getReportBodyFromEncounter(Encounter encounter) {
@@ -144,12 +144,12 @@ public class RadiologyReportConceptSet extends ConceptSetDescriptor {
         this.radiologyReportSetConcept = radiologyReportSetConcept;
     }
 
-    public Concept getAccessionNumberConcept() {
-        return accessionNumberConcept;
+    public Concept getOrderNumberConcept() {
+        return orderNumberConcept;
     }
 
-    public void setAccessionNumberConcept(Concept accessionNumberConcept) {
-        this.accessionNumberConcept = accessionNumberConcept;
+    public void setOrderNumberConcept(Concept orderNumberConcept) {
+        this.orderNumberConcept = orderNumberConcept;
     }
 
     public Concept getReportBodyConcept() {

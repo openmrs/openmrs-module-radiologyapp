@@ -25,7 +25,7 @@ public class RadiologyStudy {
 
     private RadiologyOrder associatedRadiologyOrder;
 
-    private String accessionNumber;
+    private String orderNumber;
 
     private Concept procedure;
 
@@ -47,12 +47,12 @@ public class RadiologyStudy {
         this.associatedRadiologyOrder = associatedRadiologyOrder;
     }
 
-    public String getAccessionNumber() {
-        return accessionNumber;
+    public String getOrderNumber() {
+        return orderNumber;
     }
 
-    public void setAccessionNumber(String accessionNumber) {
-        this.accessionNumber = accessionNumber;
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public Concept getProcedure() {

@@ -127,6 +127,14 @@
     </globalProperty>
 
     <globalProperty>
+        <property>emr.radiologyCareSetting</property>
+        <defaultValue>6f0c9a92-6f24-11e3-af88-005056821db0</defaultValue>
+        <description>
+            UUID of the Care Setting to use when creating radiology orders; the default is the uuid of the "Outpatient" setting baked into core
+        </description>
+    </globalProperty>
+
+    <globalProperty>
         <property>radiologyapp.contrastOrderablesConcept</property>
         <defaultValue></defaultValue>
         <description>

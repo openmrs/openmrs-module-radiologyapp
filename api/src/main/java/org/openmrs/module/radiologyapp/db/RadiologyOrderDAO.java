@@ -19,6 +19,6 @@ import org.openmrs.module.radiologyapp.RadiologyOrder;
 
 public interface RadiologyOrderDAO extends SingleClassDAO<RadiologyOrder> {
 
-    public RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);
+    public RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber);
 
 }

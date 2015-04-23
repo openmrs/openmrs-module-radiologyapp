@@ -22,7 +22,7 @@ public class IsExpectedRadiologyStudy extends ArgumentMatcher<RadiologyStudy> {
         assertThat(radiologyStudy.getPatient(), is(expectedStudy.getPatient()));
         assertThat(radiologyStudy.getStudyLocation(), is(expectedStudy.getStudyLocation()));
         assertThat(radiologyStudy.getTechnician(), is(expectedStudy.getTechnician()));
-        assertThat(radiologyStudy.getAccessionNumber(), is(expectedStudy.getAccessionNumber()));
+        assertThat(radiologyStudy.getOrderNumber(), is(expectedStudy.getOrderNumber()));
         assertThat(radiologyStudy.getProcedure(), is(expectedStudy.getProcedure()));
         assertThat(radiologyStudy.isImagesAvailable(), is(expectedStudy.isImagesAvailable()));
 

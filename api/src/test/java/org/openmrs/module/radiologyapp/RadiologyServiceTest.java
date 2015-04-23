@@ -14,7 +14,6 @@
 
 package org.openmrs.module.radiologyapp;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -50,7 +49,6 @@ import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
-import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
@@ -61,7 +59,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import uk.co.it.modular.hamcrest.date.DateMatchers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -130,13 +127,9 @@ public class RadiologyServiceTest{
 
     private Person providerPerson;
 
-    private User providerUserAccount;
-
     private Provider anotherProvider;
 
     private Person anotherProviderPerson;
-
-    private User anotherProviderUserAccount;
 
     private Location currentLocation;
 
@@ -152,7 +145,7 @@ public class RadiologyServiceTest{
 
     private Concept radiologyStudySetConcept;
 
-    private Concept accessionNumberConcept;
+    private Concept orderNumberConcept;
 
     private Concept imagesAvailableConcept;
 
@@ -195,12 +188,10 @@ public class RadiologyServiceTest{
         providerPerson = new Person();
         provider = new Provider();
         provider.setPerson(providerPerson);
-        providerUserAccount = new User(1);
 
         anotherProviderPerson = new Person();
         anotherProvider = new Provider();
         anotherProvider.setPerson(anotherProviderPerson);
-        anotherProviderUserAccount = new User(2);
 
         currentLocation = new Location();
         unknownLocation = new Location();
@@ -256,8 +247,6 @@ public class RadiologyServiceTest{
         when(Context.getConceptService()).thenReturn(conceptService);
         when(conceptService.getTrueConcept()).thenReturn(trueConcept);
         when(conceptService.getFalseConcept()).thenReturn(falseConcept);
-        when(userService.getUsersByPerson(providerPerson, false)).thenReturn(Arrays.asList(providerUserAccount));
-        when(userService.getUsersByPerson(anotherProviderPerson, false)).thenReturn(Arrays.asList(anotherProviderUserAccount));
         when(encounterService.saveEncounter(isA(Encounter.class))).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -278,7 +267,7 @@ public class RadiologyServiceTest{
     private void setupRadiologyStudyAndRadiologyReportsConceptSets() {
 
         radiologyStudySetConcept = setupConcept(conceptService, "Radiology Study Set", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_STUDY_SET);
-        accessionNumberConcept = setupConcept(conceptService, "Accession Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER);
+        orderNumberConcept = setupConcept(conceptService, "order Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ORDER_NUMBER);
         imagesAvailableConcept = setupConcept(conceptService, "Images Available", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_IMAGES_AVAILABLE);
         imagesAvailableConcept.setDatatype(booleanType);
         procedureConcept = setupConcept(conceptService, "Procedure", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE);
@@ -286,11 +275,11 @@ public class RadiologyServiceTest{
         reportBodyConcept = setupConcept(conceptService, "Report Body", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_BODY);
         reportTypeConcept = setupConcept(conceptService, "Report Type", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_TYPE);
 
-        radiologyStudySetConcept.addSetMember(accessionNumberConcept);
+        radiologyStudySetConcept.addSetMember(orderNumberConcept);
         radiologyStudySetConcept.addSetMember(imagesAvailableConcept);
         radiologyStudySetConcept.addSetMember(procedureConcept);
 
-        radiologyReportSetConcept.addSetMember(accessionNumberConcept);
+        radiologyReportSetConcept.addSetMember(orderNumberConcept);
         radiologyReportSetConcept.addSetMember(reportBodyConcept);
         radiologyReportSetConcept.addSetMember(reportTypeConcept);
         radiologyReportSetConcept.addSetMember(procedureConcept);
@@ -320,8 +309,8 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, providerUserAccount, null, null, null, study)));
-        assertThat(encounter.getOrders().iterator().next().getAccessionNumber(), is("0000000018"));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, null, null, null, study)));
+        //assertThat(encounter.getOrders().iterator().next().getOrderNumber(), is("0000000018"));
     }
 
     @Test
@@ -345,7 +334,7 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider,  providerUserAccount, null, null, null, study, secondStudy));
+        assertThat(encounter, new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider, null, null, null, study, secondStudy));
     }
 
     @Test
@@ -382,7 +371,7 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, anotherProvider,  anotherProviderUserAccount, orderDate, null, null, study)));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, anotherProvider, orderDate, null, null, study)));
     }
 
     @Test
@@ -409,7 +398,7 @@ public class RadiologyServiceTest{
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
         // note that since the visit started *after* the order, the orderDate should be visit startdate
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, provider,  providerUserAccount, currentVisit.getStartDatetime(), null, null, study)));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, provider, currentVisit.getStartDatetime(), null, null, study)));
     }
 
     @Test
@@ -430,7 +419,7 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, providerUserAccount, null, 1.8, creatinineTestDate, study)));
+        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, null, 1.8, creatinineTestDate, study)));
     }
 
 
@@ -442,7 +431,7 @@ public class RadiologyServiceTest{
         study.setDatePerformed(currentDate);
         study.setStudyLocation(currentLocation);
         study.setTechnician(provider);
-        study.setAccessionNumber("123");
+        study.setOrderNumber("123");
         study.setProcedure(new Concept());
 
         radiologyService.saveRadiologyStudy(study);
@@ -451,7 +440,7 @@ public class RadiologyServiceTest{
     }
 
     @Test(expected = RadiologyAPIException.class)
-    public void saveRadiologyStudy_shouldFailIfAccessionNumberNotSpecified() {
+    public void saveRadiologyStudy_shouldFailIfOrderNumberNotSpecified() {
 
         RadiologyStudy study = new RadiologyStudy();
         study.setPatient(patient);
@@ -470,7 +459,7 @@ public class RadiologyServiceTest{
         study.setDatePerformed(currentDate);
         study.setStudyLocation(currentLocation);
         study.setTechnician(provider);
-        study.setAccessionNumber("123");
+        study.setOrderNumber("123");
         study.setProcedure(new Concept());
 
         radiologyService.saveRadiologyStudy(study);
@@ -483,23 +472,23 @@ public class RadiologyServiceTest{
         study.setPatient(patient);
         study.setStudyLocation(currentLocation);
         study.setTechnician(provider);
-        study.setAccessionNumber("123");
+        study.setOrderNumber("123");
         study.setProcedure(new Concept());
 
         radiologyService.saveRadiologyStudy(study);
     }
 
     @Test(expected = RadiologyAPIException.class)
-    public void saveRadiologyStudy_shouldFailIfAnotherStudyExistsWithSameAccessionNumber() {
+    public void saveRadiologyStudy_shouldFailIfAnotherStudyExistsWithSameOrderNumber() {
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(Collections.singletonList(new Encounter()));
 
         RadiologyStudy study = new RadiologyStudy();
         study.setPatient(patient);
         study.setStudyLocation(currentLocation);
         study.setTechnician(provider);
-        study.setAccessionNumber("123");
+        study.setOrderNumber("123");
         study.setProcedure(new Concept());
 
         radiologyService.saveRadiologyStudy(study);
@@ -513,7 +502,7 @@ public class RadiologyServiceTest{
         study.setDatePerformed(currentDate);
         study.setStudyLocation(null);
         study.setTechnician(null);
-        study.setAccessionNumber("123");
+        study.setOrderNumber("123");
         study.setProcedure(new Concept());
 
         radiologyService.saveRadiologyStudy(study);
@@ -529,7 +518,7 @@ public class RadiologyServiceTest{
         report.setReportDate(currentDate);
         report.setPrincipalResultsInterpreter(provider);
         report.setReportLocation(currentLocation);
-        report.setAccessionNumber("123");
+        report.setOrderNumber("123");
         report.setReportBody("test");
         report.setProcedure(new Concept());
         report.setReportType(new Concept());
@@ -541,7 +530,7 @@ public class RadiologyServiceTest{
     }
 
     @Test(expected = RadiologyAPIException.class)
-    public void saveRadiologyReport_shouldFailIfAccessionNumberNotSpecified() {
+    public void saveRadiologyReport_shouldFailIfOrderNumberNotSpecified() {
 
         RadiologyReport report = new RadiologyReport();
         report.setPatient(patient);
@@ -562,7 +551,7 @@ public class RadiologyServiceTest{
         report.setPatient(patient);
         report.setPrincipalResultsInterpreter(provider);
         report.setReportLocation(currentLocation);
-        report.setAccessionNumber("123");
+        report.setOrderNumber("123");
         report.setReportBody("test");
         report.setProcedure(new Concept());
         report.setReportType(new Concept());
@@ -577,7 +566,7 @@ public class RadiologyServiceTest{
         report.setReportDate(currentDate);
         report.setPrincipalResultsInterpreter(provider);
         report.setReportLocation(currentLocation);
-        report.setAccessionNumber("123");
+        report.setOrderNumber("123");
         report.setReportBody("test");
         report.setProcedure(new Concept());
         report.setReportType(new Concept());
@@ -594,7 +583,7 @@ public class RadiologyServiceTest{
         report.setReportDate(currentDate);
         report.setPrincipalResultsInterpreter(null);
         report.setReportLocation(null);
-        report.setAccessionNumber("123");
+        report.setOrderNumber("123");
         report.setReportBody("test");
         report.setProcedure(new Concept());
         report.setReportType(new Concept());
@@ -624,7 +613,7 @@ public class RadiologyServiceTest{
         firstExpectedStudy.setTechnician(firstStudyTechnician);
         firstExpectedStudy.setStudyLocation(firstStudyLocation);
         firstExpectedStudy.setPatient(patient);
-        firstExpectedStudy.setAccessionNumber("123");
+        firstExpectedStudy.setOrderNumber("123");
         firstExpectedStudy.setImagesAvailable(true);
         firstExpectedStudy.setProcedure(firstStudyProcedure);
 
@@ -633,7 +622,7 @@ public class RadiologyServiceTest{
         secondExpectedStudy.setTechnician(secondStudyTechnician);
         secondExpectedStudy.setStudyLocation(secondStudyLocation);
         secondExpectedStudy.setPatient(patient);
-        secondExpectedStudy.setAccessionNumber("456");
+        secondExpectedStudy.setOrderNumber("456");
         secondExpectedStudy.setImagesAvailable(true);
         secondExpectedStudy.setProcedure(secondStudyProcedure);
 
@@ -704,7 +693,7 @@ public class RadiologyServiceTest{
     @Test
     public void getRadiologyStudiesForPatient_shouldDeriveRadiologyStudyFromReports() {
 
-        // first, create a couple reports (with two different accession numbers)
+        // first, create a couple reports (with two different order numbers)
         Concept prelimReport = new Concept();
         Concept finalReport = new Concept();
         Concept procedure = new Concept();
@@ -715,7 +704,7 @@ public class RadiologyServiceTest{
         Location firstLocation = new Location();
 
         RadiologyReport firstRadiologyReport = new RadiologyReport();
-        firstRadiologyReport.setAccessionNumber("123");
+        firstRadiologyReport.setOrderNumber("123");
         firstRadiologyReport.setReportDate(firstReportDate);
         firstRadiologyReport.setProcedure(procedure);
         firstRadiologyReport.setPatient(patient);
@@ -729,7 +718,7 @@ public class RadiologyServiceTest{
         Location secondLocation = new Location();
 
         RadiologyReport secondRadiologyReport = new RadiologyReport();
-        secondRadiologyReport.setAccessionNumber("456");
+        secondRadiologyReport.setOrderNumber("456");
         secondRadiologyReport.setReportDate(secondReportDate);
         secondRadiologyReport.setProcedure(procedure);
         secondRadiologyReport.setPatient(patient);
@@ -753,13 +742,13 @@ public class RadiologyServiceTest{
         firstExpectedStudy.setDatePerformed(firstReportDate);
         firstExpectedStudy.setPatient(patient);
         firstExpectedStudy.setProcedure(procedure);
-        firstExpectedStudy.setAccessionNumber("123");
+        firstExpectedStudy.setOrderNumber("123");
 
         RadiologyStudy secondExpectedStudy = new RadiologyStudy();
         secondExpectedStudy.setDatePerformed(secondReportDate);
         secondExpectedStudy.setPatient(patient);
         secondExpectedStudy.setProcedure(procedure);
-        secondExpectedStudy.setAccessionNumber("456");
+        secondExpectedStudy.setOrderNumber("456");
 
         List<RadiologyStudy> radiologyStudies = radiologyService.getRadiologyStudiesForPatient(patient);
 
@@ -769,7 +758,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumber_shouldReturnRadiologyStudyWithAccessionNumber() {
+    public void getRadiologyStudyByOrderNumber_shouldReturnRadiologyStudyWithOrderNumber() {
 
         Date studyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Provider studyTechnician = new Provider();
@@ -782,7 +771,7 @@ public class RadiologyServiceTest{
         expectedStudy.setTechnician(studyTechnician);
         expectedStudy.setStudyLocation(studyLocation);
         expectedStudy.setPatient(patient);
-        expectedStudy.setAccessionNumber("123");
+        expectedStudy.setOrderNumber("123");
         expectedStudy.setImagesAvailable(true);
         expectedStudy.setProcedure(studyProcedure);
 
@@ -790,15 +779,15 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyStudyEncounter(studyDate, studyLocation, patient, studyTechnician,
                 "123", studyProcedure));
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(encounters);
 
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("123");
         assertTrue(new IsExpectedRadiologyStudy(expectedStudy).matches(radiologyStudy));
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumber_shouldNotFailIfMultipleResults() {
+    public void getRadiologyStudyByOrderNumber_shouldNotFailIfMultipleResults() {
 
         Date firstStudyDate = new DateTime(2012, 12, 25, 12, 0, 0, 0).toDate();
         Date secondStudyDate = new DateTime(2011, 10, 10, 10, 0, 0, 0).toDate();
@@ -816,7 +805,7 @@ public class RadiologyServiceTest{
         firstStudy.setTechnician(firstStudyTechnician);
         firstStudy.setStudyLocation(firstStudyLocation);
         firstStudy.setPatient(patient);
-        firstStudy.setAccessionNumber("123");
+        firstStudy.setOrderNumber("123");
         firstStudy.setImagesAvailable(true);
         firstStudy.setProcedure(firstStudyProcedure);
 
@@ -825,7 +814,7 @@ public class RadiologyServiceTest{
         secondStudy.setTechnician(secondStudyTechnician);
         secondStudy.setStudyLocation(secondStudyLocation);
         secondStudy.setPatient(patient);
-        secondStudy.setAccessionNumber("456");
+        secondStudy.setOrderNumber("456");
         secondStudy.setImagesAvailable(true);
         secondStudy.setProcedure(secondStudyProcedure);
 
@@ -836,26 +825,26 @@ public class RadiologyServiceTest{
                 "456", secondStudyProcedure));
 
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(encounters);
 
         // should just return the first study
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("123");
         assertTrue(new IsExpectedRadiologyStudy(firstStudy).matches(radiologyStudy));
     }
 
 
     @Test
-    public void getRadiologyStudyByAccessionNumber_shouldReturnNullIfNoMatchingStudy() {
+    public void getRadiologyStudyByOrderNumber_shouldReturnNullIfNoMatchingStudy() {
         when(emrEncounterDAO.getEncountersByObsValueText(any(Concept.class), any(String.class)
                 , any(EncounterType.class), eq(false))).thenReturn(null);
 
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("1234");
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("1234");
         assertNull(radiologyStudy);
     }
 
     @Test
-    public void getRadiologyStudyByAccessionNumber_shouldDeriveRadiologyStudyFromReports() {
+    public void getRadiologyStudyByOrderNumber_shouldDeriveRadiologyStudyFromReports() {
 
         // first, create a couple reports
 
@@ -869,7 +858,7 @@ public class RadiologyServiceTest{
         Location firstLocation = new Location();
 
         RadiologyReport firstRadiologyReport = new RadiologyReport();
-        firstRadiologyReport.setAccessionNumber("123");
+        firstRadiologyReport.setOrderNumber("123");
         firstRadiologyReport.setReportDate(firstReportDate);
         firstRadiologyReport.setProcedure(procedure);
         firstRadiologyReport.setPatient(patient);
@@ -883,7 +872,7 @@ public class RadiologyServiceTest{
         Location secondLocation = new Location();
 
         RadiologyReport secondRadiologyReport = new RadiologyReport();
-        secondRadiologyReport.setAccessionNumber("123");
+        secondRadiologyReport.setOrderNumber("123");
         secondRadiologyReport.setReportDate(secondReportDate);
         secondRadiologyReport.setProcedure(procedure);
         secondRadiologyReport.setPatient(patient);
@@ -897,25 +886,25 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounter(secondRadiologyReport));
 
         // return an empty list when trying to fetch studies
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(new ArrayList<Encounter>());
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
         RadiologyStudy expectedStudy = new RadiologyStudy();
         expectedStudy.setDatePerformed(firstReportDate);
         expectedStudy.setPatient(patient);
         expectedStudy.setProcedure(procedure);
-        expectedStudy.setAccessionNumber("123");
+        expectedStudy.setOrderNumber("123");
 
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber("123");
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("123");
         assertTrue(new IsExpectedRadiologyStudy(expectedStudy).matches(radiologyStudy));
     }
 
 
     @Test
-    public void getRadiologyReportsByAccessionNumber_shouldReturnRadiologyReportsWithAccessionNumber() {
+    public void getRadiologyReportsByOrderNumber_shouldReturnRadiologyReportsWithOrderNumber() {
 
         Concept prelimReport = new Concept();
         Concept finalReport = new Concept();
@@ -927,7 +916,7 @@ public class RadiologyServiceTest{
         Location firstLocation = new Location();
 
         RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();
-        firstExpectedRadiologyReport.setAccessionNumber("123");
+        firstExpectedRadiologyReport.setOrderNumber("123");
         firstExpectedRadiologyReport.setReportDate(firstReportDate);
         firstExpectedRadiologyReport.setProcedure(procedure);
         firstExpectedRadiologyReport.setPatient(patient);
@@ -941,7 +930,7 @@ public class RadiologyServiceTest{
         Location secondLocation = new Location();
 
         RadiologyReport secondExpectedRadiologyReport = new RadiologyReport();
-        secondExpectedRadiologyReport.setAccessionNumber("123");
+        secondExpectedRadiologyReport.setOrderNumber("123");
         secondExpectedRadiologyReport.setReportDate(secondReportDate);
         secondExpectedRadiologyReport.setProcedure(procedure);
         secondExpectedRadiologyReport.setPatient(patient);
@@ -954,10 +943,10 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounter(firstExpectedRadiologyReport));
         encounters.add(setupRadiologyReportEncounter(secondExpectedRadiologyReport));
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
-        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("123");
         assertThat(radiologyReports.size(), is(2));
 
         // should now be in reverse order since we sort by report date with most recent first
@@ -966,7 +955,7 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyReportsByAccessionNumber_shouldNotFailIfNoObsGroups() {
+    public void getRadiologyReportsByOrderNumber_shouldNotFailIfNoObsGroups() {
 
         Concept prelimReport = new Concept();
         Concept finalReport = new Concept();
@@ -997,10 +986,10 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounterWithoutObsGroup(firstExpectedRadiologyReport));
         encounters.add(setupRadiologyReportEncounterWithoutObsGroup(secondExpectedRadiologyReport));
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
-        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("123");
         assertThat(radiologyReports.size(), is(2));
 
         // should now be in reverse order since we sort by report date with most recent first
@@ -1009,12 +998,12 @@ public class RadiologyServiceTest{
     }
 
     @Test
-    public void getRadiologyReportsByAccessionNumber_shouldReturnEmptyListIfNoMatchingStudies() {
+    public void getRadiologyReportsByOrderNumber_shouldReturnEmptyListIfNoMatchingStudies() {
 
-        when(emrEncounterDAO.getEncountersByObsValueText(accessionNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(new ArrayList<Encounter>());
 
-        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber("123");
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("123");
         assertThat(radiologyReports.size(), is(0));
 
     }
@@ -1036,7 +1025,7 @@ public class RadiologyServiceTest{
 
 
     private Encounter setupRadiologyStudyEncounter(Date datePerformed, Location location, Patient patient,
-                                                   Provider provider, String accessionNumber, Concept procedure) {
+                                                   Provider provider, String orderNumber, Concept procedure) {
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyStudyEncounterType);
         encounter.setEncounterDatetime(datePerformed);
@@ -1048,10 +1037,10 @@ public class RadiologyServiceTest{
         radiologyStudyObsGroup.setId(222);
         radiologyStudyObsGroup.setConcept(radiologyStudySetConcept);
 
-        Obs accessionNumberObs = new Obs();
-        accessionNumberObs.setConcept(accessionNumberConcept);
-        accessionNumberObs.setValueText(accessionNumber);
-        radiologyStudyObsGroup.addGroupMember(accessionNumberObs);
+        Obs orderNumberObs = new Obs();
+        orderNumberObs.setConcept(orderNumberConcept);
+        orderNumberObs.setValueText(orderNumber);
+        radiologyStudyObsGroup.addGroupMember(orderNumberObs);
 
         Obs imagesAvailableObs = new Obs();
         imagesAvailableObs.setConcept(imagesAvailableConcept);
@@ -1092,10 +1081,10 @@ public class RadiologyServiceTest{
         radiologyReportObsGroup.setConcept(radiologyReportSetConcept);
         radiologyReportObsGroup.setId(333);
 
-        Obs accessionNumberObs = new Obs();
-        accessionNumberObs.setConcept(accessionNumberConcept);
-        accessionNumberObs.setValueText(report.getAccessionNumber());
-        radiologyReportObsGroup.addGroupMember(accessionNumberObs);
+        Obs orderNumberObs = new Obs();
+        orderNumberObs.setConcept(orderNumberConcept);
+        orderNumberObs.setValueText(report.getOrderNumber());
+        radiologyReportObsGroup.addGroupMember(orderNumberObs);
 
         Obs procedureObs = new Obs();
         procedureObs.setConcept(procedureConcept);
@@ -1136,10 +1125,10 @@ public class RadiologyServiceTest{
         private Location expectedLocation;
         private Concept expectedStudy;
         private Date expectedOrderDate;
-        private User expectedOrderer;
-        private String expectedAccessionNumber;
+        private Provider expectedOrderer;
+        //private String expectedOrderNumber;
 
-        public IsExpectedOrder(Location expectedLocation, Date expectedOrderDate, User expectedOrderer, Concept expectedStudy) {
+        public IsExpectedOrder(Location expectedLocation, Date expectedOrderDate, Provider expectedOrderer, Concept expectedStudy) {
             this.expectedLocation = expectedLocation;
             this.expectedStudy = expectedStudy;
             this.expectedOrderDate = expectedOrderDate;
@@ -1158,17 +1147,17 @@ public class RadiologyServiceTest{
                 assertThat(actual.getClinicalHistory(), is(clinicalHistory));
                 assertThat(actual.getExamLocation(), is(expectedLocation));
                 assertThat(actual.getOrderer(), is(expectedOrderer));
-                assertThat(actual.getAccessionNumber(), is(StringUtils.leftPad(new LuhnMod10IdentifierValidator().getValidIdentifier(actual.getId().toString()), 10, "0")));
+                //assertThat(actual.getOrderNumber(), is(StringUtils.leftPad(new LuhnMod10IdentifierValidator().getValidIdentifier(actual.getId().toString()), 10, "0")));
 
                 if (expectedOrderDate != null) {
-                    assertThat(actual.getStartDate(), is(expectedOrderDate));
+                    assertThat(actual.getDateActivated(), is(expectedOrderDate));
                 }
                 else {
-                    assertThat(actual.getStartDate(), DateMatchers.within(2, TimeUnit.SECONDS, new Date()));
+                    assertThat(actual.getDateActivated(), DateMatchers.within(2, TimeUnit.SECONDS, new Date()));
                 }
             }
             catch (AssertionError e) {
-                System.out.println("Asertion Failure:" + e.getMessage());
+                System.out.println("Assertion Failure:" + e.getMessage());
                 return false;
             }
 
@@ -1183,25 +1172,23 @@ public class RadiologyServiceTest{
         private Provider expectedOrderer;
         private Date expectedOrderDate;
         private Location expectedOrderLocation;
-        private User expectedOrderedUserAccount;
         private Double expectedCreatinineLevel;
         private Date expectedCreatinineTestDate;
 
         public IsExpectedRadiologyOrderEncounter(Location expectedLocation, Location expectedOrderLocation,
-                                                 Provider expectedOrderer, User expectedOrdererUserAccount, Date expectedOrderDate,
+                                                 Provider expectedOrderer, Date expectedOrderDate,
                                                  Double expectedCreatinineLevel, Date expectedCreatinineTestDate, Concept... expectedStudies) {
 
             this.expectedStudies = expectedStudies;
             this.expectedOrderer = expectedOrderer;
             this.expectedOrderDate = expectedOrderDate;
             this.expectedOrderLocation = expectedOrderLocation;
-            this.expectedOrderedUserAccount = expectedOrdererUserAccount;
             this.expectedCreatinineLevel = expectedCreatinineLevel;
             this.expectedCreatinineTestDate = expectedCreatinineTestDate;
 
             int expectedId = 1;
             for (Concept expectedStudy : expectedStudies) {
-                expectedOrders.add(new IsExpectedOrder(expectedLocation, expectedOrderDate, expectedOrdererUserAccount, expectedStudy));
+                expectedOrders.add(new IsExpectedOrder(expectedLocation, expectedOrderDate, expectedOrderer, expectedStudy));
                 expectedId++;
             }
 

@@ -23,7 +23,6 @@ import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
-import org.openmrs.User;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.UserService;
@@ -90,17 +89,11 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             order.setClinicalHistory(requisition.getClinicalHistory());
             order.setConcept(study);
             order.setUrgency(requisition.getUrgency());
-            order.setStartDate(encounter.getEncounterDatetime());  // note that the attachToVisit method may have altered this date to match the visit
+            order.setDateActivated(encounter.getEncounterDatetime());  // note that the attachToVisit method may have altered this date to match the visit
             order.setOrderType(radiologyProperties.getRadiologyTestOrderType());
+            order.setCareSetting(radiologyProperties.getRadiologyCareSetting());  // currently only a single care setting support, defined by emr.radiologyCareSetting global property
             order.setPatient(requisition.getPatient());
-
-            // TODO: change this to just use the provider once orderer gets refactored (in core) to be a provider
-            // TODO: also note that a provider is not guaranteed to have a user account, so we have to allow that orderer might never be set
-            List<User> providerUsers = userService.getUsersByPerson(requisition.getRequestedBy().getPerson(), false);
-            if (providerUsers != null && providerUsers.size() > 0) {
-                order.setOrderer(providerUsers.get(0));
-            }
-
+            order.setOrderer(requisition.getRequestedBy());
             encounter.addOrder(order);
         }
 
@@ -115,9 +108,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             encounter.addObs(creatinineLevel);
         }
 
-        // since accession numbers are determined by primary key, we need to first save the encounter
-        encounterService.saveEncounter(encounter);
-        assignAccessionNumbersToOrders(encounter);
         return encounterService.saveEncounter(encounter);
     }
 
@@ -159,7 +149,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional
     @Override
-    // we synchronize this method so that we can verify that we never create two studies with the same accession number
+    // we synchronize this method so that we can verify that we never create two studies with the same order number
     public synchronized Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
 
         validate(radiologyStudy);
@@ -181,27 +171,27 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
-    public RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber) {
-        return radiologyOrderDAO.getRadiologyOrderByAccessionNumber(accessionNumber);
+    public RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber) {
+        return radiologyOrderDAO.getRadiologyOrderByOrderNumber(orderNumber);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber) {
+    public RadiologyStudy getRadiologyStudyByOrderNumber(String orderNumber) {
 
         RadiologyStudy radiologyStudy = null;
 
         // first search for any radiology study encounters
         List<Encounter> radiologyStudyEncounters =
-                emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
-                accessionNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
+                emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getOrderNumberConcept(),
+                        orderNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
 
         if (radiologyStudyEncounters != null && radiologyStudyEncounters.size() > 0) {
 
-            // note that also the API should prevent two radiology study encounters with the same accession number from being created,
+            // note that also the API should prevent two radiology study encounters with the same order number from being created,
             // if we do encounter this issue, we log an error, but we don't throw an exception and instead just return the first study
             if (radiologyStudyEncounters.size() > 1) {
-                log.error("More than one Radiology Study Encounter with accession number " + accessionNumber);
+                log.error("More than one Radiology Study Encounter with order number " + orderNumber);
             }
 
             radiologyStudy = convertEncounterToRadiologyStudy(radiologyStudyEncounters.get(0));
@@ -209,8 +199,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         else {
 
             // if we don't find an actual radiology study encounter, see if we can derive information from any reports
-            // with the same accession number
-            List<RadiologyReport> radiologyReports = getRadiologyReportsByAccessionNumber(accessionNumber);
+            // with the same order number
+            List<RadiologyReport> radiologyReports = getRadiologyReportsByOrderNumber(orderNumber);
 
             if (radiologyReports != null && radiologyReports.size() > 0) {
                 radiologyStudy = deriveRadiologyStudyFromRadiologyReports(radiologyReports);
@@ -222,11 +212,11 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
-    public List<RadiologyReport> getRadiologyReportsByAccessionNumber(String accessionNumber) {
+    public List<RadiologyReport> getRadiologyReportsByOrderNumber(String orderNumber) {
 
         List<Encounter> radiologyReportEncounters =
-                emrEncounterDAO.getEncountersByObsValueText(new RadiologyReportConceptSet(conceptService).getAccessionNumberConcept(),
-                accessionNumber, radiologyProperties.getRadiologyReportEncounterType(), false);
+                emrEncounterDAO.getEncountersByObsValueText(new RadiologyReportConceptSet(conceptService).getOrderNumberConcept(),
+                        orderNumber, radiologyProperties.getRadiologyReportEncounterType(), false);
 
         List<RadiologyReport> radiologyReports = new ArrayList<RadiologyReport>();
 
@@ -252,13 +242,13 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
                 null, null, null, false);
 
         List<RadiologyStudy> radiologyStudies = new ArrayList<RadiologyStudy>();
-        Set<String> accessionNumbersOfExistingRadiologyStudyEncounters = new HashSet<String>();
+        Set<String> orderNumbersOfExistingRadiologyStudyEncounters = new HashSet<String>();
 
         if (radiologyStudyEncounters != null) {
             for (Encounter encounter : radiologyStudyEncounters) {
                 RadiologyStudy radiologyStudy = convertEncounterToRadiologyStudy(encounter);
                 radiologyStudies.add(radiologyStudy);
-                accessionNumbersOfExistingRadiologyStudyEncounters.add(radiologyStudy.getAccessionNumber());
+                orderNumbersOfExistingRadiologyStudyEncounters.add(radiologyStudy.getOrderNumber());
             }
         }
 
@@ -267,20 +257,20 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
                 Collections.singletonList(radiologyProperties.getRadiologyReportEncounterType()),
                 null, null, null, false);
 
-        Map<String, List<RadiologyReport>> radiologyReportsByAccessionNumber = new HashMap<String, List<RadiologyReport>>();
+        Map<String, List<RadiologyReport>> radiologyReportsByOrderNumber = new HashMap<String, List<RadiologyReport>>();
 
         for (Encounter radiologyReportEncounter : radiologyReportEncounters) {
-            String accessionNumber = radiologyReportConceptSet.getAccessionNumberFromEncounter(radiologyReportEncounter);
+            String orderNumber = radiologyReportConceptSet.getOrderNumberFromEncounter(radiologyReportEncounter);
 
-            if (!accessionNumbersOfExistingRadiologyStudyEncounters.contains(accessionNumber)) {
-                if (!radiologyReportsByAccessionNumber.containsKey(accessionNumber)) {
-                    radiologyReportsByAccessionNumber.put(accessionNumber, new ArrayList<RadiologyReport>());
+            if (!orderNumbersOfExistingRadiologyStudyEncounters.contains(orderNumber)) {
+                if (!radiologyReportsByOrderNumber.containsKey(orderNumber)) {
+                    radiologyReportsByOrderNumber.put(orderNumber, new ArrayList<RadiologyReport>());
                 }
-                radiologyReportsByAccessionNumber.get(accessionNumber).add(convertEncounterToRadiologyReport(radiologyReportEncounter));
+                radiologyReportsByOrderNumber.get(orderNumber).add(convertEncounterToRadiologyReport(radiologyReportEncounter));
             }
         }
 
-        for (List<RadiologyReport> radiologyReports : radiologyReportsByAccessionNumber.values()) {
+        for (List<RadiologyReport> radiologyReports : radiologyReportsByOrderNumber.values()) {
             radiologyStudies.add(deriveRadiologyStudyFromRadiologyReports(radiologyReports));
         }
 
@@ -306,7 +296,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         radiologyStudy.setProcedure(radiologyStudyConceptSet.getProcedureFromEncounter(encounter));
         radiologyStudy.setImagesAvailable(radiologyStudyConceptSet.getImagesAvailableFromEncounter(encounter));
-        radiologyStudy.setAccessionNumber(radiologyStudyConceptSet.getAccessionNumberFromEncounter(encounter));
+        radiologyStudy.setOrderNumber(radiologyStudyConceptSet.getOrderNumberFromEncounter(encounter));
 
         return radiologyStudy;
     }
@@ -329,7 +319,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         radiologyReport.setReportType(radiologyReportConceptSet.getReportTypeFromEncounter(encounter));
         radiologyReport.setReportBody(radiologyReportConceptSet.getReportBodyFromEncounter(encounter));
-        radiologyReport.setAccessionNumber(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter));
+        radiologyReport.setOrderNumber(radiologyReportConceptSet.getOrderNumberFromEncounter(encounter));
         radiologyReport.setProcedure(radiologyReportConceptSet.getProcedureFromEncounter(encounter));
 
         return radiologyReport;
@@ -343,7 +333,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         // just pull the data from the most recent report
         radiologyStudy.setProcedure(radiologyReports.get(0).getProcedure());
         radiologyStudy.setPatient(radiologyReports.get(0).getPatient());
-        radiologyStudy.setAccessionNumber(radiologyReports.get(0).getAccessionNumber());
+        radiologyStudy.setOrderNumber(radiologyReports.get(0).getOrderNumber());
         radiologyStudy.setAssociatedRadiologyOrder(radiologyReports.get(0).getAssociatedRadiologyOrder());
 
         // set the date performed to the date of the earliest report
@@ -357,19 +347,19 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         // TODO: perhaps move these into an external validator?
 
-        if (StringUtils.isBlank(radiologyReport.getAccessionNumber())) {
-            throw new RadiologyAPIException("Accession number must be specified when saving Radiology Report. Patient: "
+        if (StringUtils.isBlank(radiologyReport.getOrderNumber())) {
+            throw new RadiologyAPIException("order number must be specified when saving Radiology Report. Patient: "
                     + radiologyReport.getPatient() + ", Procedure: " + radiologyReport.getProcedure());
         }
 
         if (radiologyReport.getReportDate() == null) {
             throw new RadiologyAPIException("Date performed must be specified when saving Radiology Report. Patient: "
-                    + radiologyReport.getPatient() + ", Accession Number: " + radiologyReport.getAccessionNumber());
+                    + radiologyReport.getPatient() + ", order Number: " + radiologyReport.getOrderNumber());
         }
 
         if (radiologyReport.getPatient() == null) {
-            throw new RadiologyAPIException("Patient must be specified when saving Radiology Report. Accession Number: "
-                    + radiologyReport.getAccessionNumber());
+            throw new RadiologyAPIException("Patient must be specified when saving Radiology Report. order Number: "
+                    + radiologyReport.getOrderNumber());
         }
 
     }
@@ -378,27 +368,27 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         // TODO: perhaps move these into an external validator?
 
-        if (StringUtils.isBlank(radiologyStudy.getAccessionNumber())) {
-            throw new RadiologyAPIException("Accession number must be specified when saving Radiology Study. Patient: "
+        if (StringUtils.isBlank(radiologyStudy.getOrderNumber())) {
+            throw new RadiologyAPIException("order number must be specified when saving Radiology Study. Patient: "
                     + radiologyStudy.getPatient() + ", Procedure: " + radiologyStudy.getProcedure());
         }
 
         if (radiologyStudy.getDatePerformed() == null) {
             throw new RadiologyAPIException("Date performed must be specified when saving Radiology Study. Patient: "
-                    + radiologyStudy.getPatient() + ", Accession Number: " + radiologyStudy.getAccessionNumber());
+                    + radiologyStudy.getPatient() + ", order Number: " + radiologyStudy.getOrderNumber());
         }
 
         if (radiologyStudy.getPatient() == null) {
-            throw new RadiologyAPIException("Patient must be specified when saving Radiology Study. Accession Number: "
-                    + radiologyStudy.getAccessionNumber());
+            throw new RadiologyAPIException("Patient must be specified when saving Radiology Study. order Number: "
+                    + radiologyStudy.getOrderNumber());
         }
 
-        // make sure no existing study with the same accession number
-        List<Encounter> radiologyStudyEncounters = emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getAccessionNumberConcept(),
-                radiologyStudy.getAccessionNumber(), radiologyProperties.getRadiologyStudyEncounterType(), false);
+        // make sure no existing study with the same order number
+        List<Encounter> radiologyStudyEncounters = emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getOrderNumberConcept(),
+                radiologyStudy.getOrderNumber(), radiologyProperties.getRadiologyStudyEncounterType(), false);
 
         if (radiologyStudyEncounters != null && radiologyStudyEncounters.size() > 0) {
-            throw new RadiologyAPIException("A Radiology Study already exists with accession number " + radiologyStudy.getAccessionNumber());
+            throw new RadiologyAPIException("A Radiology Study already exists with order number " + radiologyStudy.getOrderNumber());
         }
 
     }

@@ -21,7 +21,7 @@ public class IsExpectedRadiologyReport extends ArgumentMatcher<RadiologyReport> 
 
         assertThat(radiologyReport.getReportDate(), is(expectedRadiologyReport.getReportDate()));
         assertThat(radiologyReport.getProcedure(), is(expectedRadiologyReport.getProcedure()));
-        assertThat(radiologyReport.getAccessionNumber(), is(expectedRadiologyReport.getAccessionNumber()));
+        assertThat(radiologyReport.getOrderNumber(), is(expectedRadiologyReport.getOrderNumber()));
         assertThat(radiologyReport.getPatient(), is(expectedRadiologyReport.getPatient()));
         assertThat(radiologyReport.getPrincipalResultsInterpreter(), is(expectedRadiologyReport.getPrincipalResultsInterpreter()));
         assertThat(radiologyReport.getReportLocation(), is (expectedRadiologyReport.getReportLocation()));

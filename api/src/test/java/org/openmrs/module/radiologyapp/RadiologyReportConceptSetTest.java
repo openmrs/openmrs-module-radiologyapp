@@ -29,11 +29,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
 
     private Concept radiologyReportSetConcept;
-    private Concept accessionNumberConcept;
+    private Concept orderNumberConcept;
     private Concept reportBodyConcept;
     private Concept reportTypeConcept;
     private Concept procedureConcept;
@@ -52,12 +53,12 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
         emrConceptSource.setName(EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
 
         radiologyReportSetConcept = setupConcept(conceptService, "Radiology Report Set", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_SET);
-        accessionNumberConcept = setupConcept(conceptService, "Accession Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ACCESSION_NUMBER);
+        orderNumberConcept = setupConcept(conceptService, "order Number", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_ORDER_NUMBER);
         reportBodyConcept = setupConcept(conceptService, "Report Body", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_BODY);
         reportTypeConcept = setupConcept(conceptService, "Report Type", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_TYPE);;
         procedureConcept = setupConcept(conceptService, "Procedure", RadiologyConstants.CONCEPT_CODE_RADIOLOGY_PROCEDURE);
 
-        radiologyReportSetConcept.addSetMember(accessionNumberConcept);
+        radiologyReportSetConcept.addSetMember(orderNumberConcept);
         radiologyReportSetConcept.addSetMember(reportBodyConcept);
         radiologyReportSetConcept.addSetMember(reportTypeConcept);
         radiologyReportSetConcept.addSetMember(procedureConcept);
@@ -69,7 +70,7 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
 
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         assertThat(radiologyReportConceptSet.getRadiologyReportSetConcept(), is(radiologyReportSetConcept));
-        assertThat(radiologyReportConceptSet.getAccessionNumberConcept(), is(accessionNumberConcept));
+        assertThat(radiologyReportConceptSet.getOrderNumberConcept(), is(orderNumberConcept));
         assertThat(radiologyReportConceptSet.getReportBodyConcept(), is(reportBodyConcept));
         assertThat(radiologyReportConceptSet.getReportTypeConcept(), is(reportTypeConcept));
         assertThat(radiologyReportConceptSet.getProcedureConcept(), is(procedureConcept));
@@ -79,14 +80,16 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
     @Test
     public void shouldCreateObsGroupFromRadiologyReport() {
 
-        RadiologyOrder radiologyOrder = new RadiologyOrder();
-        String accessionNumber = "12345";
-        radiologyOrder.setAccessionNumber(accessionNumber);
+        String orderNumber = "12345";
+
+        RadiologyOrder radiologyOrder = mock(RadiologyOrder.class);
+        when(radiologyOrder.getOrderNumber()).thenReturn(orderNumber);
+
         Concept procedure = new Concept();
 
         RadiologyReport radiologyReport = new RadiologyReport();
         radiologyReport.setAssociatedRadiologyOrder(radiologyOrder);
-        radiologyReport.setAccessionNumber(accessionNumber);
+        radiologyReport.setOrderNumber(orderNumber);
         radiologyReport.setReportBody("Some report body");
         radiologyReport.setReportType(reportTypeFinalConcept);
         radiologyReport.setProcedure(procedure);
@@ -95,16 +98,16 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
         Obs radiologyReportObsSet = radiologyReportConceptSet.buildRadiologyReportObsGroup(radiologyReport);
 
         assertThat(radiologyReportObsSet.getGroupMembers().size(), is(4));
-        assertThat(radiologyReportObsSet.getOrder().getAccessionNumber(), is(accessionNumber));
+        assertThat(radiologyReportObsSet.getOrder().getOrderNumber(), is(orderNumber));
 
-        Obs accessionNumberObs = null;
+        Obs orderNumberObs = null;
         Obs procedureObs = null;
         Obs reportBodyObs = null;
         Obs reportTypeObs = null;
 
         for (Obs obs : radiologyReportObsSet.getGroupMembers()) {
-            if (obs.getConcept().equals(accessionNumberConcept)) {
-                accessionNumberObs = obs;
+            if (obs.getConcept().equals(orderNumberConcept)) {
+                orderNumberObs = obs;
             }
             if (obs.getConcept().equals(procedureConcept)) {
                 procedureObs  = obs;
@@ -116,12 +119,12 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
                 reportTypeObs = obs;
         }
 
-        assertNotNull(accessionNumberObs);
+        assertNotNull(orderNumberObs);
         assertNotNull(procedureObs);
         assertNotNull(reportBodyObs);
         assertNotNull(reportTypeObs);
 
-        assertThat(accessionNumberObs.getValueText(), is("12345"));
+        assertThat(orderNumberObs.getValueText(), is("12345"));
         assertThat(procedureObs.getValueCoded(), is(procedure));
         assertThat(reportBodyObs.getValueText(), is("Some report body"));
         assertThat(reportTypeObs.getValueCoded(), is(reportTypeFinalConcept));
@@ -129,7 +132,7 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
     }
 
     @Test
-    public void shouldNotCreateObsForAccessionNumberAndTypeIfNotSpecified() {
+    public void shouldNotCreateObsForOrderNumberAndTypeIfNotSpecified() {
 
         Concept procedure = new Concept();
 
@@ -163,10 +166,10 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
     }
 
     @Test
-    public void shouldFetchAccessionNumberFromObsGroup() {
+    public void shouldFetchOrderNumberFromObsGroup() {
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         Obs obsGroup = createObsGroup();
-        assertThat(radiologyReportConceptSet.getAccessionNumberFromObsGroup(obsGroup), is("123"));
+        assertThat(radiologyReportConceptSet.getOrderNumberFromObsGroup(obsGroup), is("123"));
     }
 
     @Test
@@ -198,10 +201,10 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
     }
 
     @Test
-    public void shouldFetchAccessionNumberFromEncounter() {
+    public void shouldFetchOrderNumberFromEncounter() {
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         Encounter encounter = createEncounter();
-        assertThat(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter), is("123"));
+        assertThat(radiologyReportConceptSet.getOrderNumberFromEncounter(encounter), is("123"));
     }
 
     @Test
@@ -229,7 +232,7 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
     public void shouldReturnNullForAllObs() {
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         Encounter encounter = createEncounterWithObsGroupWithNoObs();
-        assertNull(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getOrderNumberFromEncounter(encounter));
         assertNull(radiologyReportConceptSet.getProcedureFromEncounter(encounter));
         assertNull(radiologyReportConceptSet.getReportBodyFromEncounter(encounter));
         assertNull(radiologyReportConceptSet.getReportTypeFromEncounter(encounter));
@@ -239,7 +242,7 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
     public void shouldReturnNullForIfNoObsGroup() {
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         Encounter encounter = new Encounter();
-        assertNull(radiologyReportConceptSet.getAccessionNumberFromEncounter(encounter));
+        assertNull(radiologyReportConceptSet.getOrderNumberFromEncounter(encounter));
         assertNull(radiologyReportConceptSet.getProcedureFromEncounter(encounter));
         assertNull(radiologyReportConceptSet.getReportBodyFromEncounter(encounter));
         assertNull(radiologyReportConceptSet.getReportTypeFromEncounter(encounter));
@@ -257,10 +260,10 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
         obsGroup.setId(222);
         obsGroup.setConcept(radiologyReportSetConcept);
 
-        Obs accessionNumber = new Obs();
-        accessionNumber.setConcept(accessionNumberConcept);
-        accessionNumber.setValueText("123");
-        obsGroup.addGroupMember(accessionNumber);
+        Obs orderNumber = new Obs();
+        orderNumber.setConcept(orderNumberConcept);
+        orderNumber.setValueText("123");
+        obsGroup.addGroupMember(orderNumber);
 
         Concept procedure = new Concept();
         procedure.setId(321);

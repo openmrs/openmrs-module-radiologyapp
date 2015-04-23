@@ -6,14 +6,14 @@ function loadRadiologyTemplates() {
     var radiologyStudyDetailsSection = $('#study-details');
 
     function loadRadiologyStudy(studyElement) {
-        var studyAccessionNumber = studyElement.attr('studyAccessionNumber');
+        var studyOrderNumber = studyElement.attr('studyOrderNumber');
 
-        if (studyAccessionNumber != undefined) {
+        if (studyOrderNumber != undefined) {
             radiologyStudyDetailsSection.html("<i class=\"icon-spinner icon-spin icon-2x pull-left\"></i>");
 
             $.getJSON(
-                emr.fragmentActionLink("radiologyapp", "radiologyTab", "getRadiologyStudyByAccessionNumber", {
-                    studyAccessionNumber: studyAccessionNumber
+                emr.fragmentActionLink("radiologyapp", "radiologyTab", "getRadiologyStudyByOrderNumber", {
+                    studyOrderNumber: studyOrderNumber
                 })
             ).success(function(data) {
 

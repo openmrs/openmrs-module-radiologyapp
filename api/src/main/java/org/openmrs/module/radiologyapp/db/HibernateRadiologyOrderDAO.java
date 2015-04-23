@@ -26,9 +26,9 @@ public class HibernateRadiologyOrderDAO extends HibernateSingleClassDAO<Radiolog
     }
 
     @Override
-    public RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber) {
+    public RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber) {
         Criteria criteria = createRadiologyOrderCriteria();
-        addAccessionNumberRestriction(criteria, accessionNumber);
+        addOrderNumberRestriction(criteria, orderNumber);
         return (RadiologyOrder) criteria.uniqueResult();
     }
 
@@ -37,8 +37,8 @@ public class HibernateRadiologyOrderDAO extends HibernateSingleClassDAO<Radiolog
         return sessionFactory.getCurrentSession().createCriteria(RadiologyOrder.class);
     }
 
-    private void addAccessionNumberRestriction(Criteria criteria, String accessionNumber) {
-        criteria.add(Restrictions.eq("accessionNumber", accessionNumber));
+    private void addOrderNumberRestriction(Criteria criteria, String orderNumber) {
+        criteria.add(Restrictions.eq("orderNumber", orderNumber));
     }
 }
 

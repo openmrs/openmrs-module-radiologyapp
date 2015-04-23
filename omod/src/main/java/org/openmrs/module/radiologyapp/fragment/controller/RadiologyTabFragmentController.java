@@ -26,13 +26,13 @@ public class RadiologyTabFragmentController {
 
     }
 
-    public SimpleObject getRadiologyStudyByAccessionNumber(@SpringBean("radiologyService") RadiologyService radiologyService,
-                                                  @RequestParam("studyAccessionNumber") String studyAccessionNumber,
-                                                  UiUtils uiUtils, UiSessionContext uiSessionContext) {
+    public SimpleObject getRadiologyStudyByOrderNumber(@SpringBean("radiologyService") RadiologyService radiologyService,
+                                                       @RequestParam("studyOrderNumber") String studyOrderNumber,
+                                                       UiUtils uiUtils, UiSessionContext uiSessionContext) {
 
         // add the study
-        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByAccessionNumber(studyAccessionNumber);
-        SimpleObject simpleObject =  SimpleObject.fromObject(radiologyStudy, uiUtils, "procedure", "accessionNumber",
+        RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber(studyOrderNumber);
+        SimpleObject simpleObject =  SimpleObject.fromObject(radiologyStudy, uiUtils, "procedure", "orderNumber",
                 "technician", "imagesAvailable");
 
         simpleObject.put("datePerformed", DateFormatUtils.format(radiologyStudy.getDatePerformed(),
@@ -40,7 +40,7 @@ public class RadiologyTabFragmentController {
 
 
         // add any associated reports
-        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByAccessionNumber(studyAccessionNumber);
+        List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber(studyOrderNumber);
         List<SimpleObject> simpleRadiologyReports = new ArrayList<SimpleObject>();
 
         for (RadiologyReport radiologyReport : radiologyReports) {

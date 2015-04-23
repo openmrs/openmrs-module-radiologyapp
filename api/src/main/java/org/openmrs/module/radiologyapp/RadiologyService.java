@@ -28,11 +28,13 @@ public interface RadiologyService extends OpenmrsService {
     Encounter placeRadiologyRequisition(RadiologyRequisition requisition)
             throws EncounterDateBeforeVisitStartDateException, EncounterDateAfterVisitStopDateException;
 
+    // TODO: remove
     /**
      * Ensures that the accession number field has been set on the appropriate order
      * If necessary, generates accession number by padding order id with zeros and adding check digit
      * @param order
      */
+    @Deprecated
     void ensureAccessionNumberAssignedToOrder(Order order);
 
     /**
@@ -53,37 +55,37 @@ public interface RadiologyService extends OpenmrsService {
     Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy);
 
     /**
-     * Fetches the radiology order with the specified accession number
+     * Fetches the radiology order with the specified order number
      *
-     * @param accessionNumber
+     * @param orderNumber
      * @return
      */
-    RadiologyOrder getRadiologyOrderByAccessionNumber(String accessionNumber);
+    RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber);
 
     /**
-     * Fetches the radiology study with the specified accession number
-     * (If there is no explicit radiology study encounter with this accession number,
-     * it tries to derive this information from any radiology reports with the same accession number)
+     * Fetches the radiology study with the specified order number
+     * (If there is no explicit radiology study encounter with this order number,
+     * it tries to derive this information from any radiology reports with the same order number)
      *
-     * @param accessionNumber
+     * @param orderNumber
      * @return
      */
-    RadiologyStudy getRadiologyStudyByAccessionNumber(String accessionNumber);
+    RadiologyStudy getRadiologyStudyByOrderNumber(String orderNumber);
 
     /**
-     * Fetches all radiology reports with the specified accession number
+     * Fetches all radiology reports with the specified order number
      * (i.e., all the reports for a single study)
      *
-     * @param accessionNumber
+     * @param orderNumber
      * @return
      */
-    List<RadiologyReport> getRadiologyReportsByAccessionNumber(String accessionNumber);
+    List<RadiologyReport> getRadiologyReportsByOrderNumber(String orderNumber);
 
     /**
      * Returns all the radiology studies for the selected patient, sorted by date, with most recent first
      * This method determines fetches studies by 1) fetching all Radiology Study encounters, and then
      * 2) fetching all orphaned Radiology Reports (i.e., Radiology Report encounters where there is no
-     * Radiology Study encounter with the same accession number) and creating transient Radiology Study
+     * Radiology Study encounter with the same order number) and creating transient Radiology Study
      * objects for these report sets
      *
      * @param patient

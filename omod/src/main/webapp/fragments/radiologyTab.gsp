@@ -11,8 +11,8 @@
         <i class="icon-time small"></i>
         {{- datePerformed }}
     </div>
-    <small>${ ui.message('radiologyapp.accessionNumber.label') }:</small>
-    <span class="report-value"> {{- accessionNumber }}</span><br/>
+    <small>${ ui.message('radiologyapp.orderNumber.label') }:</small>
+    <span class="report-value"> {{- orderNumber }}</span><br/>
     <small>${ ui.message('radiologyapp.performedBy.label') }:</small>
     <span class="report-value"> {{- technician }}</span><br/>
     <small>${ ui.message('radiologyapp.imagesAvailable.label') }:</small>
@@ -37,7 +37,7 @@
 
 <ul class="left-menu">
     <% studies.each {  %>
-    <li class="menu-item viewRadiologyStudyDetails" studyAccessionNumber="${it.accessionNumber}">
+    <li class="menu-item viewRadiologyStudyDetails" studyOrderNumber="${it.orderNumber}">
         <span class="menu-date">
             <i class="icon-time"></i>
             ${dateFormat.format(it.datePerformed)}
