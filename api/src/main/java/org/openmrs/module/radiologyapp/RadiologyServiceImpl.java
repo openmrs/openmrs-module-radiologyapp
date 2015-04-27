@@ -24,7 +24,8 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
-import org.openmrs.api.UserService;
+import org.openmrs.api.OrderContext;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
@@ -58,7 +59,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private ConceptService conceptService;
 
-    private UserService userService;
+    private OrderService orderService;
 
     private RadiologyOrderDAO radiologyOrderDAO;
 
@@ -76,25 +77,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         encounter.setLocation(requisition.getRequestedFrom());
         encounter.setEncounterDatetime(requisition.getRequestedOn() != null ? requisition.getRequestedOn() : new Date());
 
-        if (requisition.getVisit() != null) {
-            new EncounterDomainWrapper(encounter).attachToVisit(requisition.getVisit());
-        }
-
-        for (Concept study : requisition.getStudies()) {
-
-            RadiologyOrder order = new RadiologyOrder();
-            order.setExamLocation(requisition.getExamLocation());
-            order.setClinicalHistory(requisition.getClinicalHistory());
-            order.setConcept(study);
-            order.setUrgency(requisition.getUrgency());
-            order.setDateActivated(encounter.getEncounterDatetime());  // note that the attachToVisit method may have altered this date to match the visit
-            order.setOrderType(radiologyProperties.getRadiologyTestOrderType());
-            order.setCareSetting(radiologyProperties.getRadiologyCareSetting());  // currently only a single care setting support, defined by emr.radiologyCareSetting global property
-            order.setPatient(requisition.getPatient());
-            order.setOrderer(requisition.getRequestedBy());
-            encounter.addOrder(order);
-        }
-
         // add creatinine level if it has been specified
         if (requisition.getCreatinineLevel() != null) {
             Obs creatinineLevel = new Obs();
@@ -106,7 +88,33 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             encounter.addObs(creatinineLevel);
         }
 
-        return encounterService.saveEncounter(encounter);
+        // save the encounter
+        encounterService.saveEncounter(encounter);
+
+        if (requisition.getVisit() != null) {
+            new EncounterDomainWrapper(encounter).attachToVisit(requisition.getVisit());
+        }
+
+        OrderContext orderContext = new OrderContext();
+        orderContext.setOrderType(radiologyProperties.getRadiologyTestOrderType());
+
+        // now add the orders
+        for (Concept study : requisition.getStudies()) {
+            RadiologyOrder order = new RadiologyOrder();
+            order.setExamLocation(requisition.getExamLocation());
+            order.setClinicalHistory(requisition.getClinicalHistory());
+            order.setConcept(study);
+            order.setUrgency(requisition.getUrgency());
+            order.setDateActivated(encounter.getEncounterDatetime());  // note that the attachToVisit method may have altered this date to match the visit
+            order.setOrderType(radiologyProperties.getRadiologyTestOrderType());
+            order.setCareSetting(radiologyProperties.getRadiologyCareSetting());  // currently only a single care setting support, defined by emr.radiologyCareSetting global property
+            order.setPatient(requisition.getPatient());
+            order.setOrderer(requisition.getRequestedBy());
+            encounter.addOrder(order);
+            orderService.saveOrder(order, orderContext);
+        }
+
+        return encounter;
     }
 
     @Transactional
@@ -392,8 +400,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         this.conceptService = conceptService;
     }
 
-    public void setUserService(UserService userService) {
-        this.userService = userService;
+    public void setOrderService(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     public void setRadiologyOrderDAO(RadiologyOrderDAO radiologyOrderDAO) {

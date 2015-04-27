@@ -20,8 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDatatype;
 import org.openmrs.ConceptMap;
@@ -43,7 +41,7 @@ import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
-import org.openmrs.api.UserService;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.EmrApiProperties;
@@ -99,7 +97,7 @@ public class RadiologyServiceTest{
 
     private ConceptService conceptService;
     
-    private UserService userService;
+    private OrderService orderService;
 
     private EmrEncounterDAO emrEncounterDAO;
 
@@ -216,7 +214,7 @@ public class RadiologyServiceTest{
         radiologyService.setEncounterService(encounterService);
         radiologyService.setRadiologyOrderDAO(radiologyOrderDAO);
         radiologyService.setConceptService(conceptService);
-        radiologyService.setUserService(userService);
+        radiologyService.setOrderService(orderService);
         radiologyService.setEmrEncounterDAO(emrEncounterDAO);
     }
 
@@ -227,7 +225,7 @@ public class RadiologyServiceTest{
         conceptService = mock(ConceptService.class);
         radiologyOrderDAO = mock(RadiologyOrderDAO.class);
         conceptService = mock(ConceptService.class);
-        userService = mock(UserService.class);
+        orderService = mock(OrderService.class);
         emrEncounterDAO = mock(EmrEncounterDAO.class);
         booleanType = mock(ConceptDatatype.class);
 
@@ -247,21 +245,7 @@ public class RadiologyServiceTest{
         when(Context.getConceptService()).thenReturn(conceptService);
         when(conceptService.getTrueConcept()).thenReturn(trueConcept);
         when(conceptService.getFalseConcept()).thenReturn(falseConcept);
-        when(encounterService.saveEncounter(isA(Encounter.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                Encounter encounter = (Encounter) (args[0]);
-
-                // mimic setting the order id on the order
-                int orderId = 1;
-                for (Order order : encounter.getOrders()) {
-                    order.setId(orderId);
-                    orderId++;
-                }
-                return encounter;
-            }
-        });
+        when(encounterService.saveEncounter(isA(Encounter.class))).thenReturn(new Encounter());
     }
 
     private void setupRadiologyStudyAndRadiologyReportsConceptSets() {
@@ -1007,22 +991,6 @@ public class RadiologyServiceTest{
         assertThat(radiologyReports.size(), is(0));
 
     }
-
-    @Test
-    public void ensureAccessionNumberAssignedToOrder_shouldAssignAccessionNumberToOrder() {
-        Order order = new Order(2);
-        radiologyService.ensureAccessionNumberAssignedToOrder(order);
-        assertThat(order.getAccessionNumber(), is("0000000026"));
-    }
-
-    @Test
-    public void ensureAccessionNumberAssignedToOrder_shouldNotOverrideExistingAccessionNumber() {
-        Order order = new Order(2);
-        order.setAccessionNumber("test123");
-        radiologyService.ensureAccessionNumberAssignedToOrder(order);
-        assertThat(order.getAccessionNumber(), is("test123"));
-    }
-
 
     private Encounter setupRadiologyStudyEncounter(Date datePerformed, Location location, Patient patient,
                                                    Provider provider, String orderNumber, Concept procedure) {
