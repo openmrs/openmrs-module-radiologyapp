@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
-import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
@@ -32,7 +31,6 @@ import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateEx
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.encounter.EncounterDomainWrapper;
-import org.openmrs.module.idgen.validator.LuhnMod10IdentifierValidator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
@@ -109,21 +107,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         }
 
         return encounterService.saveEncounter(encounter);
-    }
-
-    private void assignAccessionNumbersToOrders(Encounter encounter) {
-        for (Order order : encounter.getOrders()) {
-            ensureAccessionNumberAssignedToOrder(order);
-        }
-    }
-
-    @Override
-    public void ensureAccessionNumberAssignedToOrder(Order order) {
-        if (order.getAccessionNumber() == null) {
-            String accessionNumber = new LuhnMod10IdentifierValidator().getValidIdentifier(order.getOrderId().toString());
-            accessionNumber = StringUtils.leftPad(accessionNumber, 10, "0"); // pad the accession number to 10 digits
-            order.setAccessionNumber(accessionNumber);
-        }
     }
 
     @Transactional
