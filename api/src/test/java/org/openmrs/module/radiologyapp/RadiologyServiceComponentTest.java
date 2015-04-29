@@ -121,13 +121,15 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // sanity check
         Assert.assertEquals(0, encounterService.getEncountersByPatient(patient).size());
 
+        Date currentDate = new Date();
+
         RadiologyRequisition requisition = new RadiologyRequisition();
 
         requisition.setPatient(patient);
         requisition.setStudies(Collections.singleton(conceptService.getConcept(18)));
         requisition.setUrgency(Order.Urgency.STAT);
         requisition.setRequestedBy(providerService.getProvider(1));
-        requisition.setRequestedOn(new Date());
+        requisition.setRequestedOn(currentDate);
         requisition.setRequestedFrom(locationService.getLocation(1));
         requisition.setVisit(visit);
         requisition.setCreatinineLevel(1.8);
@@ -142,11 +144,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         Set<Order> orders = encounters.get(0).getOrders();
         Assert.assertEquals(1, orders.size());
 
-        assertThat(orders.iterator().next().getOrderNumber(), is("ORD-1"));
+        Order order = orders.iterator().next();
+        assertThat(order.getOrderNumber(), is("ORD-1"));
+        assertThat(order.getDateActivated(), is(currentDate));
+        assertThat(order.getAutoExpireDate(), is(currentDate));   // auto-expire date is set to same as date activated as a hack, see RadiologyService for more info
 
         Set<Obs> obs = encounters.get(0).getObs();
         Assert.assertEquals(1, obs.size());
-
     }
 
     @Test

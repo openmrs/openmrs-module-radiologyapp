@@ -106,6 +106,9 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             order.setConcept(study);
             order.setUrgency(requisition.getUrgency());
             order.setDateActivated(encounter.getEncounterDatetime());  // note that the attachToVisit method may have altered this date to match the visit
+            // HACK: set the expire date to the same as the active date to enforce that an order is *never* considered active
+            // we do this because the API doesn't allow more than 1 active order per patient and study type, and doesn't provide a way to mark a study as performed/complete
+            order.setAutoExpireDate(encounter.getEncounterDatetime());
             order.setOrderType(radiologyProperties.getRadiologyTestOrderType());
             order.setCareSetting(radiologyProperties.getRadiologyCareSetting());  // currently only a single care setting support, defined by emr.radiologyCareSetting global property
             order.setPatient(requisition.getPatient());
