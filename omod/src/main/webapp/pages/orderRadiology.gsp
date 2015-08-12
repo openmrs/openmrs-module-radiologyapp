@@ -46,7 +46,7 @@
 <script type="text/javascript">
     var breadcrumbs = [
         { icon: "icon-home", link: '/' + OPENMRS_CONTEXT_PATH + '/index.htm' },
-        { label: "${ ui.format(patient.familyName) }, ${ ui.format(patient.givenName) }", link:'${ui.pageLink("coreapps", "patientdashboard/patientDashboard", [patientId: patient.id])}' },
+        { label: "${ ui.format(patient.familyName) }, ${ ui.format(patient.givenName) }", link:'${ui.urlBind("/" + contextPath + dashboardUrl, patient)}' },
         { label: "${ui.message("radiologyapp.task.order." + modality + ".label")}" }
     ];
 </script>
@@ -57,7 +57,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
 <div id="contentForm">
     <h1>${ ui.message("radiologyapp.order." + modality + ".title") }</h1>
     <form id="radiology-order" data-bind="submit: handleSubmit" action="${ ui.actionLink("radiologyapp", "radiologyRequisition", "orderRadiology",
-            [ successUrl: ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id, visitId: visit.id ]) ]) }" method="post">
+            [ successUrl: returnUrl ?: ui.pageLink("coreapps", "patientdashboard/patientDashboard", [ patientId: patient.id, visitId: visit.id ]) ]) }" method="post">
         <input type="hidden" name="patient" value="${ patient.id }"/>
         <input type="hidden" name="modality" value="${ modality }"/>
         <input type="hidden" name="visit" value="${ visit.id }" />

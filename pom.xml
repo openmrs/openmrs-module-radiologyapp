@@ -46,6 +46,7 @@
         <providerManagementVersion>2.0</providerManagementVersion>
         <reportingVersion>0.9.4</reportingVersion>
         <calculationVersion>1.0</calculationVersion>
+        <coreappsVersion>1.7-SNAPSHOT</coreappsVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -128,6 +129,14 @@
             <groupId>org.openmrs.module</groupId>
             <artifactId>idgen-api</artifactId>
             <version>${idgenVersion}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>coreapps-api</artifactId>
+            <version>${coreappsVersion}</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>

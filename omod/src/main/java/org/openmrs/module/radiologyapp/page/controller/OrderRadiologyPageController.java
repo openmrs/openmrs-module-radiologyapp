@@ -11,6 +11,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.feature.FeatureToggleProperties;
+import org.openmrs.module.coreapps.CoreAppsProperties;
 import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.RadiologyConstants;
@@ -36,13 +37,18 @@ public class OrderRadiologyPageController {
     public void controller(@RequestParam("visitId") Visit visit,
                            @RequestParam("patientId") Patient patient,
                            @RequestParam("modality") String modality,
+                           @RequestParam(value = "returnUrl", required = false) String returnUrl,
                            @SpringBean("radiologyProperties") RadiologyProperties radiologyProperties,
                            @SpringBean("providerService") ProviderService providerService,
                            @SpringBean("locationService") LocationService locationService,
                            @SpringBean("emrApiProperties") EmrApiProperties emrApiProperties,
+                           @SpringBean("coreAppsProperties") CoreAppsProperties coreAppsProperties,
                            @SpringBean("featureToggles") FeatureToggleProperties featureToggles,
                            UiUtils ui,
                            PageModel model) {
+
+        model.addAttribute("dashboardUrl", coreAppsProperties.getDashboardUrl());
+        model.addAttribute("returnUrl", returnUrl);
 
         // default to x-ray
         if (StringUtils.isBlank(modality)) {
