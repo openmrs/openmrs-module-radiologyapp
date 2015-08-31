@@ -3,6 +3,11 @@
     def dateFormat = new java.text.SimpleDateFormat("dd MMM yyyy")
     ui.includeJavascript("radiologyapp", "radiologyTab.js")
     ui.includeCss("radiologyapp", "radiologyTab.css")
+
+    def studyNumber = null
+    if (param.studyordernumber) {
+        studyNumber = param.studyordernumber[0]
+    }
 %>
 
 <script type="text/template" id="radiologyStudyDetailsTemplate">
@@ -31,7 +36,7 @@
 </script>
 <script type="text/javascript">
     jq(function(){
-        loadRadiologyTemplates();
+        loadRadiologyTemplates("${ studyNumber }");
     });
 </script>
 

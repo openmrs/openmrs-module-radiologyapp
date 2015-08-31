@@ -1,5 +1,5 @@
 
-function loadRadiologyTemplates() {
+function loadRadiologyTemplates(displayStudyOrderNumber) {
 
     var radiologyStudyDetailsTemplate= _.template(jq('#radiologyStudyDetailsTemplate').html());
 
@@ -30,7 +30,15 @@ function loadRadiologyTemplates() {
     }
 
     // load the first study
-    loadRadiologyStudy($('.viewRadiologyStudyDetails').first());
+    studyOrderElement = null;
+    if (displayStudyOrderNumber != null && displayStudyOrderNumber != 'null') {
+        studyOrderElement = $('.viewRadiologyStudyDetails[studyordernumber=' + displayStudyOrderNumber + ']');
+    }
+    if ( typeof studyOrderElement !== undefined && studyOrderElement !== null) {
+        loadRadiologyStudy(studyOrderElement);
+    } else {
+        loadRadiologyStudy($('.viewRadiologyStudyDetails').first());
+    }
 
     // register click handlers for loading other studies
     $('.viewRadiologyStudyDetails').click(function() {

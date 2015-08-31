@@ -18,7 +18,7 @@
         <ul>
             <% studies.each { it -> %>
             <li class="clear">
-                <a href="" class="visit-link">
+                <a href="/${contextPath}/radiologyapp/radiologyDashboard.page?studyordernumber=${it.orderNumber}&patientId=${patient.id}" class="visit-link">
                     ${ ui.formatDatePretty(it.datePerformed) }
                 </a>
                 <div class="tag">
