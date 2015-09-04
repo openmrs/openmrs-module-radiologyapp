@@ -78,7 +78,7 @@ public interface RadiologyService extends OpenmrsService {
      * @param patient
      * @return
      */
-    List<Order> getRadiologyOrdersForPatient(Patient patient);
+    List<Order> getUnfulfilledRadiologyOrdersForPatient(Patient patient);
 
     /**
      * Returns all the radiology studies for the selected patient, sorted by date, with most recent first

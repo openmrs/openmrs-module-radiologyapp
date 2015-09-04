@@ -5,7 +5,7 @@
 <div class="info-section">
     <div class="info-header">
         <i class="icon-camera"></i>
-        <h3>${ ui.message("coreapps.clinicianfacing.radiology").toUpperCase() }</h3>
+        <h3>${ ui.message("radiologyapp.app.studies").toUpperCase() }</h3>
         <% if (context.hasPrivilege("Task: org.openmrs.module.radiologyapp.tab")) { %>
         <a href='${ui.pageLink("radiologyapp", "radiologyDashboard", [patientId: patient.id, returnUrl: ui.urlBind("/" + contextPath + dashboardUrl, [ patientId: patient.patient.id ] )])}' class="right">
             <i class="icon-share-alt edit-action" title="${ ui.message("coreapps.edit") }"></i>

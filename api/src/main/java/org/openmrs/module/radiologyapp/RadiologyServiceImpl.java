@@ -229,7 +229,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
-    public List<Order> getRadiologyOrdersForPatient(Patient patient) {
+    public List<Order> getUnfulfilledRadiologyOrdersForPatient(Patient patient) {
 
         List<Order> radiologyOrders = null;
 

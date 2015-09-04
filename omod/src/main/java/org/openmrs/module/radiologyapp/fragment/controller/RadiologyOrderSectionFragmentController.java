@@ -17,7 +17,7 @@ public class RadiologyOrderSectionFragmentController {
                            @SpringBean CoreAppsProperties coreAppsProperties,
                            @SpringBean RadiologyService radiologyService) {
 
-        List<Order> orders = radiologyService.getRadiologyOrdersForPatient(patient);
+        List<Order> orders = radiologyService.getUnfulfilledRadiologyOrdersForPatient(patient);
         if (orders != null && orders.size() > 5) {
             //display only the last 5 radiology orders
             orders = orders.subList(0, 5);
