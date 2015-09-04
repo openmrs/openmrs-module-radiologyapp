@@ -20,6 +20,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 
 import java.util.Date;
+import java.util.List;
 
 public class RadiologyStudy {
 
@@ -38,6 +39,8 @@ public class RadiologyStudy {
     private Location studyLocation;
 
     private Boolean imagesAvailable;
+
+    private List<RadiologyReport> reports;
 
     public RadiologyOrder getAssociatedRadiologyOrder() {
         return associatedRadiologyOrder;
@@ -107,4 +110,11 @@ public class RadiologyStudy {
         this.imagesAvailable = imagesAvailable;
     }
 
+    public List<RadiologyReport> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<RadiologyReport> reports) {
+        this.reports = reports;
+    }
 }

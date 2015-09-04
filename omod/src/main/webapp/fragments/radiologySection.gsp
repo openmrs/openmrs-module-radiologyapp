@@ -1,4 +1,5 @@
 <%
+    ui.includeCss("radiologyapp", "radiologyOrder.css")
     def patient = config.patient
 %>
 <div class="info-section">
@@ -16,12 +17,17 @@
         ${ui.message("coreapps.none")}
         <% } %>
         <ul>
-            <% studies.each { it -> %>
+            <% studies.each { it ->
+            def report = false
+            if (it.reports) {
+                report = true
+            }
+            %>
             <li class="clear">
                 <a href="/${contextPath}/radiologyapp/radiologyDashboard.page?studyordernumber=${it.orderNumber}&patientId=${patient.id}" class="visit-link">
                     ${ ui.formatDatePretty(it.datePerformed) }
                 </a>
-                <div class="tag">
+                <div class="${ !report ? 'studytag' : 'tag'} ">
                     ${ it.procedure ? ui.format(it.procedure) :  ui.message("radiologyapp.procedure.unknown") }
                 </div>
             </li>

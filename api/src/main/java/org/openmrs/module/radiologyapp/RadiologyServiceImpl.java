@@ -20,6 +20,8 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
+import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.ConceptService;
@@ -32,6 +34,7 @@ import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateEx
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.encounter.EncounterDomainWrapper;
+import org.openmrs.module.radiologyapp.comparator.RadiologyOrderByDateComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
@@ -226,6 +229,39 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
+    public List<Order> getRadiologyOrdersForPatient(Patient patient) {
+
+        List<Order> radiologyOrders = null;
+
+        OrderType radiologyTestOrderType = radiologyProperties.getRadiologyTestOrderType();
+        List<Order> allOrders = orderService.getAllOrdersByPatient(patient);
+        if (allOrders != null && allOrders.size() > 0) {
+            for (Order order : allOrders) {
+                if (order.getOrderType().getUuid().equals(radiologyTestOrderType.getUuid())
+                        && !order.isVoided()) {
+                    String orderNumber = order.getOrderNumber();
+                    if (StringUtils.isNotBlank(orderNumber)) {
+                        RadiologyStudy study = getRadiologyStudyByOrderNumber(orderNumber);
+                        if (study == null) {
+                            //we found a Radiology Order with no study
+                            if (radiologyOrders == null) {
+                                radiologyOrders = new ArrayList<Order>();
+                            }
+                            radiologyOrders.add(order);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (radiologyOrders != null && radiologyOrders.size() > 0 ) {
+            Collections.sort(radiologyOrders, new RadiologyOrderByDateComparator());
+        }
+        return radiologyOrders;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient) {
 
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
@@ -269,6 +305,15 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         }
 
         Collections.sort(radiologyStudies, new RadiologyStudyByDateComparator());
+        for (RadiologyStudy radiologyStudy : radiologyStudies) {
+            String orderNumber = radiologyStudy.getOrderNumber();
+            if ( StringUtils.isNotBlank(orderNumber)) {
+                List<RadiologyReport> reports = getRadiologyReportsByOrderNumber(orderNumber);
+                if ( reports!=null && reports.size()>0 ) {
+                    radiologyStudy.setReports(reports);
+                }
+            }
+        }
         return radiologyStudies;
     }
 

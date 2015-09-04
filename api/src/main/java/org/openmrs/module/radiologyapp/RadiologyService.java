@@ -15,6 +15,7 @@
 package org.openmrs.module.radiologyapp;
 
 import org.openmrs.Encounter;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
@@ -70,6 +71,14 @@ public interface RadiologyService extends OpenmrsService {
      * @return
      */
     List<RadiologyReport> getRadiologyReportsByOrderNumber(String orderNumber);
+
+    /**
+     * Returns radiology orders that have no corresponding study for the selected patient,
+     * sorted by date, with most recent first.
+     * @param patient
+     * @return
+     */
+    List<Order> getRadiologyOrdersForPatient(Patient patient);
 
     /**
      * Returns all the radiology studies for the selected patient, sorted by date, with most recent first

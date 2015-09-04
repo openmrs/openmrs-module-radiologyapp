@@ -9,6 +9,18 @@
   clear: left;
 }
 
+.studytag {
+  background: #fdfcdf;
+  display: inline;
+  padding: 2px 5px;
+  border-radius: 1px;
+  font-size: 0.8em;
+  float: right;
+  min-width: 66px;
+  text-align: center;
+}
+
+
 #study-search {
   width: 330px;
   height: 2em;
@@ -49,7 +61,6 @@
     display: inline-block;
     float: none;
   }
-
 }
 
 #contentForm {
