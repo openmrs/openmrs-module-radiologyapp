@@ -9,6 +9,16 @@
   clear: left;
 }
 
+.cleartag {
+  display: inline;
+  padding: 2px 5px;
+  border-radius: 1px;
+  font-size: 0.8em;
+  float: right;
+  min-width: 66px;
+  text-align: center;
+}
+
 .studytag {
   background: #fdfcdf;
   display: inline;

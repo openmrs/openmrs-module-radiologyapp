@@ -27,7 +27,7 @@
                 <a href="/${contextPath}/radiologyapp/radiologyDashboard.page?studyordernumber=${it.orderNumber}&patientId=${patient.id}" class="visit-link">
                     ${ ui.formatDatePretty(it.datePerformed) }
                 </a>
-                <div class="${ !report ? 'studytag' : 'tag'} ">
+                <div class="${ !report ? 'cleartag' : 'studytag'} ">
                     ${ it.procedure ? ui.format(it.procedure) :  ui.message("radiologyapp.procedure.unknown") }
                 </div>
             </li>

@@ -22,7 +22,7 @@
                 <a href="/${contextPath}/coreapps/patientdashboard/patientDashboard.page?visitId=${it.encounter.visit.id}&patientId=${patient.id}" class="visit-link">
                     ${ ui.formatDatePretty(it.dateCreated) }
                 </a>
-                <div class="studytag ">
+                <div class="cleartag">
                     ${ it.concept ? ui.format(it.concept) :  ui.message("radiologyapp.procedure.unknown") }
                 </div>
             </li>
