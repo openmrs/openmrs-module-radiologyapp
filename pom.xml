@@ -159,6 +159,13 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
+            <artifactId>htmlformentry-api-1.10</artifactId>
+            <version>${htmlformentryVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
             <artifactId>serialization.xstream-api</artifactId>
             <version>${serializationxstreamVersion}</version>
             <scope>test</scope>
