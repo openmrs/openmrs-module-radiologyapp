@@ -20,7 +20,7 @@
                 <property name="radiologyOrderDAO">
                     <bean class="${project.parent.groupId}.${project.parent.artifactId}.db.HibernateRadiologyOrderDAO">
                         <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
+                            <ref bean="dbSessionFactory"/>
                         </property>
                     </bean>
                 </property>
