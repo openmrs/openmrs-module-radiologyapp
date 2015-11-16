@@ -44,7 +44,7 @@
         <htmlformentryVersion>2.7-SNAPSHOT</htmlformentryVersion>
         <idgenVersion>4.0</idgenVersion>
         <providermanagementVersion>2.3</providermanagementVersion>
-        <reportingVersion>0.9.8-SNAPSHOT</reportingVersion>
+        <reportingVersion>0.9.8</reportingVersion>
         <calculationVersion>1.1</calculationVersion>
         <coreappsVersion>1.8-SNAPSHOT</coreappsVersion>
         <serializationxstreamVersion>0.2.10-SNAPSHOT</serializationxstreamVersion>
