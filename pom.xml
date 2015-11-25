@@ -42,7 +42,7 @@
         <uicommonsVersion>1.8-SNAPSHOT</uicommonsVersion>
         <appuiVersion>1.3</appuiVersion>
         <htmlformentryVersion>2.7-SNAPSHOT</htmlformentryVersion>
-        <idgenVersion>4.0</idgenVersion>
+        <idgenVersion>4.2</idgenVersion>
         <providermanagementVersion>2.3</providermanagementVersion>
         <reportingVersion>0.9.9-SNAPSHOT</reportingVersion>
         <calculationVersion>1.1</calculationVersion>
