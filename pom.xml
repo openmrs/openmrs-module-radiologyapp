@@ -47,7 +47,7 @@
         <reportingVersion>0.9.9-SNAPSHOT</reportingVersion>
         <calculationVersion>1.1</calculationVersion>
         <coreappsVersion>1.8-SNAPSHOT</coreappsVersion>
-        <serializationxstreamVersion>0.2.10-SNAPSHOT</serializationxstreamVersion>
+        <serializationxstreamVersion>0.2.10</serializationxstreamVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
