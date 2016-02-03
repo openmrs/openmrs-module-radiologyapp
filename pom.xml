@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openmrs.module</groupId>
@@ -35,18 +34,18 @@
 	
 	<properties>
 		<openMRSVersion>1.10.2</openMRSVersion>
-        <uiframeworkVersion>3.5-SNAPSHOT</uiframeworkVersion>
-        <emrapiVersion>1.13-SNAPSHOT</emrapiVersion>
-        <appframeworkVersion>2.5-SNAPSHOT</appframeworkVersion>
+        <uiframeworkVersion>3.5</uiframeworkVersion>
+        <emrapiVersion>1.12</emrapiVersion>
+        <appframeworkVersion>2.4</appframeworkVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
-        <uicommonsVersion>1.8-SNAPSHOT</uicommonsVersion>
+        <uicommonsVersion>1.7</uicommonsVersion>
         <appuiVersion>1.3</appuiVersion>
-        <htmlformentryVersion>3.0-SNAPSHOT</htmlformentryVersion>
+        <htmlformentryVersion>2.7</htmlformentryVersion>
         <idgenVersion>4.2</idgenVersion>
-        <providermanagementVersion>2.3</providermanagementVersion>
-        <reportingVersion>0.9.9-SNAPSHOT</reportingVersion>
+        <providermanagementVersion>2.4</providermanagementVersion>
+        <reportingVersion>0.9.8.1</reportingVersion>
         <calculationVersion>1.1</calculationVersion>
-        <coreappsVersion>1.10-SNAPSHOT</coreappsVersion>
+        <coreappsVersion>1.9</coreappsVersion>
         <serializationxstreamVersion>0.2.10</serializationxstreamVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -274,7 +273,7 @@
                 <version>2.1</version>
                 <configuration>
                     <generateBackupPoms>false</generateBackupPoms>
-                    <allowSnapshots>true</allowSnapshots>
+                    <allowSnapshots>false</allowSnapshots>
                     <properties>
                         <property>
                             <name>openMRSVersion</name>
@@ -284,58 +283,6 @@
                             <name>openMRSwebVersion</name>
                             <version>[1.9.0,1.10.0-!)</version>
                         </property>
-                        <property>
-                            <name>htmlwidgetsVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>metadatasharingVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>metadatamappingVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>calculationVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>namephoneticsVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>addresshierarchyVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>providermanagementVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>eventVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>logicVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>chartsearchVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>metadatadeployVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <property>
-                            <name>idgenVersion</name>
-                            <banSnapshots>true</banSnapshots>
-                        </property>
-                        <!--      <property>
-                                  <name>webservicesRestVersion</name>
-                                  <banSnapshots>true</banSnapshots>
-                              </property>-->
                     </properties>
                 </configuration>
             </plugin>
