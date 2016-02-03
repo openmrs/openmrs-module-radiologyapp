@@ -43,7 +43,7 @@
         <appuiVersion>1.3</appuiVersion>
         <htmlformentryVersion>3.0-SNAPSHOT</htmlformentryVersion>
         <idgenVersion>4.2</idgenVersion>
-        <providermanagementVersion>2.3</providermanagementVersion>
+        <providermanagementVersion>2.4</providermanagementVersion>
         <reportingVersion>0.9.9-SNAPSHOT</reportingVersion>
         <calculationVersion>1.1</calculationVersion>
         <coreappsVersion>1.10-SNAPSHOT</coreappsVersion>
