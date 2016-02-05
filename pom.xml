@@ -33,7 +33,7 @@
 	</modules>
 	
 	<properties>
-		<openMRSVersion>1.10.2</openMRSVersion>
+		<openMRSVersion>1.10.4-SNAPSHOT</openMRSVersion>
         <uiframeworkVersion>3.5</uiframeworkVersion>
         <emrapiVersion>1.12</emrapiVersion>
         <appframeworkVersion>2.6</appframeworkVersion>
