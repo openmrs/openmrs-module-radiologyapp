@@ -40,7 +40,7 @@
         <springVersion>3.0.5.RELEASE</springVersion>
         <uicommonsVersion>1.7</uicommonsVersion>
         <appuiVersion>1.3</appuiVersion>
-        <htmlformentryVersion>2.7</htmlformentryVersion>
+        <htmlformentryVersion>3.0</htmlformentryVersion>
         <idgenVersion>4.2</idgenVersion>
         <providermanagementVersion>2.4</providermanagementVersion>
         <reportingVersion>0.9.8.1</reportingVersion>
