@@ -46,7 +46,7 @@
         <reportingVersion>0.9.8.1</reportingVersion>
         <calculationVersion>1.1</calculationVersion>
         <coreappsVersion>1.9</coreappsVersion>
-        <serializationxstreamVersion>0.2.10</serializationxstreamVersion>
+        <serializationxstreamVersion>0.2.11</serializationxstreamVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
