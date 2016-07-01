@@ -48,6 +48,10 @@
 		<lang>ht</lang>
 		<file>messages_ht.properties</file>
 	</messages>
+    <messages>
+        <lang>pt</lang>
+        <file>messages_pt.properties</file>
+    </messages>
 	<!-- /Internationalization -->
 
 
