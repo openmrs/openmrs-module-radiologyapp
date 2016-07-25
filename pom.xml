@@ -38,7 +38,7 @@
         <uiframeworkVersion>3.7</uiframeworkVersion>
         <emrapiVersion>1.16-SNAPSHOT</emrapiVersion>
         <appframeworkVersion>2.9</appframeworkVersion>
-        <uicommonsVersion>1.8</uicommonsVersion>
+        <uicommonsVersion>1.9</uicommonsVersion>
         <appuiVersion>1.6-SNAPSHOT</appuiVersion>
         <htmlformentryVersion>3.2</htmlformentryVersion>
         <idgenVersion>4.3</idgenVersion>
