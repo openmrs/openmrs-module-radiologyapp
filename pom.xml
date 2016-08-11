@@ -241,6 +241,11 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>uk.co.modular-it</groupId>
+            <artifactId>hamcrest-date</artifactId>
+            <version>0.9.5</version>
+        </dependency>
 
         <!-- end other dependencies -->
 
