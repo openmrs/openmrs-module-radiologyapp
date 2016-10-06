@@ -35,10 +35,10 @@
 	<properties>
 		<openMRSVersion>1.10.4</openMRSVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
-        <uiframeworkVersion>3.8</uiframeworkVersion>
+        <uiframeworkVersion>3.9</uiframeworkVersion>
         <emrapiVersion>1.17</emrapiVersion>
         <appframeworkVersion>2.9</appframeworkVersion>
-        <uicommonsVersion>2.0</uicommonsVersion>
+        <uicommonsVersion>2.1</uicommonsVersion>
         <appuiVersion>1.6</appuiVersion>
         <htmlformentryVersion>3.3.0</htmlformentryVersion>
         <idgenVersion>4.4.0</idgenVersion>
