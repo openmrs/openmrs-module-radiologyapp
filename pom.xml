@@ -45,7 +45,7 @@
         <providermanagementVersion>2.5.0</providermanagementVersion>
         <reportingVersion>0.10.4</reportingVersion>
         <calculationVersion>1.2</calculationVersion>
-        <coreappsVersion>1.11.0</coreappsVersion>
+        <coreappsVersion>1.11.1</coreappsVersion>
         <serializationxstreamVersion>0.2.12</serializationxstreamVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
