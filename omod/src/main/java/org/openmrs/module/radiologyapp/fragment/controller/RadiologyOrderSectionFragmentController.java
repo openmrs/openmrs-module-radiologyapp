@@ -25,6 +25,7 @@ public class RadiologyOrderSectionFragmentController {
         model.addAttribute("patient", patient);
         model.addAttribute("orders", orders);
         model.addAttribute("dashboardUrl", coreAppsProperties.getDashboardUrl());
+        model.addAttribute("visitsPageWithSpecificVisitUrl", coreAppsProperties.getVisitsPageWithSpecificVisitUrl());
 
     }
 }
