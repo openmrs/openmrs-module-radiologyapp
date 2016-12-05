@@ -1,7 +1,7 @@
 <%
     ui.decorateWith("appui", "standardEmrPage")
 
-    ui.includeJavascript("uicommons", "knockout-2.1.0.js")
+    ui.includeJavascript("uicommons", "knockout-2.2.1.js")
     ui.includeJavascript("radiologyapp", "radiologyOrder.js")
 
     ui.includeCss("radiologyapp", "radiologyOrder.css")
