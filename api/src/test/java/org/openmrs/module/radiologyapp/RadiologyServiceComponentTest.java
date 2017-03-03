@@ -26,6 +26,7 @@ import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
@@ -34,10 +35,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.EmrApiProperties;
-import org.openmrs.module.metadatamapping.MetadataSource;
-import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
@@ -89,9 +87,6 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Qualifier("encounterService")
     private EncounterService encounterService;
 
-    @Autowired
-    @Qualifier("metadatamapping.MetadataMappingService")
-    private MetadataMappingService metadataMappingService;
 
     @Autowired
     @Qualifier("emrApiProperties")
@@ -101,22 +96,13 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Qualifier("radiologyProperties")
     private RadiologyProperties radiologyProperties;
 
+    @Autowired
+    @Qualifier("adminService")
+    private AdministrationService administrationService;
 
     @Before
     public void beforeAllTests() throws Exception {
         executeDataSet("radiologyServiceComponentTestDataset.xml");
-
-        // setup the EMR API metadata mapping source
-        MetadataSource source = new MetadataSource();
-        source.setName(EmrApiConstants.EMR_METADATA_SOURCE_NAME);
-        source.setDescription(EmrApiConstants.EMR_METADATA_SOURCE_DESCRIPTION);
-        metadataMappingService.saveMetadataSource(source);
-
-        // set up metadata mappings used (generally just using some random types from the test dataset -->
-        metadataMappingService.mapMetadataItem(locationService.getLocationByUuid("8d6c993e-c2cc-11de-8d13-0010c6dffd0f"), EmrApiConstants.EMR_METADATA_SOURCE_NAME, "emr.unknownLocation");
-        metadataMappingService.mapMetadataItem(providerService.getProviderByUuid("c2299800-cca9-11e0-9572-0800200c9a66"), EmrApiConstants.EMR_METADATA_SOURCE_NAME, "emr.unknownProvider");
-        metadataMappingService.mapMetadataItem(encounterService.getEncounterRoleByUuid("a0b03050-c99b-11e0-9572-0800200c9a66" ), EmrApiConstants.EMR_METADATA_SOURCE_NAME, "emr.orderingProviderEncounterRole");
-
     }
 
     @Test
