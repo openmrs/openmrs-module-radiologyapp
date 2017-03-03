@@ -3,12 +3,8 @@
 
     <!-- just use a random types from the test dataset -->
     <global_property property="emr.radiologyOrderEncounterType" property_value="61ae96f4-6afe-4351-b6f8-cd4fc383cce1" uuid="696cb344-9e66-42c6-8f03-2a0c1e9ca2a8"/>
-    <global_property property="emr.orderingProviderEncounterRole" property_value="a0b03050-c99b-11e0-9572-0800200c9a66" uuid="696cb344-9e66-6666-8f03-2a0c1e9ca2a8"/>
     <global_property property="emr.radiologyTestOrderType" property_value="c303c420-e9d4-11e4-b571-0800200c9a66" uuid="677cb344-9e66-6666-8f03-2a0c1e9ca2a8"/>
     <global_property property="emr.radiologyCareSetting" property_value="6f0c9a92-6f24-11e3-af88-005056821db0" uuid="497f32e0-e9db-11e4-b571-0800200c9a66"/>
-
-    <global_property property="emr.unknownLocation" property_value="8d6c993e-c2cc-11de-8d13-0010c6dffd0f" uuid="6977b3c3-9e66-42c6-8f03-2a0c1e9ca2a8"/>
-    <global_property property="emr.unknownProvider" property_value="c2299800-cca9-11e0-9572-0800200c9a66" uuid="6988b3c3-9e66-42c6-8f03-2a0c1e9ca2a8"/>
 
     <!-- define metadata for the Radiology Requisiton -->
     <concept concept_id="2001" retired="false" datatype_id="1" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="999e2ed3-dd5f-4f46-9459-26127c9265ab"/>
