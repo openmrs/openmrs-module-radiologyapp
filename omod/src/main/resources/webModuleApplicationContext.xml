@@ -9,16 +9,5 @@
         <property name="moduleId" value="${project.parent.artifactId}"/>
     </bean>
 
-    <!-- Tasks -->
-
-    <bean id="emrOrderXrayTask" class="org.openmrs.module.emr.task.SimpleTaskDescriptor">
-        <property name="id" value="emr.orderXray"/>
-        <property name="labelCode" value="radiologyapp.task.orderXray.label"/>
-        <property name="url" value="radiologyapp/orderXray.page"/>
-        <property name="priority" value="20.2"/>
-        <property name="extensionPoint" value="patient.visits.active.actions"/>
-        <property name="iconUrl" value="icon-x-ray"/>
-    </bean>
-
 
 </beans>
