@@ -93,4 +93,12 @@
     <test_order order_id="1001"/>
     <emr_radiology_order order_id="1001"/>
 
+    <!--metadata mappings -->
+    <metadatamapping_metadata_source metadata_source_id="1001" name="org.openmrs.module.emrapi" description="Source used to tag metadata used in the EMR API module" creator="1" date_created="2008-08-19 12:24:10.0" retired="false" uuid="c46a6ae2-7678-4fc9-b538-ba0e8082c9de"/>
+    <metadatamapping_metadata_term_mapping metadata_term_mapping_id="1001" metadata_source_id="1001" name="emr.primaryIdentifierType" code="emr.primaryIdentifierType" metadata_class="org.openmrs.PatientIdentifierType" metadata_uuid="1a339fe9-38bc-4ab3-b180-320988c0b968" creator="1" date_created="2008-08-19 12:24:10.0" retired="false" uuid="93195335-837a-4984-9775-b4f75820c3f6"/>  <!-- just assigning this to patient identifier 1 in the core data set -->
+    <metadatamapping_metadata_term_mapping metadata_term_mapping_id="1002" metadata_source_id="1001" name="emr.orderingProviderEncounterRole" code="emr.orderingProviderEncounterRole" metadata_class="org.openmrs.EncounterRole" metadata_uuid="a0b03050-c99b-11e0-9572-0800200c9a66" creator="1" date_created="2008-08-19 12:24:10.0" retired="false" uuid="ab0f9d5c-fc48-41b2-92f0-f713ee0b49a4"/>
+    <metadatamapping_metadata_term_mapping metadata_term_mapping_id="1003" metadata_source_id="1001" name="emr.unknownLocation" code="emr.unknownLocation" metadata_class="org.openmrs.Location" metadata_uuid="8d6c993e-c2cc-11de-8d13-0010c6dffd0f" creator="1" date_created="2008-08-19 12:24:10.0" retired="false" uuid="31bca0f3-b260-472c-a9d2-f2d574aeceab"/>
+    <metadatamapping_metadata_term_mapping metadata_term_mapping_id="1004" metadata_source_id="1001" name="emr.unknownProvider" code="emr.unknownProvider" metadata_class="org.openmrs.Provider" metadata_uuid="c2299800-cca9-11e0-9572-0800200c9a66" creator="1" date_created="2008-08-19 12:24:10.0" retired="false" uuid="7353bada-6c1a-46a4-bdd3-30d243abce13"/>
+
+
 </dataset>
