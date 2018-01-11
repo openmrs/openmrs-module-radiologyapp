@@ -37,10 +37,10 @@
         <springVersion>3.0.5.RELEASE</springVersion>
         <uiframeworkVersion>3.13.0</uiframeworkVersion>
         <emrapiVersion>1.23.0</emrapiVersion>
-        <appframeworkVersion>2.10.0</appframeworkVersion>
+        <appframeworkVersion>2.11.0</appframeworkVersion>
         <uicommonsVersion>2.5.1</uicommonsVersion>
         <appuiVersion>1.6</appuiVersion>
-        <htmlformentryVersion>3.4.0</htmlformentryVersion>
+        <htmlformentryVersion>3.5.1</htmlformentryVersion>
         <idgenVersion>4.4.1</idgenVersion>
         <providermanagementVersion>2.10.0</providermanagementVersion>
         <reportingVersion>1.15.0</reportingVersion>
