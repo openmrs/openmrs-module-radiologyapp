@@ -91,12 +91,12 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             encounter.addObs(creatinineLevel);
         }
 
-        // save the encounter
-        encounterService.saveEncounter(encounter);
-
         if (requisition.getVisit() != null) {
             new EncounterDomainWrapper(encounter).attachToVisit(requisition.getVisit());
         }
+
+        // save the encounter
+        encounterService.saveEncounter(encounter);
 
         OrderContext orderContext = new OrderContext();
         orderContext.setOrderType(radiologyProperties.getRadiologyTestOrderType());
