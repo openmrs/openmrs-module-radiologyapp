@@ -13,7 +13,7 @@
                 <% orders.each { it -> %>
                 <li class="clear">
                     <a href="${ ui.urlBind("/" + contextPath + visitsPageWithSpecificVisitUrl, it.encounter.visit) }">
-                        ${ ui.formatDatePretty(it.dateCreated) }
+                        ${ ui.formatDatePretty(it.dateActivated) }
                     </a>
                     <div class="cleartag">
                         ${ it.concept ? ui.format(it.concept) :  ui.message("radiologyapp.procedure.unknown") }
