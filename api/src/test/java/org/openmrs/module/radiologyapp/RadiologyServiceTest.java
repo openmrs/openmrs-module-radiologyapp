@@ -465,7 +465,7 @@ public class RadiologyServiceTest{
     @Test(expected = RadiologyAPIException.class)
     public void saveRadiologyStudy_shouldFailIfAnotherStudyExistsWithSameOrderNumber() {
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(Collections.singletonList(new Encounter()));
 
         RadiologyStudy study = new RadiologyStudy();
@@ -763,7 +763,7 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyStudyEncounter(studyDate, studyLocation, patient, studyTechnician,
                 "123", studyProcedure));
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(encounters);
 
         RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("123");
@@ -809,7 +809,7 @@ public class RadiologyServiceTest{
                 "456", secondStudyProcedure));
 
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(encounters);
 
         // should just return the first study
@@ -820,7 +820,7 @@ public class RadiologyServiceTest{
 
     @Test
     public void getRadiologyStudyByOrderNumber_shouldReturnNullIfNoMatchingStudy() {
-        when(emrEncounterDAO.getEncountersByObsValueText(any(Concept.class), any(String.class)
+        when(emrEncounterDAO.getEncountersByObsValueText(any(Patient.class), any(Concept.class), any(String.class)
                 , any(EncounterType.class), eq(false))).thenReturn(null);
 
         RadiologyStudy radiologyStudy = radiologyService.getRadiologyStudyByOrderNumber("1234");
@@ -870,10 +870,10 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounter(secondRadiologyReport));
 
         // return an empty list when trying to fetch studies
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyStudyEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyStudyEncounterType, false))
                 .thenReturn(new ArrayList<Encounter>());
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
         RadiologyStudy expectedStudy = new RadiologyStudy();
@@ -927,7 +927,7 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounter(firstExpectedRadiologyReport));
         encounters.add(setupRadiologyReportEncounter(secondExpectedRadiologyReport));
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
         List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("123");
@@ -970,7 +970,7 @@ public class RadiologyServiceTest{
         encounters.add(setupRadiologyReportEncounterWithoutObsGroup(firstExpectedRadiologyReport));
         encounters.add(setupRadiologyReportEncounterWithoutObsGroup(secondExpectedRadiologyReport));
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(encounters);
 
         List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("123");
@@ -984,7 +984,7 @@ public class RadiologyServiceTest{
     @Test
     public void getRadiologyReportsByOrderNumber_shouldReturnEmptyListIfNoMatchingStudies() {
 
-        when(emrEncounterDAO.getEncountersByObsValueText(orderNumberConcept, "123", radiologyReportEncounterType, false))
+        when(emrEncounterDAO.getEncountersByObsValueText(null, orderNumberConcept, "123", radiologyReportEncounterType, false))
                 .thenReturn(new ArrayList<Encounter>());
 
         List<RadiologyReport> radiologyReports = radiologyService.getRadiologyReportsByOrderNumber("123");

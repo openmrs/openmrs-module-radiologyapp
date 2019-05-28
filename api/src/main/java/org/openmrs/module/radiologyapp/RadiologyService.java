@@ -54,6 +54,16 @@ public interface RadiologyService extends OpenmrsService {
     RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber);
 
     /**
+     * Fetches the radiology study with the specified order number for the given patient
+     * (If there is no explicit radiology study encounter with this order number,
+     * it tries to derive this information from any radiology reports with the same order number)
+     *
+     * @param orderNumber
+     * @return
+     */
+    RadiologyStudy getRadiologyStudyByOrderNumber(Patient patient, String orderNumber);
+
+    /**
      * Fetches the radiology study with the specified order number
      * (If there is no explicit radiology study encounter with this order number,
      * it tries to derive this information from any radiology reports with the same order number)
@@ -62,6 +72,15 @@ public interface RadiologyService extends OpenmrsService {
      * @return
      */
     RadiologyStudy getRadiologyStudyByOrderNumber(String orderNumber);
+
+    /**
+     * Fetches all radiology reports with the specified order number for the given patient
+     * (i.e., all the reports for a single study)
+     *
+     * @param orderNumber
+     * @return
+     */
+    List<RadiologyReport> getRadiologyReportsByOrderNumber(Patient patient, String orderNumber);
 
     /**
      * Fetches all radiology reports with the specified order number

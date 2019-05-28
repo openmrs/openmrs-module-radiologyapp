@@ -36,7 +36,7 @@
 		<openMRSVersion>1.10.4</openMRSVersion>
         <springVersion>3.0.5.RELEASE</springVersion>
         <uiframeworkVersion>3.15.0</uiframeworkVersion>
-        <emrapiVersion>1.27.0</emrapiVersion>
+        <emrapiVersion>1.28.0-SNAPSHOT</emrapiVersion>
         <appframeworkVersion>2.13.0</appframeworkVersion>
         <uicommonsVersion>2.6.1</uicommonsVersion>
         <appuiVersion>1.6</appuiVersion>

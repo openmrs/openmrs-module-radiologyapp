@@ -175,12 +175,18 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Transactional(readOnly = true)
     @Override
     public RadiologyStudy getRadiologyStudyByOrderNumber(String orderNumber) {
+        return getRadiologyStudyByOrderNumber(null, orderNumber);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public RadiologyStudy getRadiologyStudyByOrderNumber(Patient patient, String orderNumber) {
 
         RadiologyStudy radiologyStudy = null;
 
         // first search for any radiology study encounters
         List<Encounter> radiologyStudyEncounters =
-                emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getOrderNumberConcept(),
+                emrEncounterDAO.getEncountersByObsValueText(patient, new RadiologyStudyConceptSet(conceptService).getOrderNumberConcept(),
                         orderNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
 
         if (radiologyStudyEncounters != null && radiologyStudyEncounters.size() > 0) {
@@ -197,7 +203,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
             // if we don't find an actual radiology study encounter, see if we can derive information from any reports
             // with the same order number
-            List<RadiologyReport> radiologyReports = getRadiologyReportsByOrderNumber(orderNumber);
+            List<RadiologyReport> radiologyReports = getRadiologyReportsByOrderNumber(patient, orderNumber);
 
             if (radiologyReports != null && radiologyReports.size() > 0) {
                 radiologyStudy = deriveRadiologyStudyFromRadiologyReports(radiologyReports);
@@ -210,9 +216,15 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Transactional(readOnly = true)
     @Override
     public List<RadiologyReport> getRadiologyReportsByOrderNumber(String orderNumber) {
+        return getRadiologyReportsByOrderNumber(null, orderNumber);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<RadiologyReport> getRadiologyReportsByOrderNumber(Patient patient, String orderNumber) {
 
         List<Encounter> radiologyReportEncounters =
-                emrEncounterDAO.getEncountersByObsValueText(new RadiologyReportConceptSet(conceptService).getOrderNumberConcept(),
+                emrEncounterDAO.getEncountersByObsValueText(patient, new RadiologyReportConceptSet(conceptService).getOrderNumberConcept(),
                         orderNumber, radiologyProperties.getRadiologyReportEncounterType(), false);
 
         List<RadiologyReport> radiologyReports = new ArrayList<RadiologyReport>();
@@ -241,7 +253,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
                         && !order.isVoided()) {
                     String orderNumber = order.getOrderNumber();
                     if (StringUtils.isNotBlank(orderNumber)) {
-                        RadiologyStudy study = getRadiologyStudyByOrderNumber(orderNumber);
+                        RadiologyStudy study = getRadiologyStudyByOrderNumber(patient, orderNumber);
                         if (study == null) {
                             //we found a Radiology Order with no study
                             if (radiologyOrders == null) {
@@ -308,7 +320,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         for (RadiologyStudy radiologyStudy : radiologyStudies) {
             String orderNumber = radiologyStudy.getOrderNumber();
             if ( StringUtils.isNotBlank(orderNumber)) {
-                List<RadiologyReport> reports = getRadiologyReportsByOrderNumber(orderNumber);
+                List<RadiologyReport> reports = getRadiologyReportsByOrderNumber(patient, orderNumber);
                 if ( reports!=null && reports.size()>0 ) {
                     radiologyStudy.setReports(reports);
                 }
