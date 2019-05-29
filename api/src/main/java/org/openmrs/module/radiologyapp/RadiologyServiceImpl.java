@@ -295,34 +295,39 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
         }
 
-        // now find any "orphaned" reports" and make transient radiology studies to represent them
+        // now fetch all the radiology reports for this patient, and organize by order number
+        Map<String, List<RadiologyReport>> radiologyReportsByOrderNumber = new HashMap<String, List<RadiologyReport>>();
+
         List<Encounter> radiologyReportEncounters = encounterService.getEncounters(patient, null, null, null, null,
                 Collections.singletonList(radiologyProperties.getRadiologyReportEncounterType()),
                 null, null, null, false);
 
-        Map<String, List<RadiologyReport>> radiologyReportsByOrderNumber = new HashMap<String, List<RadiologyReport>>();
-
         for (Encounter radiologyReportEncounter : radiologyReportEncounters) {
             String orderNumber = radiologyReportConceptSet.getOrderNumberFromEncounter(radiologyReportEncounter);
 
+            if (!radiologyReportsByOrderNumber.containsKey(orderNumber)) {
+                radiologyReportsByOrderNumber.put(orderNumber, new ArrayList<RadiologyReport>());
+            }
+            radiologyReportsByOrderNumber.get(orderNumber).add(convertEncounterToRadiologyReport(radiologyReportEncounter));
+        }
+
+        // now find any "orphaned" reports" and make transient radiology studies to represent them
+        for (String orderNumber : radiologyReportsByOrderNumber.keySet()) {
             if (!orderNumbersOfExistingRadiologyStudyEncounters.contains(orderNumber)) {
-                if (!radiologyReportsByOrderNumber.containsKey(orderNumber)) {
-                    radiologyReportsByOrderNumber.put(orderNumber, new ArrayList<RadiologyReport>());
-                }
-                radiologyReportsByOrderNumber.get(orderNumber).add(convertEncounterToRadiologyReport(radiologyReportEncounter));
+                List<RadiologyReport> radiologyReports = radiologyReportsByOrderNumber.get(orderNumber);
+                radiologyStudies.add(deriveRadiologyStudyFromRadiologyReports(radiologyReports));
             }
         }
 
-        for (List<RadiologyReport> radiologyReports : radiologyReportsByOrderNumber.values()) {
-            radiologyStudies.add(deriveRadiologyStudyFromRadiologyReports(radiologyReports));
-        }
-
         Collections.sort(radiologyStudies, new RadiologyStudyByDateComparator());
+
+        // Make sure all reports are associated with studies
+
         for (RadiologyStudy radiologyStudy : radiologyStudies) {
             String orderNumber = radiologyStudy.getOrderNumber();
             if ( StringUtils.isNotBlank(orderNumber)) {
-                List<RadiologyReport> reports = getRadiologyReportsByOrderNumber(patient, orderNumber);
-                if ( reports!=null && reports.size()>0 ) {
+                List<RadiologyReport> reports = radiologyReportsByOrderNumber.get(orderNumber);
+                if ( reports != null && reports.size() > 0 ) {
                     radiologyStudy.setReports(reports);
                 }
             }
