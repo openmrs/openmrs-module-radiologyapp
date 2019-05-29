@@ -247,13 +247,14 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         OrderType radiologyTestOrderType = radiologyProperties.getRadiologyTestOrderType();
         List<Order> allOrders = orderService.getAllOrdersByPatient(patient);
+        List<RadiologyStudy> allStudies = getRadiologyStudiesForPatient(patient);
+
         if (allOrders != null && allOrders.size() > 0) {
             for (Order order : allOrders) {
-                if (order.getOrderType().getUuid().equals(radiologyTestOrderType.getUuid())
-                        && !order.isVoided()) {
+                if (order.getOrderType().getUuid().equals(radiologyTestOrderType.getUuid()) && !order.isVoided()) {
                     String orderNumber = order.getOrderNumber();
                     if (StringUtils.isNotBlank(orderNumber)) {
-                        RadiologyStudy study = getRadiologyStudyByOrderNumber(patient, orderNumber);
+                        RadiologyStudy study = getStudyWithOrderNumber(allStudies, orderNumber);
                         if (study == null) {
                             //we found a Radiology Order with no study
                             if (radiologyOrders == null) {
@@ -327,6 +328,15 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
         }
         return radiologyStudies;
+    }
+
+    private RadiologyStudy getStudyWithOrderNumber(List<RadiologyStudy> studies, String orderNumber) {
+        for (RadiologyStudy s : studies) {
+            if (s.getOrderNumber().equals(orderNumber)) {
+                return s;
+            }
+        }
+        return null;
     }
 
     private RadiologyStudy convertEncounterToRadiologyStudy(Encounter encounter) {
