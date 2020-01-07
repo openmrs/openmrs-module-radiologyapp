@@ -38,14 +38,14 @@
         <uiframeworkVersion>3.15.0</uiframeworkVersion>
         <emrapiVersion>1.28.0-SNAPSHOT</emrapiVersion>
         <appframeworkVersion>2.13.0</appframeworkVersion>
-        <uicommonsVersion>2.8.0</uicommonsVersion>
+        <uicommonsVersion>2.9.0</uicommonsVersion>
         <appuiVersion>1.6</appuiVersion>
         <htmlformentryVersion>3.9.2</htmlformentryVersion>
         <idgenVersion>4.5.0</idgenVersion>
         <providermanagementVersion>2.10.0</providermanagementVersion>
         <reportingVersion>1.19.0</reportingVersion>
         <calculationVersion>1.2</calculationVersion>
-        <coreappsVersion>1.23.0</coreappsVersion>
+        <coreappsVersion>1.24.0</coreappsVersion>
         <serializationxstreamVersion>0.2.14</serializationxstreamVersion>
         <metadatamappingVersion>1.3.4</metadatamappingVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
