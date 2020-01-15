@@ -1,6 +1,5 @@
 <%
-    ui.decorateWith("appui", "standardEmrPage")
-
+    ui.decorateWith("appui", "standardEmrPage", [includeBootstrap: false])
     ui.includeJavascript("uicommons", "knockout-2.2.1.js")
     ui.includeJavascript("radiologyapp", "radiologyOrder.js")
 
