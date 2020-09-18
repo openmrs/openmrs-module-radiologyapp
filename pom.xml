@@ -47,7 +47,7 @@
         <calculationVersion>1.2.1</calculationVersion>
         <coreappsVersion>1.29.0</coreappsVersion>
         <serializationxstreamVersion>0.2.14</serializationxstreamVersion>
-        <metadatamappingVersion>1.3.4</metadatamappingVersion>
+        <metadatamappingVersion>1.3.5</metadatamappingVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
