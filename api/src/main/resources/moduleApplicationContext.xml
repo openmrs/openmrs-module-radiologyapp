@@ -39,10 +39,10 @@
         <property name="moduleService">
             <list merge="true">
                 <value>${project.parent.groupId}.${project.parent.artifactId}.RadiologyService</value>
-                <ref local="radiologyService"/>
+                <ref bean="radiologyService"/>
             </list>
         </property>
     </bean>
 
-	
+
 </beans>
