@@ -405,7 +405,7 @@
 		<repository>
 			<id>openmrs-repo</id>
 			<name>OpenMRS Nexus Repository</name>
-			<url>https://mavenrepo.openmrs.org/public</url>
+			<url>https://openmrs.jfrog.io/artifactory/public</url>
 		</repository>
         <repository>
             <id>rubygems-releases</id>
@@ -417,7 +417,7 @@
 		<pluginRepository>
 			<id>openmrs-repo</id>
 			<name>OpenMRS Nexus Repository</name>
-			<url>https://mavenrepo.openmrs.org/public</url>
+			<url>https://openmrs.jfrog.io/artifactory/public</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -428,12 +428,12 @@
         <repository>
             <id>openmrs-repo-modules</id>
             <name>OpenMRS Modules</name>
-            <url>https://mavenrepo.openmrs.org/modules</url>
+            <url>https://openmrs.jfrog.io/artifactory/modules</url>
         </repository>
         <snapshotRepository>
             <id>openmrs-repo-snapshots</id>
             <name>OpenMRS Snapshots</name>
-            <url>https://mavenrepo.openmrs.org/snapshots</url>
+            <url>https://openmrs.jfrog.io/artifactory/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
