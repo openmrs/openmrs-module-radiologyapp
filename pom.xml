@@ -38,13 +38,13 @@
         <springVersion>3.0.5.RELEASE</springVersion>
         <uiframeworkVersion>3.25.0</uiframeworkVersion>
         <emrapiVersion>1.36.0</emrapiVersion>
-        <appframeworkVersion>2.17.0</appframeworkVersion>
+        <appframeworkVersion>2.18.0</appframeworkVersion>
         <uicommonsVersion>2.26.0</uicommonsVersion>
         <appuiVersion>1.6</appuiVersion>
         <htmlformentryVersion>3.13.1</htmlformentryVersion>
         <idgenVersion>4.14.0</idgenVersion>
         <providermanagementVersion>2.15.0</providermanagementVersion>
-        <reportingVersion>1.26.0</reportingVersion>
+        <reportingVersion>1.27.0</reportingVersion>
         <calculationVersion>1.3.0</calculationVersion>
         <coreappsVersion>1.40.0</coreappsVersion>
         <serializationxstreamVersion>0.2.16</serializationxstreamVersion>
