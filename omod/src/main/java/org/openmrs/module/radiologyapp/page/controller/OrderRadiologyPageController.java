@@ -11,8 +11,10 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.feature.FeatureToggleProperties;
+import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.coreapps.CoreAppsProperties;
 import org.openmrs.module.emrapi.EmrApiProperties;
+import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.RadiologyConstants;
 import org.openmrs.module.radiologyapp.RadiologyProperties;
@@ -44,6 +46,8 @@ public class OrderRadiologyPageController {
                            @SpringBean("emrApiProperties") EmrApiProperties emrApiProperties,
                            @SpringBean("coreAppsProperties") CoreAppsProperties coreAppsProperties,
                            @SpringBean("featureToggles") FeatureToggleProperties featureToggles,
+                           @SpringBean("adtService") AdtService adtService,
+                           UiSessionContext uiSessionContext,
                            UiUtils ui,
                            PageModel model) {
 
@@ -56,6 +60,16 @@ public class OrderRadiologyPageController {
         }
 
         VisitDomainWrapper visitWrapper = new VisitDomainWrapper(visit);
+
+        VisitDomainWrapper activeVisit = null;
+        try {
+            Location visitLocation = adtService.getLocationThatSupportsVisits(uiSessionContext.getSessionLocation());
+            activeVisit = adtService.getActiveVisit(patient, visitLocation);
+        }
+        catch (IllegalArgumentException e) {
+            // don't fail hard if location doesn't support visits
+        }
+        model.addAttribute("activeVisit", activeVisit);
 
         // TODO better handle the case where this is multiple providers for a single user
         Collection<Provider> providers = Context.getProviderService().getProvidersByPerson(Context.getAuthenticatedUser().getPerson());
