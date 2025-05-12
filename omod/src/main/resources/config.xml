@@ -254,6 +254,11 @@
     </privilege>
 
     <privilege>
+        <name>Task: org.openmrs.module.radiologyapp.orderUS</name>
+        <description>Rights to order an Ultrasound via the radiology app</description>
+    </privilege>
+
+    <privilege>
         <name>Task: org.openmrs.module.radiologyapp.tab</name>
         <description>Ability to view the Radiology tab for patient</description>
     </privilege>
