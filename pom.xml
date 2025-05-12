@@ -240,24 +240,6 @@
         </dependency>
 
         <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>compass</artifactId>
-            <version>0.11.7</version>
-            <type>gem</type>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- we explicitly use version 3.2.10 since 3.2.11 has a bug which was giving us issues,
-        can probably remove this after next sass release -->
-        <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>sass</artifactId>
-            <version>3.2.10</version>
-            <type>gem</type>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>uk.co.modular-it</groupId>
             <artifactId>hamcrest-date</artifactId>
             <version>0.9.5</version>
@@ -274,8 +256,8 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
-						<target>1.6</target>
-						<source>1.6</source>
+						<target>8</target>
+						<source>8</source>
                         <encoding>UTF-8</encoding>
 					</configuration>
 				</plugin>
@@ -287,28 +269,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.8.1</version>
 				</plugin>
-                <plugin>
-                    <groupId>org.jasig.maven</groupId>
-                    <artifactId>sass-maven-plugin</artifactId>
-                    <version>1.1.1</version>
-                    <configuration>
-                        <sassSourceDirectory>${basedir}/src/main/webapp</sassSourceDirectory>
-                        <outputDirectory>${basedir}/src/main/webapp/resources/styles</outputDirectory>
-                        <baseOutputDirectory>${basedir}/src/main/webapp/resources/styles</baseOutputDirectory>
-                        <skin>scss</skin>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>de.saumya.mojo</groupId>
-                    <artifactId>gem-maven-plugin</artifactId>
-                    <version>1.0.6</version>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>3.5.3</version>
                     <configuration>
                         <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                     </configuration>
