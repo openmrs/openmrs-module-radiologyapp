@@ -94,30 +94,6 @@
 				</executions>
 			</plugin>
             <plugin>
-                <groupId>com.github.searls</groupId>
-                <artifactId>jasmine-maven-plugin</artifactId>
-                <version>1.2.0.0</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jsSrcDir>${project.basedir}/src/main/webapp/resources/scripts</jsSrcDir>
-                    <jsTestSrcDir>${project.basedir}/src/test/webapp/resources/scripts</jsTestSrcDir>
-                    <preloadSources>
-                        <source>${project.basedir}/src/test/webapp/resources/scripts/knockout-2.2.1.js</source>
-                    </preloadSources>
-                    <serverPort>7234</serverPort>
-                    <skipTests>false</skipTests>
-                </configuration>
-            </plugin>
-		</plugins>
-	</build>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -135,71 +111,9 @@
 							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 						</configuration>
 					</execution>
-                    <execution>
-                        <id>Fetch SASS sources from uicommons</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.openmrs.module</groupId>
-                                    <artifactId>uicommons-scss</artifactId>
-                                    <version>${uicommonsVersion}</version>
-                                    <type>zip</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>src/main/compass/sass-external</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>de.saumya.mojo</groupId>
-                <artifactId>gem-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <execArgs>${gem.home}/bin/compass compile ${basedir}/src/main/compass</execArgs>
-                </configuration>
             </plugin>
 		</plugins>
 	</build>
-
-    <profiles>
-        <profile>
-            <id>watch-sass</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>de.saumya.mojo</groupId>
-                        <artifactId>gem-maven-plugin</artifactId>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <phase>generate-resources</phase>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <execArgs>${gem.home}/bin/compass watch ${basedir}/src/main/compass</execArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>
