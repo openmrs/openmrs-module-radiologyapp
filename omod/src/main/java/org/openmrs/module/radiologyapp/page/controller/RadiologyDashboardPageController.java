@@ -3,15 +3,12 @@ package org.openmrs.module.radiologyapp.page.controller;
 
 import org.openmrs.Location;
 import org.openmrs.Patient;
-import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.context.AppContextModel;
-import org.openmrs.module.appframework.service.AppFrameworkService;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.coreapps.CoreAppsConstants;
 import org.openmrs.module.coreapps.CoreAppsProperties;
 import org.openmrs.module.coreapps.contextmodel.PatientContextModel;
-import org.openmrs.module.coreapps.contextmodel.VisitContextModel;
 import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.event.ApplicationEventService;
 import org.openmrs.module.emrapi.patient.PatientDomainWrapper;
@@ -57,7 +54,6 @@ public class RadiologyDashboardPageController {
 
         AppContextModel contextModel = sessionContext.generateAppContextModel();
         contextModel.put("patient", new PatientContextModel(patient));
-        contextModel.put("visit", activeVisit == null ? null : new VisitContextModel(activeVisit));
         model.addAttribute("appContextModel", contextModel);
 
         model.addAttribute("dashboardUrl", coreAppsProperties.getDashboardUrl());
