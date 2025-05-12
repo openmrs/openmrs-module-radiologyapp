@@ -30,7 +30,7 @@
 </script>
 
 
-${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient.patient, activeVisit: activeVisit, appContextModel: appContextModel ]) }
+${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient.patient, appContextModel: appContextModel ]) }
 <div id="radiologyapp-id">
     ${ ui.includeFragment("radiologyapp", "radiologyTab", [ patient: patient ]) }
 </div>
