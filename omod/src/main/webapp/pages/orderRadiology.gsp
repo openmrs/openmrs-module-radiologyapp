@@ -5,9 +5,8 @@
 
     ui.includeCss("radiologyapp", "radiologyOrder.css")
 
-    def isThisVisitActive = emrContext.activeVisit && emrContext.activeVisit.visit == visit
-    def areProviderLocationAndDateEditable = !isThisVisitActive || emrContext.userContext.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")
-
+    def isThisVisitActive = activeVisit && activeVisit.visit == visit
+    def areProviderLocationAndDateEditable = !isThisVisitActive || sessionContext.currentUser.hasPrivilege("Task: org.openmrs.module.radiologyapp.retroOrder")
 %>
 
 <script type="text/javascript" xmlns="http://www.w3.org/1999/html">
@@ -64,7 +63,7 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
         <div id="who-where-when-view" class="row <% if (areProviderLocationAndDateEditable) { %> hidden <% } %>">
             <div class="col-12 col-lg-4">
                 <h5>${ ui.message("radiologyapp.order.requestedBy") }</h5>
-                <span>${ ui.format(emrContext.currentProvider) }</span>
+                <span>${ ui.format(currentProvider) }</span>
             </div>
             <div class="col-12 col-lg-4">
                 <h5>${ ui.message("radiologyapp.order.requestedFrom") }</h5>
@@ -84,17 +83,17 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                         formFieldName: "requestedBy",
                         options: providers,
                         classes: ['required'],
-                        initialValue: areProviderLocationAndDateEditable ? null : emrContext.currentProvider.providerId
+                        initialValue: currentProvider.providerId
                 ])}
             </div>
             <div class="col-12 col-lg-4">
-                ${ ui.includeFragment("emr", "field/location", [
+                ${ ui.includeFragment("uicommons", "field/location", [
                         id: "requestedFrom",
                         label: "radiologyapp.order.requestedFrom",
                         formFieldName: "requestedFrom",
                         classes: ['required'],
                         withTag: "Login Location",
-                        initialValue: areProviderLocationAndDateEditable ? null : sessionContext.sessionLocationId
+                        initialValue: sessionContext.sessionLocationId
                 ])}
             </div>
             <div class="col-12 col-lg-4">
