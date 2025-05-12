@@ -11,11 +11,3 @@ target
 *.jar
 *.war
 *.ear
-
-omod/src/main/compass/sass-external/*
-
-omod/src/main/webapp/resources/styles/radiologyOrder.css
-
-# Rubygems build directories #
-omod/.rubygems
-omod/.rubygems-provided

@@ -48,61 +48,52 @@
   list-style: none;
   margin-left: 0;
   padding-left: 0;
-
-  li {
-    border: 1px #eee solid;
-    border-radius: 5px;
-    background-color: #e0e0e0;
-    padding: 0.5em 1em 0.5em 1em;
-  }
-
-  span:nth-child(3) {
-    float:right;
-    cursor: pointer;
-  }
+}
+#selected-studies li {
+  border: 1px #eee solid;
+  border-radius: 5px;
+  background-color: #e0e0e0;
+  padding: 0.5em 1em 0.5em 1em;
+}
+#selected-studies span:nth-child(3) {
+  float: right;
+  cursor: pointer;
 }
 
 #bottom {
   clear: both;
-
-  button:nth-child(2) {
-    float: right;
-  }
+}
+#bottom button:nth-child(2) {
+  float: right;
 }
 
 .detail-row {
   display: table-row;
-
-  input, span, .select, input[type="checkbox"] {
-    display: inline-block;
-    float: none;
-  }
+}
+.detail-row input, .detail-row span, .detail-row .select, .detail-row input[type="checkbox"] {
+  display: inline-block;
+  float: none;
 }
 
 #contentForm {
   padding-left: 50px;
   padding-right: 50px;
-
-  #who-where-when-edit {
-    padding-bottom: 20px;
-  }
-
-  #who-where-when-view {
-    margin: 0;
-    padding-bottom: 20px;
-  }
-
-  #requestedOn-display {
-    width: 150px;
-    min-width: 0;
-  }
-
-  #requestedBy-field, #requestedFrom-field {
-    width: 200px;
-    min-width: 0;
-  }
-
-  label {
-    margin-top: 0;
-  }
+}
+#contentForm #who-where-when-edit {
+  padding-bottom: 20px;
+}
+#contentForm #who-where-when-view {
+  margin: 0;
+  padding-bottom: 20px;
+}
+#contentForm #requestedOn-display {
+  width: 150px;
+  min-width: 0;
+}
+#contentForm #requestedBy-field, #contentForm #requestedFrom-field {
+  width: 200px;
+  min-width: 0;
+}
+#contentForm label {
+  margin-top: 0;
 }
