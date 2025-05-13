@@ -14,6 +14,8 @@
 
 package org.openmrs.module.radiologyapp;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -52,6 +54,7 @@ import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import uk.co.it.modular.hamcrest.date.DateMatchers;
@@ -83,6 +86,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
+@PowerMockIgnore("javax.management.*")
 public class RadiologyServiceTest{
 
     private RadiologyServiceImpl radiologyService;
@@ -293,7 +297,8 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, null, null, null, study)));
+        IsExpectedRadiologyOrderEncounter matcher = new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, null, null, null, study);
+        assertTrue(matcher.matches(encounter));
         //assertThat(encounter.getOrders().iterator().next().getOrderNumber(), is("0000000018"));
     }
 
@@ -318,7 +323,8 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider, null, null, null, study, secondStudy));
+        IsExpectedRadiologyOrderEncounter matcher = new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider, null, null, null, study, secondStudy);
+        assertTrue(matcher.matches(encounter));
     }
 
     @Test
@@ -355,7 +361,8 @@ public class RadiologyServiceTest{
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, anotherProvider, orderDate, null, null, study)));
+        IsExpectedRadiologyOrderEncounter matcher = new IsExpectedRadiologyOrderEncounter(null, orderLocation, anotherProvider, orderDate, null, null, study);
+        assertTrue(matcher.matches(encounter));
     }
 
     @Test
@@ -382,7 +389,8 @@ public class RadiologyServiceTest{
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
 
         // note that since the visit started *after* the order, the orderDate should be visit startdate
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, orderLocation, provider, currentVisit.getStartDatetime(), null, null, study)));
+        IsExpectedRadiologyOrderEncounter matcher = new IsExpectedRadiologyOrderEncounter(null, orderLocation, provider, currentVisit.getStartDatetime(), null, null, study);
+        assertTrue(matcher.matches(encounter));
     }
 
     @Test
@@ -402,8 +410,8 @@ public class RadiologyServiceTest{
         radiologyRequisition.setCreatinineTestDate(creatinineTestDate);
 
         Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
-
-        assertThat(encounter, is(new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, null, 1.8, creatinineTestDate, study)));
+        IsExpectedRadiologyOrderEncounter matcher = new IsExpectedRadiologyOrderEncounter(null, currentLocation, provider, null, 1.8, creatinineTestDate, study);
+        assertTrue(matcher.matches(encounter));
     }
 
 
@@ -1089,7 +1097,7 @@ public class RadiologyServiceTest{
 
     // TODO: could move the rest of these matchers out into separate classes in matchers package
 
-    private class IsExpectedOrder extends ArgumentMatcher<Order> {
+    private class IsExpectedOrder extends BaseMatcher<Order> {
         private Location expectedLocation;
         private Concept expectedStudy;
         private Date expectedOrderDate;
@@ -1101,6 +1109,11 @@ public class RadiologyServiceTest{
             this.expectedStudy = expectedStudy;
             this.expectedOrderDate = expectedOrderDate;
             this.expectedOrderer = expectedOrderer;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+
         }
 
         @Override
@@ -1133,7 +1146,7 @@ public class RadiologyServiceTest{
         }
     }
 
-    private class IsExpectedRadiologyOrderEncounter extends ArgumentMatcher<Encounter> {
+    private class IsExpectedRadiologyOrderEncounter implements ArgumentMatcher<Encounter> {
 
         private Concept[] expectedStudies;
         private List<IsExpectedOrder> expectedOrders = new ArrayList<IsExpectedOrder>();
@@ -1163,8 +1176,7 @@ public class RadiologyServiceTest{
         }
 
         @Override
-        public boolean matches(Object o) {
-            Encounter encounter = (Encounter) o;
+        public boolean matches(Encounter encounter) {
 
             Set<Provider> providersByRole = encounter.getProvidersByRole(clinicianEncounterRole);
             assertThat(encounter.getEncounterType(), is(placeOrdersEncounterType));
@@ -1200,7 +1212,7 @@ public class RadiologyServiceTest{
         }
     }
 
-    private class IsExpectedRadiologyStudyEncounter extends ArgumentMatcher<Encounter> {
+    private class IsExpectedRadiologyStudyEncounter implements ArgumentMatcher<Encounter> {
 
         Location expectedLocation;
 
@@ -1212,8 +1224,7 @@ public class RadiologyServiceTest{
         }
 
         @Override
-        public boolean matches(Object o) {
-            Encounter encounter = (Encounter) o;
+        public boolean matches(Encounter encounter) {
 
             assertThat(encounter.getEncounterType(), is(radiologyStudyEncounterType));
             assertThat(encounter.getPatient(), is(patient));
@@ -1230,7 +1241,7 @@ public class RadiologyServiceTest{
 
     }
 
-    private class IsExpectedRadiologyReportEncounter extends ArgumentMatcher<Encounter> {
+    private class IsExpectedRadiologyReportEncounter implements ArgumentMatcher<Encounter> {
 
         Location expectedLocation;
 
@@ -1243,8 +1254,7 @@ public class RadiologyServiceTest{
 
 
         @Override
-        public boolean matches(Object o) {
-            Encounter encounter = (Encounter) o;
+        public boolean matches(Encounter encounter) {
 
             assertThat(encounter.getEncounterType(), is(radiologyReportEncounterType));
             assertThat(encounter.getPatient(), is(patient));
