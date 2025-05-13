@@ -6,7 +6,7 @@ import org.openmrs.module.radiologyapp.RadiologyStudy;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class IsExpectedRadiologyStudy extends ArgumentMatcher<RadiologyStudy> {
+public class IsExpectedRadiologyStudy implements ArgumentMatcher<RadiologyStudy> {
 
     private RadiologyStudy expectedStudy;
 
@@ -15,9 +15,7 @@ public class IsExpectedRadiologyStudy extends ArgumentMatcher<RadiologyStudy> {
     }
 
     @Override
-    public boolean matches(Object o) {
-        RadiologyStudy radiologyStudy = (RadiologyStudy) o;
-
+    public boolean matches(RadiologyStudy radiologyStudy) {
         assertThat(radiologyStudy.getDatePerformed(), is(expectedStudy.getDatePerformed()));
         assertThat(radiologyStudy.getPatient(), is(expectedStudy.getPatient()));
         assertThat(radiologyStudy.getStudyLocation(), is(expectedStudy.getStudyLocation()));

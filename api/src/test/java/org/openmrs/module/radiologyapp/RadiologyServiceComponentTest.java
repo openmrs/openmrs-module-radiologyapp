@@ -40,6 +40,7 @@ import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -49,6 +50,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -119,9 +121,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         Visit visit = visitService.getVisit(4);
 
         // sanity check
-        Assert.assertEquals(0, encounterService.getEncountersByPatient(patient).size());
+        Assert.assertEquals(1, encounterService.getEncountersByPatient(patient).size());
 
-        Date currentDate = new Date();
+        Date currentDate = DateUtil.truncateToSeconds(new Date());
 
         RadiologyRequisition requisition = new RadiologyRequisition();
 
@@ -135,21 +137,22 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setCreatinineLevel(1.8);
         requisition.setCreatinineTestDate(new DateTime(2014,1,1,20,0,0,0).toDate());
 
-        radiologyService.placeRadiologyRequisition(requisition);
+        Encounter radiologyRequisition = radiologyService.placeRadiologyRequisition(requisition);
+        Encounter encounter = encounterService.getEncounter(radiologyRequisition.getEncounterId());
 
         List<Encounter> encounters = encounterService.getEncountersByPatient(patient);
-        Assert.assertEquals(1, encounters.size());
-        Assert.assertEquals(visit, encounters.get(0).getVisit());
+        Assert.assertEquals(2, encounters.size());
+        Assert.assertEquals(visit, encounter.getVisit());
 
-        Set<Order> orders = encounters.get(0).getOrders();
+        Set<Order> orders = encounter.getOrders();
         Assert.assertEquals(1, orders.size());
 
         Order order = orders.iterator().next();
-        assertThat(order.getOrderNumber(), is("ORD-1"));
+        assertThat(order.getOrderNumber(), startsWith("ORD-"));
         assertThat(order.getDateActivated(), is(currentDate));
         assertThat(order.getAutoExpireDate(), is(currentDate));   // auto-expire date is set to same as date activated as a hack, see RadiologyService for more info
 
-        Set<Obs> obs = encounters.get(0).getObs();
+        Set<Obs> obs = encounter.getObs();
         Assert.assertEquals(1, obs.size());
     }
 
@@ -168,10 +171,9 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         requisition.setRequestedOn(new Date());
         requisition.setRequestedFrom(locationService.getLocation(1));
 
-        radiologyService.placeRadiologyRequisition(requisition);
-
-        List<Encounter> encounters = encounterService.getEncountersByPatient(patient);
-        Set<Order> orders = encounters.get(0).getOrders();
+        Encounter radiologyRequisition = radiologyService.placeRadiologyRequisition(requisition);
+        Encounter encounter = encounterService.getEncounter(radiologyRequisition.getEncounterId());
+        Set<Order> orders = encounter.getOrders();
 
         String orderNumber = orders.iterator().next().getOrderNumber();
 
@@ -184,7 +186,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Test
     public void saveRadiologyStudy_shouldSaveARadiologyStudy() {
 
-        Date timeOfStudy = new Date();
+        Date timeOfStudy = DateUtil.truncateToSeconds(new Date());
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -280,7 +282,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Test
     public void saveRadiologyReport_shouldSaveARadiologyReport() {
 
-        Date timeOfStudy = new Date();
+        Date timeOfStudy = DateUtil.truncateToSeconds(new Date());
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -354,8 +356,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // first create a couple studies
 
-        Date timeOfFirstStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
-        Date timeOfSecondStudy = new DateTime(2013,4,3,20,20,20,20).toDate();
+        Date timeOfFirstStudy = new DateTime(2012,1,1,10,10,10,0).toDate();
+        Date timeOfSecondStudy = new DateTime(2013,4,3,20,20,20,0).toDate();
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -403,8 +405,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Test
     public void getRadiologyStudiesForPatient_shouldDeriveRadiologyStudyFromRadiologyReports() {
 
-        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
-        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
+        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,0).toDate();
+        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,0).toDate();
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -464,7 +466,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     public void getRadiologyStudyByOrderNumber_shouldRetrieveRadiologyStudyByOrderNumber() {
 
         // first create a study
-        Date timeOfStudy = new DateTime(2012,1,1,10,10,10,10).toDate();
+        Date timeOfStudy = new DateTime(2012,1,1,10,10,10,0).toDate();
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -498,8 +500,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Test
     public void getRadiologyStudyByOrderNumber_shouldDeriveRadiologyStudyFromRadiologyReports() {
 
-        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
-        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
+        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,0).toDate();
+        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,0).toDate();
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);
@@ -550,8 +552,8 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
     @Test
     public void getRadiologyReportsByOrderNumber_shouldRetrieveRadiologyReportsByOrderNumber() {
 
-        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,10).toDate();
-        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,10).toDate();
+        Date firstTimeOfReport = new DateTime(2012,1,1,10,10,10,0).toDate();
+        Date secondTimeOfReport = new DateTime(2012,1,2,10,10,10,0).toDate();
 
         // use patient demo database
         Patient patient = patientService.getPatient(6);

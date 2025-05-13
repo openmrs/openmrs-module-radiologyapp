@@ -26,6 +26,7 @@ import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emrapi.EmrApiConstants;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -39,6 +40,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
+@PowerMockIgnore("javax.management.*")
 public class RadiologyStudyConceptSetTest extends BaseConceptSetTest {
 
     private Concept radiologyStudySetConcept;

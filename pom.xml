@@ -34,21 +34,14 @@
 	</modules>
 
 	<properties>
-		<openMRSVersion>1.10.4</openMRSVersion>
-        <springVersion>3.0.5.RELEASE</springVersion>
-        <uiframeworkVersion>3.25.0</uiframeworkVersion>
-        <emrapiVersion>1.36.0</emrapiVersion>
+		<openMRSVersion>2.6.0</openMRSVersion>
         <appframeworkVersion>2.18.0</appframeworkVersion>
-        <uicommonsVersion>2.26.0</uicommonsVersion>
-        <appuiVersion>1.6</appuiVersion>
-        <htmlformentryVersion>3.13.1</htmlformentryVersion>
-        <idgenVersion>4.14.0</idgenVersion>
-        <providermanagementVersion>2.15.0</providermanagementVersion>
-        <reportingVersion>1.27.0</reportingVersion>
-        <calculationVersion>1.3.0</calculationVersion>
+        <appuiVersion>1.18.0</appuiVersion>
         <coreappsVersion>2.0.0</coreappsVersion>
-        <serializationxstreamVersion>0.2.16</serializationxstreamVersion>
+        <emrapiVersion>2.3.0</emrapiVersion>
         <metadatamappingVersion>1.6.0</metadatamappingVersion>
+        <uicommonsVersion>2.26.0</uicommonsVersion>
+        <uiframeworkVersion>3.25.0</uiframeworkVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -65,24 +58,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.openmrs.web</groupId>
-            <artifactId>openmrs-web</artifactId>
-            <version>${openMRSVersion}</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.openmrs.api</groupId>
             <artifactId>openmrs-api</artifactId>
-            <version>${openMRSVersion}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.web</groupId>
-            <artifactId>openmrs-web</artifactId>
             <version>${openMRSVersion}</version>
             <type>test-jar</type>
             <scope>test</scope>
@@ -100,13 +77,6 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>uiframework-api</artifactId>
-            <version>${uiframeworkVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
             <artifactId>appframework-api</artifactId>
             <version>${appframeworkVersion}</version>
             <scope>provided</scope>
@@ -114,8 +84,8 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>uicommons-api</artifactId>
-            <version>${uicommonsVersion}</version>
+            <artifactId>coreapps-api</artifactId>
+            <version>${coreappsVersion}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -128,107 +98,24 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>emrapi-api-1.10</artifactId>
-            <version>${emrapiVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>emrapi-api-pre2.2</artifactId>
-            <version>${emrapiVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>idgen-api</artifactId>
-            <version>${idgenVersion}</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>coreapps-api</artifactId>
-            <version>${coreappsVersion}</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
             <artifactId>metadatamapping-api</artifactId>
             <version>${metadatamappingVersion}</version>
             <scope>provided</scope>
         </dependency>
 
-        <!-- OpenMRS modules simply required to fire up the application context when running component tests -->
-
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>reporting-api</artifactId>
-            <version>${reportingVersion}</version>
-            <scope>test</scope>
+            <artifactId>uicommons-api</artifactId>
+            <version>${uicommonsVersion}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>htmlformentry-api</artifactId>
-            <version>${htmlformentryVersion}</version>
-            <scope>test</scope>
+            <artifactId>uiframework-api</artifactId>
+            <version>${uiframeworkVersion}</version>
+            <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>htmlformentry-api-1.10</artifactId>
-            <version>${htmlformentryVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>serialization.xstream-api</artifactId>
-            <version>${serializationxstreamVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>serialization.xstream-api-1.9</artifactId>
-            <version>${serializationxstreamVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>serialization.xstream-api-1.10</artifactId>
-            <version>${serializationxstreamVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>serialization.xstream-api-2.0</artifactId>
-            <version>${serializationxstreamVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>calculation-api</artifactId>
-            <version>${calculationVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>providermanagement-api</artifactId>
-            <version>${providermanagementVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- End OpenMRS modules -->
 
         <!-- start other dependencies -->
 
@@ -243,6 +130,20 @@
             <groupId>uk.co.modular-it</groupId>
             <artifactId>hamcrest-date</artifactId>
             <version>0.9.5</version>
+        </dependency>
+
+        <!-- This is needed for appframework testing -->
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>3.0.0</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- end other dependencies -->
@@ -293,11 +194,7 @@
                     <properties>
                         <property>
                             <name>openMRSVersion</name>
-                            <version>[1.9.0,1.10.0-!)</version>
-                        </property>
-                        <property>
-                            <name>openMRSwebVersion</name>
-                            <version>[1.9.0,1.10.0-!)</version>
+                            <version>${openMRSVersion}</version>
                         </property>
                         <property>
                             <name>htmlwidgetsVersion</name>

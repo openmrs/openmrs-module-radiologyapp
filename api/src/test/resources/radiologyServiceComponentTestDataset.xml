@@ -8,6 +8,7 @@
 
     <!-- define metadata for the Radiology Requisiton -->
     <concept concept_id="2001" retired="false" datatype_id="1" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="999e2ed3-dd5f-4f46-9459-26127c9265ab"/>
+    <concept_numeric concept_id="2001" units="mg/dL" allow_decimal="true" display_precision="10" />
     <concept_name concept_id="2001" name="Creatinine Level" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="2001" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9995693a-f558-40c9-8177-145dfe119ca7"/>
     <concept_description concept_description_id="2001" concept_id="2001" locale="en" description="Creatinine Level" creator="1" date_created="2004-08-12 00:00:00.0" uuid="999d710b-d444-40b7-b449-6e0e739dedd0"/>
     <global_property property="radiologyapp.creatinineLevelConcept" property_value="999e2ed3-dd5f-4f46-9459-26127c9265ab" uuid="9998b3c3-9e66-42c6-8f03-2a0c1e9ca2a8"/>
@@ -25,7 +26,7 @@
     <concept_name concept_id="1001" name="Chest X-ray" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1001" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f558-40c9-8177-145dfe119ca7"/>
     <concept_description concept_description_id="1001" concept_id="1001" locale="en" description="Chest x-ray" creator="1" date_created="2004-08-12 00:00:00.0" uuid="5f4d710b-d444-40b7-b449-6e0e739dedd0"/>
 
-    <concept concept_id="1002" retired="false" datatype_id="4" class_id="10" is_set="false" creator="1" date_created="2008-08-15 15:51:39.0" version="" changed_by="1" date_changed="2008-08-15 15:52:38.0" uuid="89ca642a-dab6-4f20-b712-e12ce4fc6d36"/>
+    <concept concept_id="1002" retired="false" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2008-08-15 15:51:39.0" version="" changed_by="1" date_changed="2008-08-15 15:52:38.0" uuid="89ca642a-dab6-4f20-b712-e12ce4fc6d36"/>
     <concept_name concept_id="1002" name="Radiology Study Set" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1002" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f551-40c9-8177-145dfe119ca7"/>
     <concept_description concept_description_id="1002" concept_id="1002" description="Radiology Study Set" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" uuid="5f4d710b-d333-40b7-b446-6e0e739dedd0"/>
     <concept_reference_term concept_reference_term_id="1002" concept_source_id="1001" code="Radiology study construct" description="Radiology Study Set" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5693a-f556-40c9-8177-145dfe119ca7"/>
@@ -37,7 +38,7 @@
     <concept_reference_term concept_reference_term_id="1003" concept_source_id="1001" code="Radiology procedure performed" description="Radiology Procedure" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5612a-f551-40c9-8177-145dfe119ca7"/>
     <concept_reference_map concept_map_id="1003" concept_id="1003" concept_reference_term_id="1003" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23b6e712-49d8-22e0-8fed-18a911e044dc"/>
 
-    <concept concept_id="1004" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2008-08-15 15:52:17.0" version="" uuid="92accc7c-78c9-47bd-a841-0de0817027d4"/>
+    <concept concept_id="1004" retired="false" datatype_id="3" class_id="7" is_set="false" creator="1" date_created="2008-08-15 15:52:17.0" version="" uuid="92accc7c-78c9-47bd-a841-0de0817027d4"/>
     <concept_name concept_id="1004" name="Accession Number" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1003" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f558-4fff-8177-145dfe119ca7"/>
     <concept_description concept_description_id="1004" concept_id="1004" locale="en" description="Accession Number" creator="1" date_created="2004-08-12 00:00:00.0" uuid="5f4d710b-d333-40b7-b559-6e0ea3ededd0"/>
     <concept_reference_term concept_reference_term_id="1004" concept_source_id="1001" code="Radiology accession number" description="Accession Number" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5693a-f558-4eef-8177-145dfe119ca7"/>
@@ -72,7 +73,7 @@
     <concept_reference_term concept_reference_term_id="1007" concept_source_id="1001" code="Type of radiology report" description="Radiology Report Type" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5612a-f551-40c9-8757-145dfe119ca7"/>
     <concept_reference_map concept_map_id="1007" concept_id="1007" concept_reference_term_id="1007" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23b6e712-49d8-22e0-8fed-18a911e044tf"/>
 
-    <concept concept_id="1008" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2008-08-15 15:52:17.0" version="" uuid="92accc7c-78c9-48bd-a841-0de0817027d4"/>
+    <concept concept_id="1008" retired="false" datatype_id="3" class_id="7" is_set="false" creator="1" date_created="2008-08-15 15:52:17.0" version="" uuid="92accc7c-78c9-48bd-a841-0de0817027d4"/>
     <concept_name concept_id="1008" name="Radiology Report Body" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1008" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f558-4fff-8165-145dfe119ca7"/>
     <concept_description concept_description_id="1008" concept_id="1008" locale="en" description="Radiology Report Body" creator="1" date_created="2004-08-12 00:00:00.0" uuid="5f4d710b-d333-40b7-b559-6e0ea3edegd0"/>
     <concept_reference_term concept_reference_term_id="1008" concept_source_id="1001" code="Radiology report comments" description="Radiology Report Body" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5676a-f558-4eef-8177-145dfe119ca7"/>
@@ -89,7 +90,8 @@
     <concept_set concept_set_id="1009" concept_id="1008" concept_set="1006" sort_weight="0.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="1a152827-639f-4dd4-961f-1e0223f88d90"/>
 
     <order_type order_type_id="1001" name="RadiologyOrder" parent="2" java_class_name="org.openmrs.module.radiologyapp.RadiologyOrder" description="Radiology Order" date_created="2008-08-15 13:49:47.0" retired="false" uuid="c303c420-e9d4-11e4-b571-0800200c9a66" creator="1" />  <!-- parent=2 references Test Order in standard test dataset -->
-    <orders order_number="12345" order_id="1001" encounter_id="1" order_action="NEW" order_type_id="2" care_setting="1" urgency="ROUTINE" concept_id="1001" orderer="1" instructions="x-ray" date_activated="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 12:24:10.0" voided="false" patient_id="6" uuid="0c96f25c-7777-4f72-9931-d808fbc226db"/>
+    <encounter encounter_id="12345" encounter_type="1" patient_id="6" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 00:00:00.0" voided="false" uuid="d1d5c114-301e-11f0-aa00-eecfb235ec7d"/>
+    <orders order_number="12345" order_id="1001" encounter_id="12345" order_action="NEW" order_type_id="2" care_setting="1" urgency="ROUTINE" concept_id="1001" orderer="1" instructions="x-ray" date_activated="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 12:24:10.0" voided="false" patient_id="6" uuid="0c96f25c-7777-4f72-9931-d808fbc226db"/>
     <test_order order_id="1001"/>
     <emr_radiology_order order_id="1001"/>
 
