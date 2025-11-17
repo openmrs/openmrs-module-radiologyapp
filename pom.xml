@@ -37,11 +37,11 @@
 		<openMRSVersion>2.6.0</openMRSVersion>
         <appframeworkVersion>2.18.0</appframeworkVersion>
         <appuiVersion>1.18.0</appuiVersion>
-        <coreappsVersion>2.0.0</coreappsVersion>
-        <emrapiVersion>2.3.0</emrapiVersion>
-        <metadatamappingVersion>1.6.0</metadatamappingVersion>
+        <coreappsVersion>3.0.0</coreappsVersion>
+        <emrapiVersion>2.4.0</emrapiVersion>
+        <metadatamappingVersion>1.7.0</metadatamappingVersion>
         <uicommonsVersion>2.26.0</uicommonsVersion>
-        <uiframeworkVersion>3.25.0</uiframeworkVersion>
+        <uiframeworkVersion>4.0.0</uiframeworkVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
