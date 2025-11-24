@@ -12,8 +12,6 @@
         </property>
         <property name="target">
             <bean class="${project.parent.groupId}.${project.parent.artifactId}.RadiologyServiceImpl">
-                <property name="emrApiProperties" ref="emrApiProperties"/>
-                <property name="radiologyProperties" ref="radiologyProperties"/>
                 <property name="encounterService" ref="encounterService"/>
                 <property name="conceptService" ref="conceptService"/>
                 <property name="orderService" ref="orderService"/>
