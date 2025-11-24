@@ -46,7 +46,6 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.emrapi.EmrApiConstants;
-import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
@@ -90,8 +89,6 @@ import static org.mockito.Mockito.when;
 public class RadiologyServiceTest{
 
     private RadiologyServiceImpl radiologyService;
-
-    private EmrApiProperties emrApiProperties;
 
     private RadiologyProperties radiologyProperties;
 
@@ -213,7 +210,6 @@ public class RadiologyServiceTest{
         setupRadiologyStudyAndRadiologyReportsConceptSets();
 
         radiologyService = new RadiologyServiceImpl();
-        radiologyService.setEmrApiProperties(emrApiProperties);
         radiologyService.setRadiologyProperties(radiologyProperties);
         radiologyService.setEncounterService(encounterService);
         radiologyService.setRadiologyOrderDAO(radiologyOrderDAO);
@@ -223,7 +219,6 @@ public class RadiologyServiceTest{
     }
 
     private void prepareMocks() {
-        emrApiProperties = mock(EmrApiProperties.class);
         radiologyProperties = mock(RadiologyProperties.class);
         encounterService = mock(EncounterService.class);
         conceptService = mock(ConceptService.class);
@@ -241,9 +236,9 @@ public class RadiologyServiceTest{
         when(radiologyProperties.getRadiologyTechnicianEncounterRole()).thenReturn(radiologyTechnicianEncounterRole);
         when(radiologyProperties.getPrincipalResultsInterpreterEncounterRole()).thenReturn(principalResultsInterpreterEncounterRole);
         when(radiologyProperties.getCreatinineLevelConcept()).thenReturn(creatinineLevelConcept);
-        when(emrApiProperties.getOrderingProviderEncounterRole()).thenReturn(clinicianEncounterRole);
-        when(emrApiProperties.getUnknownLocation()).thenReturn(unknownLocation);
-        when(emrApiProperties.getUnknownProvider()).thenReturn(unknownProvider);
+        when(radiologyProperties.getOrderingProviderEncounterRole()).thenReturn(clinicianEncounterRole);
+        when(radiologyProperties.getUnknownLocation()).thenReturn(unknownLocation);
+        when(radiologyProperties.getUnknownProvider()).thenReturn(unknownProvider);
         when(radiologyProperties.getRadiologyTestOrderType()).thenReturn(orderType);
         when(booleanType.isBoolean()).thenReturn(true);
         when(Context.getConceptService()).thenReturn(conceptService);

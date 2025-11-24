@@ -29,7 +29,6 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderContext;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
@@ -54,8 +53,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     private static final Log log = LogFactory.getLog(RadiologyServiceImpl.class);
 
-    private EmrApiProperties emrApiProperties;
-
     private RadiologyProperties radiologyProperties;
 
     private EncounterService encounterService;
@@ -75,7 +72,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyOrderEncounterType());
-        encounter.setProvider(emrApiProperties.getOrderingProviderEncounterRole(), requisition.getRequestedBy());
+        encounter.setProvider(radiologyProperties.getOrderingProviderEncounterRole(), requisition.getRequestedBy());
         encounter.setPatient(requisition.getPatient());
         encounter.setLocation(requisition.getRequestedFrom());
         encounter.setEncounterDatetime(requisition.getRequestedOn() != null ? requisition.getRequestedOn() : new Date());
@@ -133,10 +130,10 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         encounter.setEncounterType(radiologyProperties.getRadiologyReportEncounterType());
         encounter.setEncounterDatetime(radiologyReport.getReportDate());
         encounter.setLocation(radiologyReport.getReportLocation() != null ?
-                radiologyReport.getReportLocation() : emrApiProperties.getUnknownLocation());
+                radiologyReport.getReportLocation() : radiologyProperties.getUnknownLocation());
         encounter.setPatient(radiologyReport.getPatient());
         encounter.addProvider(radiologyProperties.getPrincipalResultsInterpreterEncounterRole(),
-                radiologyReport.getPrincipalResultsInterpreter() != null ?  radiologyReport.getPrincipalResultsInterpreter() : emrApiProperties.getUnknownProvider());
+                radiologyReport.getPrincipalResultsInterpreter() != null ?  radiologyReport.getPrincipalResultsInterpreter() : radiologyProperties.getUnknownProvider());
 
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         encounter.addObs(radiologyReportConceptSet.buildRadiologyReportObsGroup(radiologyReport));
@@ -155,10 +152,10 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         encounter.setEncounterType(radiologyProperties.getRadiologyStudyEncounterType());
         encounter.setEncounterDatetime(radiologyStudy.getDatePerformed());
         encounter.setLocation(radiologyStudy.getStudyLocation() != null ?
-                radiologyStudy.getStudyLocation() : emrApiProperties.getUnknownLocation());
+                radiologyStudy.getStudyLocation() : radiologyProperties.getUnknownLocation());
         encounter.setPatient(radiologyStudy.getPatient());
         encounter.addProvider(radiologyProperties.getRadiologyTechnicianEncounterRole(),
-                radiologyStudy.getTechnician() != null ? radiologyStudy.getTechnician() : emrApiProperties.getUnknownProvider());
+                radiologyStudy.getTechnician() != null ? radiologyStudy.getTechnician() : radiologyProperties.getUnknownProvider());
 
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         encounter.addObs(radiologyStudyConceptSet.buildRadiologyStudyObsGroup(radiologyStudy));
@@ -457,10 +454,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             throw new RadiologyAPIException("A Radiology Study already exists with order number " + radiologyStudy.getOrderNumber());
         }
 
-    }
-
-    public void setEmrApiProperties(EmrApiProperties emrApiProperties) {
-        this.emrApiProperties = emrApiProperties;
     }
 
     public void setRadiologyProperties(RadiologyProperties radiologyProperties) {
