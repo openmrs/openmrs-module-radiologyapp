@@ -14,17 +14,44 @@
 
 package org.openmrs.module.radiologyapp;
 
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.CareSetting;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
+import org.openmrs.Location;
+import org.openmrs.OpenmrsMetadata;
 import org.openmrs.OrderType;
-import org.openmrs.module.emrapi.utils.ModuleProperties;
-import org.springframework.stereotype.Component;
+import org.openmrs.Provider;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.ProviderService;
+import org.openmrs.module.emrapi.EmrApiConstants;
+import org.openmrs.module.metadatamapping.MetadataTermMapping;
+import org.openmrs.module.metadatamapping.api.MetadataMappingService;
 
-@Component("radiologyProperties")
-public class RadiologyProperties extends ModuleProperties {
+public class RadiologyProperties {
+
+    @Setter
+    private AdministrationService administrationService;
+
+    @Setter
+    private ConceptService conceptService;
+
+    @Setter
+    private EncounterService encounterService;
+
+    @Setter
+    private OrderService orderService;
+
+    @Setter
+    private MetadataMappingService metadataMappingService;
+
+    @Setter
+    private ProviderService providerService;
 
     public Concept getXrayOrderablesConcept() {
         return getConceptByGlobalProperty(RadiologyConstants.GP_XRAY_ORDERABLES_CONCEPT);
@@ -39,15 +66,15 @@ public class RadiologyProperties extends ModuleProperties {
     }
 
     public EncounterType getRadiologyOrderEncounterType() {
-        return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_ORDER_ENCOUNTER_TYPE);
+        return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_ORDER_ENCOUNTER_TYPE, true);
     }
 
     public EncounterType getRadiologyStudyEncounterType() {
-        return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_STUDY_ENCOUNTER_TYPE);
+        return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_STUDY_ENCOUNTER_TYPE, true);
     }
 
     public EncounterType getRadiologyReportEncounterType() {
-        return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_REPORT_ENCOUNTER_TYPE);
+        return getEncounterTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_REPORT_ENCOUNTER_TYPE, true);
     }
 
     public EncounterRole getRadiologyTechnicianEncounterRole() {
@@ -99,4 +126,75 @@ public class RadiologyProperties extends ModuleProperties {
         return administrationService.getGlobalProperty(RadiologyConstants.GP_LEAD_RADIOLOGY_TECH_CONTACT_INFO);
     }
 
+    // Copied over from emrapiproperties
+
+    public EncounterRole getOrderingProviderEncounterRole() {
+        return getEmrApiMetadataByCode(EncounterRole.class, EmrApiConstants.GP_ORDERING_PROVIDER_ENCOUNTER_ROLE, true);
+    }
+
+    public Location getUnknownLocation() {
+        return getEmrApiMetadataByCode(Location.class, EmrApiConstants.GP_UNKNOWN_LOCATION, true);
+    }
+
+    public Provider getUnknownProvider() {
+        return providerService.getProviderByUuid(getEmrApiMetadataUuidByCode(EmrApiConstants.GP_UNKNOWN_PROVIDER, true));
+    }
+
+    // Helper methods
+
+    protected Concept getConceptByGlobalProperty(String globalPropertyName) {
+        String globalProperty = administrationService.getGlobalProperty(globalPropertyName);
+        Concept concept = conceptService.getConceptByUuid(globalProperty);
+        if (concept == null) {
+            throw new IllegalStateException("Configuration required: " + globalPropertyName);
+        }
+        return concept;
+    }
+
+    protected EncounterType getEncounterTypeByGlobalProperty(String globalPropertyName, boolean required) {
+        String globalProperty = administrationService.getGlobalProperty(globalPropertyName);
+        EncounterType encounterType = encounterService.getEncounterTypeByUuid(globalProperty);
+        if (required && encounterType == null) {
+            throw new IllegalStateException("Configuration required: " + globalPropertyName);
+        }
+        return encounterType;
+    }
+
+    protected EncounterRole getEncounterRoleByGlobalProperty(String globalPropertyName) {
+        String globalProperty = administrationService.getGlobalProperty(globalPropertyName);
+        EncounterRole encounterRole = encounterService.getEncounterRoleByUuid(globalProperty);
+        if (encounterRole == null) {
+            throw new IllegalStateException("Configuration required: " + globalPropertyName);
+        }
+        return encounterRole;
+    }
+
+    protected OrderType getOrderTypeByGlobalProperty(String globalPropertyName) {
+        String globalProperty = administrationService.getGlobalProperty(globalPropertyName);
+        OrderType orderType = orderService.getOrderTypeByUuid(globalProperty);
+        if (orderType == null) {
+            throw new IllegalStateException("Configuration required: " + globalPropertyName);
+        }
+        return orderType;
+    }
+
+    protected <T extends OpenmrsMetadata> T getEmrApiMetadataByCode(Class<T> type, String code, boolean required) {
+        T metadataItem = metadataMappingService.getMetadataItem(type, "org.openmrs.module.emrapi", code);
+        if (required && metadataItem == null) {
+            throw new IllegalStateException("Configuration required: " + code);
+        } else {
+            return metadataItem;
+        }
+    }
+
+    protected String getEmrApiMetadataUuidByCode(String mappingCode, boolean required) {
+        MetadataTermMapping mapping = metadataMappingService.getMetadataTermMapping("org.openmrs.module.emrapi", mappingCode);
+        if (mapping != null && mapping.getMetadataUuid() != null) {
+            return mapping.getMetadataUuid();
+        } else if (required) {
+            throw new IllegalStateException("Configuration required: " + mappingCode);
+        } else {
+            return null;
+        }
+    }
 }

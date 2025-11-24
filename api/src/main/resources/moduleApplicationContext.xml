@@ -6,13 +6,21 @@
 
 	<!-- Add here beans related to the API context -->
 
+    <bean id="radiologyProperties" class="org.openmrs.module.radiologyapp.RadiologyProperties">
+        <property name="administrationService" ref="adminService"/>
+        <property name="conceptService" ref="conceptService"/>
+        <property name="encounterService" ref="encounterService"/>
+        <property name="orderService" ref="orderService"/>
+        <property name="metadataMappingService" ref="metadatamapping.MetadataMappingService"/>
+        <property name="providerService" ref="providerService"/>
+    </bean>
+
     <bean id="radiologyService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
         </property>
         <property name="target">
             <bean class="${project.parent.groupId}.${project.parent.artifactId}.RadiologyServiceImpl">
-                <property name="emrApiProperties" ref="emrApiProperties"/>
                 <property name="radiologyProperties" ref="radiologyProperties"/>
                 <property name="encounterService" ref="encounterService"/>
                 <property name="conceptService" ref="conceptService"/>
