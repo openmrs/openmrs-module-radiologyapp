@@ -39,7 +39,7 @@
         <appuiVersion>1.18.0</appuiVersion>
         <coreappsVersion>3.0.0</coreappsVersion>
         <emrapiVersion>2.4.0</emrapiVersion>
-        <lombokVersion>1.18.38</lombokVersion>
+        <lombokVersion>1.18.42</lombokVersion>
         <metadatamappingVersion>1.7.0</metadatamappingVersion>
         <uicommonsVersion>2.26.0</uicommonsVersion>
         <uiframeworkVersion>4.0.0</uiframeworkVersion>
