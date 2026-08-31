@@ -22,9 +22,9 @@
 	</organization>
 
     <scm>
-        <connection>scm:git:git@github.com:PIH/openmrs-module-radiologyapp.git</connection>
-        <developerConnection>scm:git:git@github.com:PIH/openmrs-module-radiologyapp.git</developerConnection>
-        <url>scm:git:git@github.com:PIH/openmrs-module-radiologyapp.git</url>
+        <connection>scm:git:https://github.com/PIH/openmrs-module-radiologyapp.git</connection>
+        <developerConnection>scm:git:https://github.com/PIH/openmrs-module-radiologyapp.git</developerConnection>
+        <url>https://github.com/PIH/openmrs-module-radiologyapp</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -293,14 +293,14 @@
 
     <distributionManagement>
         <repository>
-            <id>openmrs-repo-modules</id>
-            <name>OpenMRS Modules</name>
-            <url>https://openmrs.jfrog.io/artifactory/modules</url>
+            <id>openmrs-repo-modules-pih</id>
+            <name>Modules</name>
+            <url>https://openmrs.jfrog.io/artifactory/modules-pih/</url>
         </repository>
         <snapshotRepository>
-            <id>openmrs-repo-snapshots</id>
+            <id>openmrs-repo-modules-pih</id>
             <name>OpenMRS Snapshots</name>
-            <url>https://openmrs.jfrog.io/artifactory/snapshots</url>
+            <url>https://openmrs.jfrog.io/artifactory/modules-pih-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
