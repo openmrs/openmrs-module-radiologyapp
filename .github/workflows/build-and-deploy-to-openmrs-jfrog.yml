@@ -7,8 +7,19 @@ on:
   repository_dispatch:
 
 jobs:
+  update-versions:
+    if: github.repository_owner == 'openmrs'
+    permissions:
+      contents: write
+    concurrency:
+      group: update-versions-${{ github.ref }}
+      cancel-in-progress: true
+    uses: PIH/openmrs-contrib-distro-tools/.github/workflows/update-versions.yml@main
+    secrets: inherit
+
   build-and-publish:
-    if: github.repository_owner == 'PIH'
+    if: github.repository_owner == 'openmrs'
+    needs: update-versions
     concurrency:
       group: build-and-deploy-${{ github.ref }}
       cancel-in-progress: true
