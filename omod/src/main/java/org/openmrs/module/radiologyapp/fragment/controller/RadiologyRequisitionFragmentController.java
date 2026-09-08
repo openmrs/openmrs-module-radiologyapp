@@ -14,6 +14,8 @@
 
 package org.openmrs.module.radiologyapp.fragment.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appui.AppUiConstants;
 import org.openmrs.module.appui.UiSessionContext;
@@ -30,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 public class RadiologyRequisitionFragmentController {
+
+    private static final Log log = LogFactory.getLog(RadiologyRequisitionFragmentController.class);
 
     public FragmentActionResult orderRadiology(@BindParams RadiologyRequisition requisition,
                                                @RequestParam("modality") String modality,
@@ -55,6 +59,7 @@ public class RadiologyRequisitionFragmentController {
         }
         catch (Exception e) {
             // TODO make this more user-friendly (but we never should get here)
+            log.error("Failed to place radiology requisition", e);
             return new FailureResult(e.getLocalizedMessage());
         }
 
