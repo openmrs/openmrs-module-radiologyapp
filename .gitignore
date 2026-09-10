@@ -4,6 +4,8 @@
 .settings
 .project
 .classpath
+.rubygems
+.rubygems-provided
 *.sass-cache
 target
 
