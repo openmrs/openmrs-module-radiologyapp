@@ -53,6 +53,7 @@ public class RadiologyConstants {
 
     public static final String GP_CREATININE_LEVEL_CONCEPT = "radiologyapp.creatinineLevelConcept";
 
+    public static final String LOCATION_TAG_ORDER_RADIOLOGY_STUDY = "Order Radiology Study Location";
 
     // concept codes used by radiology
 
