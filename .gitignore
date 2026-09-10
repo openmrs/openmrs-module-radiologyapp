@@ -7,6 +7,7 @@
 .rubygems
 .rubygems-provided
 *.sass-cache
+/omod/src/main/compass/sass-external/*
 target
 
 
@@ -14,3 +15,4 @@ target
 *.jar
 *.war
 *.ear
+
