@@ -87,12 +87,12 @@ ${ ui.includeFragment("coreapps", "patientHeader", [ patient: patient ]) }
                 ])}
             </div>
             <div class="col-12 col-lg-4">
-                ${ ui.includeFragment("uicommons", "field/location", [
+                ${ ui.includeFragment("uicommons", "field/dropDown", [
                         id: "requestedFrom",
                         label: "radiologyapp.order.requestedFrom",
                         formFieldName: "requestedFrom",
                         classes: ['required'],
-                        withTag: "Login Location",
+                        options: requestedFromLocations,
                         initialValue: sessionContext.sessionLocationId
                 ])}
             </div>

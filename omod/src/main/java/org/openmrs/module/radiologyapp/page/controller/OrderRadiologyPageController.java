@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.openmrs.Concept;
 import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
@@ -13,7 +14,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.feature.FeatureToggleProperties;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.coreapps.CoreAppsProperties;
-import org.openmrs.module.emrapi.EmrApiProperties;
 import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
 import org.openmrs.module.radiologyapp.RadiologyConstants;
@@ -43,7 +43,6 @@ public class OrderRadiologyPageController {
                            @SpringBean("radiologyProperties") RadiologyProperties radiologyProperties,
                            @SpringBean("providerService") ProviderService providerService,
                            @SpringBean("locationService") LocationService locationService,
-                           @SpringBean("emrApiProperties") EmrApiProperties emrApiProperties,
                            @SpringBean("coreAppsProperties") CoreAppsProperties coreAppsProperties,
                            @SpringBean("featureToggles") FeatureToggleProperties featureToggles,
                            @SpringBean("adtService") AdtService adtService,
@@ -78,7 +77,9 @@ public class OrderRadiologyPageController {
         model.addAttribute("xrayModalityCode", RadiologyConstants.XRAY_MODALITY_CODE);
         model.addAttribute("ctScanModalityCode", RadiologyConstants.CT_SCAN_MODALITY_CODE);
 
-        model.addAttribute("portableLocations", ui.toJson(getPortableLocations(locationService, emrApiProperties, ui)));
+        List<SimpleObject> orderRadiologyLocations = getOrderRadiologyStudyLocations(locationService, visit, ui);
+        model.addAttribute("requestedFromLocations", orderRadiologyLocations);
+        model.addAttribute("portableLocations", ui.toJson(orderRadiologyLocations));
         model.addAttribute("patient", patient);
         model.addAttribute("modality", modality.toUpperCase());
         model.addAttribute("providers", getProviders(providerService));
@@ -131,13 +132,19 @@ public class OrderRadiologyPageController {
 
     }
 
-    private List<SimpleObject> getPortableLocations(LocationService locationService, EmrApiProperties emrApiProperties, final UiUtils ui) {
-        List<SimpleObject> items = new ArrayList<SimpleObject>();
-        List<Location> locations = locationService.getLocationsByTag(emrApiProperties.getSupportsLoginLocationTag()); // TODO: is login locations really the right thing here?
+    // valid locations to order a radiology study from: those tagged "Order Radiology Study Location" that are
+    // equal to (or descendants of) the location of the visit this order is being placed against.
+    List<SimpleObject> getOrderRadiologyStudyLocations(LocationService locationService, Visit visit, final UiUtils ui) {
+        LocationTag tag = locationService.getLocationTagByName(RadiologyConstants.LOCATION_TAG_ORDER_RADIOLOGY_STUDY);
+        List<Location> locations = new ArrayList<Location>();
+        if (tag != null) {
+            collectTaggedLocations(visit.getLocation(), tag, locations);
+        }
 
         // sort objects by localized name
         Collections.sort(locations, new ByFormattedObjectComparator(ui));
 
+        List<SimpleObject> items = new ArrayList<SimpleObject>();
         for (Location location: locations) {
             SimpleObject item = new SimpleObject();
             item.put("value", location.getLocationId());
@@ -146,6 +153,17 @@ public class OrderRadiologyPageController {
         }
         return items;
 
+    }
+
+    // walks the location tree rooted at the given location, collecting any location (including the root itself)
+    // that carries the given tag
+    void collectTaggedLocations(Location location, LocationTag tag, List<Location> collected) {
+        if (location.getTags() != null && location.getTags().contains(tag)) {
+            collected.add(location);
+        }
+        for (Location child : location.getChildLocations(false)) {
+            collectTaggedLocations(child, tag, collected);
+        }
     }
 
     private List<SimpleObject> getOrderables(Concept orderablesSet, Locale locale) {
