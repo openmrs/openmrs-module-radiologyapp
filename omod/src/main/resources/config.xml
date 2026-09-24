@@ -29,11 +29,6 @@
 	<activator>${project.parent.groupId}.${project.parent.artifactId}.RadiologyAppActivator</activator>
 
 
-	<!-- Maps hibernate file's, if present -->
-	<mappingFiles>
-        RadiologyOrder.hbm.xml
-	</mappingFiles>
-
 	<!-- Internationalization -->
 	<!-- All message codes should start with ${project.parent.artifactId}. -->
 	<messages>
@@ -156,6 +151,15 @@
         <defaultValue></defaultValue>
         <description>
             UUID of the the Radiology Test order type
+        </description>
+    </globalProperty>
+
+    <globalProperty>
+        <property>radiologyapp.examLocationOrderAttributeType</property>
+        <defaultValue>af127936-e165-44d2-a4e2-352dbbf7f834</defaultValue>
+        <description>
+            UUID of the Exam Location order attribute type, used to record the location to send a portable exam
+            machine to for a radiology order (replaces the retired RadiologyOrder.examLocation field)
         </description>
     </globalProperty>
 

@@ -21,14 +21,17 @@ import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.OrderAttribute;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.TestOrder;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderContext;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.customdatatype.CustomDatatypeUtil;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
@@ -36,7 +39,6 @@ import org.openmrs.module.emrapi.encounter.EncounterDomainWrapper;
 import org.openmrs.module.radiologyapp.comparator.RadiologyOrderByDateComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
-import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,8 +62,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     private ConceptService conceptService;
 
     private OrderService orderService;
-
-    private RadiologyOrderDAO radiologyOrderDAO;
 
     private EmrEncounterDAO emrEncounterDAO;
 
@@ -100,8 +100,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         // now add the orders
         for (Concept study : requisition.getStudies()) {
-            RadiologyOrder order = new RadiologyOrder();
-            order.setExamLocation(requisition.getExamLocation());
+            TestOrder order = new TestOrder();
             order.setClinicalHistory(requisition.getClinicalHistory());
             order.setConcept(study);
             order.setUrgency(requisition.getUrgency());
@@ -113,7 +112,20 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             order.setCareSetting(radiologyProperties.getRadiologyCareSetting());  // currently only a single care setting support, defined by emr.radiologyCareSetting global property
             order.setPatient(requisition.getPatient());
             order.setOrderer(requisition.getRequestedBy());
+
+            if (requisition.getExamLocation() != null) {
+                OrderAttribute orderAttribute = new OrderAttribute();
+                orderAttribute.setAttributeType(radiologyProperties.getExamLocationOrderAttributeType());
+                orderAttribute.setValue(requisition.getExamLocation());
+                orderAttribute.setOrder(order);
+                order.addAttribute(orderAttribute);
+            }
+
             encounter.addOrder(order);
+            // OrderService#saveOrder does not itself serialize dirty custom-datatype attribute values (unlike, e.g.,
+            // PersonService#savePerson), so the exam-location attribute's value_reference must be computed here or
+            // the save below fails with a not-null constraint violation on order_attribute.value_reference
+            CustomDatatypeUtil.saveAttributesIfNecessary(order);
             orderService.saveOrder(order, orderContext);
         }
 
@@ -165,8 +177,13 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
-    public RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber) {
-        return radiologyOrderDAO.getRadiologyOrderByOrderNumber(orderNumber);
+    public Order getRadiologyOrderByOrderNumber(String orderNumber) {
+        Order order = orderService.getOrderByOrderNumber(orderNumber);
+        if (order != null && order.getOrderType() != null
+                && order.getOrderType().getUuid().equals(radiologyProperties.getRadiologyTestOrderType().getUuid())) {
+            return order;
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)
@@ -470,10 +487,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     public void setOrderService(OrderService orderService) {
         this.orderService = orderService;
-    }
-
-    public void setRadiologyOrderDAO(RadiologyOrderDAO radiologyOrderDAO) {
-        this.radiologyOrderDAO = radiologyOrderDAO;
     }
 
     public void setEmrEncounterDAO(EmrEncounterDAO emrEncounterDAO) {

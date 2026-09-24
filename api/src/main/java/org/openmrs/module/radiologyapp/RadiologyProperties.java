@@ -22,6 +22,7 @@ import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
 import org.openmrs.Location;
 import org.openmrs.OpenmrsMetadata;
+import org.openmrs.OrderAttributeType;
 import org.openmrs.OrderType;
 import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
@@ -87,6 +88,15 @@ public class RadiologyProperties {
 
     public OrderType getRadiologyTestOrderType() {
         return getOrderTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_TEST_ORDER_TYPE);
+    }
+
+    public OrderAttributeType getExamLocationOrderAttributeType() {
+        String globalProperty = administrationService.getGlobalProperty(RadiologyConstants.GP_EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE);
+        OrderAttributeType orderAttributeType = orderService.getOrderAttributeTypeByUuid(globalProperty);
+        if (orderAttributeType == null) {
+            throw new IllegalStateException("Configuration required: " + RadiologyConstants.GP_EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE);
+        }
+        return orderAttributeType;
     }
 
     public CareSetting getRadiologyCareSetting() {

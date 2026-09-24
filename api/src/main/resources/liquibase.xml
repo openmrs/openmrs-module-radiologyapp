@@ -30,4 +30,72 @@
                                  referencedTableName="location" referencedColumnNames="location_id" />
     </changeSet>
 
+    <changeSet id="20260910-1-insert-exam-location-order-attribute-type" author="mgoodrich">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from order_attribute_type where uuid = 'af127936-e165-44d2-a4e2-352dbbf7f834'</sqlCheck>
+        </preConditions>
+        <comment>
+            Radiology Order refactor: create an Exam Location order attribute type, backed by core's LocationDatatype,
+            to replace the exam_location column previously stored on the now-retired emr_radiology_order table
+        </comment>
+        <insert tableName="order_attribute_type">
+            <column name="name" value="Exam Location" />
+            <column name="description" value="Location to send a portable exam machine to" />
+            <column name="datatype" value="org.openmrs.customdatatype.datatype.LocationDatatype" />
+            <column name="min_occurs" valueNumeric="0" />
+            <column name="max_occurs" valueNumeric="1" />
+            <column name="creator" valueNumeric="1" />
+            <column name="date_created" valueDate="2026-09-10" />
+            <column name="retired" valueNumeric="0" />
+            <column name="uuid" value="af127936-e165-44d2-a4e2-352dbbf7f834" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260910-2-migrate-exam-location-to-order-attribute" author="mgoodrich">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="emr_radiology_order" />
+        </preConditions>
+        <comment>
+            Radiology Order refactor: migrate exam_location values from emr_radiology_order into order_attribute
+            rows (using the new Exam Location order attribute type inserted above), storing the referenced
+            location's uuid as the value_reference, as expected by LocationDatatype
+        </comment>
+        <sql>
+            INSERT INTO order_attribute (order_id, attribute_type_id, value_reference, uuid, creator, date_created, voided)
+            SELECT ro.order_id,
+                   (select order_attribute_type_id from order_attribute_type where uuid = 'af127936-e165-44d2-a4e2-352dbbf7f834'),
+                   loc.uuid,
+                   UUID(),
+                   1,
+                   NOW(),
+                   0
+            FROM emr_radiology_order ro
+            INNER JOIN location loc ON loc.location_id = ro.exam_location
+            WHERE ro.exam_location IS NOT NULL
+        </sql>
+    </changeSet>
+
+    <changeSet id="20260910-3-migrate-radiology-order-type-java-class" author="mgoodrich">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                select count(*) from order_type where java_class_name = 'org.openmrs.module.radiologyapp.RadiologyOrder'
+            </sqlCheck>
+        </preConditions>
+        <comment>Radiology Order refactor: order types previously backed by the custom RadiologyOrder class are now backed by plain TestOrder</comment>
+        <sql>UPDATE order_type SET java_class_name = 'org.openmrs.TestOrder' WHERE java_class_name = 'org.openmrs.module.radiologyapp.RadiologyOrder'</sql>
+    </changeSet>
+
+    <changeSet id="20260910-4-drop-emr-radiology-order" author="mgoodrich">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="emr_radiology_order" />
+        </preConditions>
+        <comment>
+            Radiology Order refactor: exam_location data has been migrated to order_attribute above, so the
+            emr_radiology_order table (which backed the now-retired RadiologyOrder class) is no longer needed
+        </comment>
+        <dropForeignKeyConstraint baseTableName="emr_radiology_order" constraintName="emr_radiology_order_test_order_id_fk" />
+        <dropForeignKeyConstraint baseTableName="emr_radiology_order" constraintName="emr_radiology_order_location_fk" />
+        <dropTable tableName="emr_radiology_order" />
+    </changeSet>
+
 </databaseChangeLog>

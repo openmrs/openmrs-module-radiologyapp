@@ -40,6 +40,8 @@ public class RadiologyConstants {
 
     public static final String GP_RADIOLOGY_TEST_ORDER_TYPE = "emr.radiologyTestOrderType";
 
+    public static final String GP_EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE = "radiologyapp.examLocationOrderAttributeType";
+
     public static final String GP_RADIOLOGY_CARE_SETTING = "emr.radiologyCareSetting";
 
     // used to specify the orderables that require constrast; not mandatory, but if this concept is set
