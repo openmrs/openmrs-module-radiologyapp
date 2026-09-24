@@ -35,20 +35,25 @@ import org.openmrs.EncounterType;
 import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.OrderAttribute;
+import org.openmrs.OrderAttributeType;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.Provider;
+import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.Visit;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.DatatypeService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.customdatatype.datatype.LocationDatatype;
 import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
-import org.openmrs.module.radiologyapp.db.RadiologyOrderDAO;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyReport;
 import org.openmrs.module.radiologyapp.matchers.IsExpectedRadiologyStudy;
@@ -59,6 +64,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import uk.co.it.modular.hamcrest.date.DateMatchers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -94,15 +100,15 @@ public class RadiologyServiceTest{
 
     private EncounterService encounterService;
 
-    private RadiologyOrderDAO radiologyOrderDAO;
-
     private ConceptService conceptService;
-    
+
     private OrderService orderService;
 
     private EmrEncounterDAO emrEncounterDAO;
 
     private OrderType orderType;
+
+    private OrderAttributeType examLocationOrderAttributeType;
 
     private Patient patient;
 
@@ -195,6 +201,7 @@ public class RadiologyServiceTest{
         currentLocation = new Location();
         unknownLocation = new Location();
         unknownProvider = new Provider();
+        examLocationOrderAttributeType = new OrderAttributeType();
 
         currentVisit = new Visit();
         currentVisit.setStartDatetime(currentDate);
@@ -212,7 +219,6 @@ public class RadiologyServiceTest{
         radiologyService = new RadiologyServiceImpl();
         radiologyService.setRadiologyProperties(radiologyProperties);
         radiologyService.setEncounterService(encounterService);
-        radiologyService.setRadiologyOrderDAO(radiologyOrderDAO);
         radiologyService.setConceptService(conceptService);
         radiologyService.setOrderService(orderService);
         radiologyService.setEmrEncounterDAO(emrEncounterDAO);
@@ -222,7 +228,6 @@ public class RadiologyServiceTest{
         radiologyProperties = mock(RadiologyProperties.class);
         encounterService = mock(EncounterService.class);
         conceptService = mock(ConceptService.class);
-        radiologyOrderDAO = mock(RadiologyOrderDAO.class);
         conceptService = mock(ConceptService.class);
         orderService = mock(OrderService.class);
         emrEncounterDAO = mock(EmrEncounterDAO.class);
@@ -240,7 +245,25 @@ public class RadiologyServiceTest{
         when(radiologyProperties.getUnknownLocation()).thenReturn(unknownLocation);
         when(radiologyProperties.getUnknownProvider()).thenReturn(unknownProvider);
         when(radiologyProperties.getRadiologyTestOrderType()).thenReturn(orderType);
+        when(radiologyProperties.getExamLocationOrderAttributeType()).thenReturn(examLocationOrderAttributeType);
         when(booleanType.isBoolean()).thenReturn(true);
+
+        // configure the exam location attribute type's datatype so that OrderAttribute#setValue/getValue and
+        // CustomDatatypeUtil#saveAttributesIfNecessary (both invoked by placeRadiologyRequisition) can serialize
+        // a Location through the real LocationDatatype, exactly as production is configured (see liquibase.xml)
+        examLocationOrderAttributeType.setDatatypeClassname(LocationDatatype.class.getName());
+        DatatypeService datatypeService = mock(DatatypeService.class);
+        when(Context.getDatatypeService()).thenReturn(datatypeService);
+        // ValidateUtil.validate(location), invoked internally while serializing the attribute's value, delegates to
+        // Context.getAdministrationService().validate(...); a no-op mock is sufficient since we aren't testing validation
+        when(Context.getAdministrationService()).thenReturn(mock(AdministrationService.class));
+        try {
+            PowerMockito.when(Context.loadClass(LocationDatatype.class.getName())).thenReturn((Class) LocationDatatype.class);
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        when(datatypeService.getDatatype(eq(LocationDatatype.class), (String) any())).thenReturn(new LocationDatatype());
         when(Context.getConceptService()).thenReturn(conceptService);
         when(conceptService.getTrueConcept()).thenReturn(trueConcept);
         when(conceptService.getFalseConcept()).thenReturn(falseConcept);
@@ -320,6 +343,56 @@ public class RadiologyServiceTest{
 
         IsExpectedRadiologyOrderEncounter matcher = new IsExpectedRadiologyOrderEncounter(examLocation, currentLocation, provider, null, null, null, study, secondStudy);
         assertTrue(matcher.matches(encounter));
+    }
+
+    @Test
+    public void placeRadiologyRequisition_shouldAttachExamLocationOrderAttributeThatResolvesToSameLocation()
+            throws Exception {
+
+        Location examLocation = new Location();
+        Concept study = new Concept();
+
+        RadiologyRequisition radiologyRequisition = new RadiologyRequisition();
+        radiologyRequisition.setPatient(patient);
+        radiologyRequisition.setClinicalHistory(clinicalHistory);
+        radiologyRequisition.addStudy(study);
+        radiologyRequisition.setUrgency(Order.Urgency.STAT);
+        radiologyRequisition.setExamLocation(examLocation);
+        radiologyRequisition.setRequestedBy(provider);
+        radiologyRequisition.setRequestedFrom(currentLocation);
+        radiologyRequisition.setVisit(currentVisit);
+
+        Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
+
+        Order order = encounter.getOrders().iterator().next();
+        Collection<OrderAttribute> activeAttributes = order.getActiveAttributes();
+        assertThat(activeAttributes.size(), is(1));
+
+        OrderAttribute orderAttribute = activeAttributes.iterator().next();
+        assertThat(orderAttribute.getAttributeType(), is(examLocationOrderAttributeType));
+        // getValue() round-trips through the attribute's transient value (set directly by setValue(), not
+        // yet re-serialized/deserialized through the datatype), confirming it resolves back to the same Location
+        assertThat((Location) orderAttribute.getValue(), is(examLocation));
+    }
+
+    @Test
+    public void placeRadiologyRequisition_shouldNotAttachExamLocationOrderAttributeIfExamLocationNotSpecified()
+            throws Exception {
+
+        Concept study = new Concept();
+        RadiologyRequisition radiologyRequisition = new RadiologyRequisition();
+        radiologyRequisition.setPatient(patient);
+        radiologyRequisition.setClinicalHistory(clinicalHistory);
+        radiologyRequisition.addStudy(study);
+        radiologyRequisition.setUrgency(Order.Urgency.STAT);
+        radiologyRequisition.setRequestedBy(provider);
+        radiologyRequisition.setRequestedFrom(currentLocation);
+        radiologyRequisition.setVisit(currentVisit);
+
+        Encounter encounter = radiologyService.placeRadiologyRequisition(radiologyRequisition);
+
+        Order order = encounter.getOrders().iterator().next();
+        assertTrue(order.getActiveAttributes().isEmpty());
     }
 
     @Test
@@ -995,6 +1068,41 @@ public class RadiologyServiceTest{
 
     }
 
+    @Test
+    public void getRadiologyOrderByOrderNumber_shouldReturnOrderForMatchingRadiologyOrderType() {
+
+        TestOrder radiologyOrder = new TestOrder();
+        radiologyOrder.setOrderType(orderType);
+        when(orderService.getOrderByOrderNumber("123")).thenReturn(radiologyOrder);
+
+        Order result = radiologyService.getRadiologyOrderByOrderNumber("123");
+
+        assertThat(result, is((Order) radiologyOrder));
+    }
+
+    @Test
+    public void getRadiologyOrderByOrderNumber_shouldReturnNullForNonRadiologyOrderType() {
+
+        OrderType nonRadiologyOrderType = new OrderType();
+        TestOrder nonRadiologyOrder = new TestOrder();
+        nonRadiologyOrder.setOrderType(nonRadiologyOrderType);
+        when(orderService.getOrderByOrderNumber("456")).thenReturn(nonRadiologyOrder);
+
+        Order result = radiologyService.getRadiologyOrderByOrderNumber("456");
+
+        assertNull(result);
+    }
+
+    @Test
+    public void getRadiologyOrderByOrderNumber_shouldReturnNullIfNoOrderWithThatOrderNumber() {
+
+        when(orderService.getOrderByOrderNumber("789")).thenReturn(null);
+
+        Order result = radiologyService.getRadiologyOrderByOrderNumber("789");
+
+        assertNull(result);
+    }
+
     private Encounter setupRadiologyStudyEncounter(Date datePerformed, Location location, Patient patient,
                                                    Provider provider, String orderNumber, Concept procedure) {
         Encounter encounter = new Encounter();
@@ -1092,6 +1200,15 @@ public class RadiologyServiceTest{
 
     // TODO: could move the rest of these matchers out into separate classes in matchers package
 
+    private Location getExamLocationFromOrderAttribute(Order order) {
+        for (OrderAttribute attribute : order.getActiveAttributes()) {
+            if (attribute.getAttributeType().equals(examLocationOrderAttributeType)) {
+                return (Location) attribute.getValue();
+            }
+        }
+        return null;
+    }
+
     private class IsExpectedOrder extends BaseMatcher<Order> {
         private Location expectedLocation;
         private Concept expectedStudy;
@@ -1113,7 +1230,7 @@ public class RadiologyServiceTest{
 
         @Override
         public boolean matches(Object o) {
-            RadiologyOrder actual = (RadiologyOrder) o;
+            TestOrder actual = (TestOrder) o;
 
             try {
                 assertThat(actual.getOrderType(), is(orderType));
@@ -1121,7 +1238,7 @@ public class RadiologyServiceTest{
                 assertThat(actual.getConcept(), is(expectedStudy));
                 assertThat(actual.getUrgency(), is(Order.Urgency.STAT));
                 assertThat(actual.getClinicalHistory(), is(clinicalHistory));
-                assertThat(actual.getExamLocation(), is(expectedLocation));
+                assertThat(getExamLocationFromOrderAttribute(actual), is(expectedLocation));
                 assertThat(actual.getOrderer(), is(expectedOrderer));
                 //assertThat(actual.getOrderNumber(), is(StringUtils.leftPad(new LuhnMod10IdentifierValidator().getValidIdentifier(actual.getId().toString()), 10, "0")));
 
