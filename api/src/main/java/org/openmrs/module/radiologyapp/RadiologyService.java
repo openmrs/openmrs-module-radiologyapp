@@ -47,11 +47,13 @@ public interface RadiologyService extends OpenmrsService {
 
     /**
      * Fetches the radiology order with the specified order number
+     * (returns null if no order with this order number exists, or if the order that exists
+     * is not a radiology test order)
      *
      * @param orderNumber
      * @return
      */
-    RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber);
+    Order getRadiologyOrderByOrderNumber(String orderNumber);
 
     /**
      * Fetches the radiology study with the specified order number for the given patient

@@ -5,6 +5,10 @@
     <global_property property="emr.radiologyOrderEncounterType" property_value="61ae96f4-6afe-4351-b6f8-cd4fc383cce1" uuid="696cb344-9e66-42c6-8f03-2a0c1e9ca2a8"/>
     <global_property property="emr.radiologyTestOrderType" property_value="c303c420-e9d4-11e4-b571-0800200c9a66" uuid="677cb344-9e66-6666-8f03-2a0c1e9ca2a8"/>
     <global_property property="emr.radiologyCareSetting" property_value="6f0c9a92-6f24-11e3-af88-005056821db0" uuid="497f32e0-e9db-11e4-b571-0800200c9a66"/>
+    <!-- "Exam Location" order attribute type: mirrors the row liquibase.xml inserts in production
+         (this test harness does not run the module's own liquibase.xml, so it is declared explicitly here) -->
+    <order_attribute_type order_attribute_type_id="1001" name="Exam Location" description="Location to send a portable exam machine to" datatype="org.openmrs.customdatatype.datatype.LocationDatatype" min_occurs="0" max_occurs="1" creator="1" date_created="2026-09-10 00:00:00.0" retired="false" uuid="af127936-e165-44d2-a4e2-352dbbf7f834"/>
+    <global_property property="radiologyapp.examLocationOrderAttributeType" property_value="af127936-e165-44d2-a4e2-352dbbf7f834" uuid="597f32e0-e9db-11e4-b571-0800200c9a67"/>
 
     <!-- define metadata for the Radiology Requisiton -->
     <concept concept_id="2001" retired="false" datatype_id="1" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="999e2ed3-dd5f-4f46-9459-26127c9265ab"/>
@@ -89,11 +93,14 @@
     <concept_set concept_set_id="1008" concept_id="1007" concept_set="1006" sort_weight="0.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="1a111827-639f-4dd4-961f-1e0223f88d90"/>
     <concept_set concept_set_id="1009" concept_id="1008" concept_set="1006" sort_weight="0.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="1a152827-639f-4dd4-961f-1e0223f88d90"/>
 
-    <order_type order_type_id="1001" name="RadiologyOrder" parent="2" java_class_name="org.openmrs.module.radiologyapp.RadiologyOrder" description="Radiology Order" date_created="2008-08-15 13:49:47.0" retired="false" uuid="c303c420-e9d4-11e4-b571-0800200c9a66" creator="1" />  <!-- parent=2 references Test Order in standard test dataset -->
+    <order_type order_type_id="1001" name="RadiologyOrder" parent="2" java_class_name="org.openmrs.TestOrder" description="Radiology Order" date_created="2008-08-15 13:49:47.0" retired="false" uuid="c303c420-e9d4-11e4-b571-0800200c9a66" creator="1" />  <!-- parent=2 references Test Order in standard test dataset -->
     <encounter encounter_id="12345" encounter_type="1" patient_id="6" location_id="2" form_id="1" encounter_datetime="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 00:00:00.0" voided="false" uuid="d1d5c114-301e-11f0-aa00-eecfb235ec7d"/>
-    <orders order_number="12345" order_id="1001" encounter_id="12345" order_action="NEW" order_type_id="2" care_setting="1" urgency="ROUTINE" concept_id="1001" orderer="1" instructions="x-ray" date_activated="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 12:24:10.0" voided="false" patient_id="6" uuid="0c96f25c-7777-4f72-9931-d808fbc226db"/>
+    <orders order_number="12345" order_id="1001" encounter_id="12345" order_action="NEW" order_type_id="1001" care_setting="1" urgency="ROUTINE" concept_id="1001" orderer="1" instructions="x-ray" date_activated="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 12:24:10.0" voided="false" patient_id="6" uuid="0c96f25c-7777-4f72-9931-d808fbc226db"/>
     <test_order order_id="1001"/>
-    <emr_radiology_order order_id="1001"/>
+    <!-- order_type_id=2 is the standard "Test Order" type (not the RadiologyOrder type above), so this order
+         is intentionally not a radiology order; used to test getRadiologyOrderByOrderNumber's negative case -->
+    <orders order_number="99999" order_id="1002" encounter_id="12345" order_action="NEW" order_type_id="2" care_setting="1" urgency="ROUTINE" concept_id="1001" orderer="1" instructions="x-ray" date_activated="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 12:24:10.0" voided="false" patient_id="6" uuid="6b13f322-9c3f-49b6-9c67-6f2b5b6f6a1a"/>
+    <test_order order_id="1002"/>
 
     <!--metadata mappings -->
     <metadatamapping_metadata_source metadata_source_id="1001" name="org.openmrs.module.emrapi" description="Source used to tag metadata used in the EMR API module" creator="1" date_created="2008-08-19 12:24:10.0" retired="false" uuid="c46a6ae2-7678-4fc9-b538-ba0e8082c9de"/>

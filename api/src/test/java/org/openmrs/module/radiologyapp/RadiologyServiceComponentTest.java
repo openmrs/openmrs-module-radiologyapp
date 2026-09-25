@@ -23,6 +23,8 @@ import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.OrderAttribute;
+import org.openmrs.OrderAttributeType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
@@ -44,6 +46,7 @@ import org.openmrs.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -177,10 +180,52 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         String orderNumber = orders.iterator().next().getOrderNumber();
 
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber(orderNumber);
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber(orderNumber);
         Assert.assertNotNull(radiologyOrder);
         Assert.assertEquals(conceptService.getConcept(18), radiologyOrder.getConcept());
         Assert.assertEquals(Order.Urgency.STAT, radiologyOrder.getUrgency());
+    }
+
+    @Test
+    public void getRadiologyOrderByOrderNumber_shouldReturnNullForOrderOfNonRadiologyOrderType()
+        throws Exception {
+
+        // "99999" (from radiologyServiceComponentTestDataset.xml) is a plain Test Order, not a Radiology Order
+        Order order = radiologyService.getRadiologyOrderByOrderNumber("99999");
+        Assert.assertNull(order);
+    }
+
+    @Test
+    public void placeRadiologyRequisition_shouldSaveExamLocationAsOrderAttributeThatResolvesToSameLocation()
+        throws Exception {
+
+        Patient patient = patientService.getPatient(6);
+        Location examLocation = locationService.getLocation(2);
+
+        RadiologyRequisition requisition = new RadiologyRequisition();
+
+        requisition.setPatient(patient);
+        requisition.setStudies(Collections.singleton(conceptService.getConcept(18)));
+        requisition.setUrgency(Order.Urgency.STAT);
+        requisition.setRequestedBy(providerService.getProvider(1));
+        requisition.setRequestedOn(new Date());
+        requisition.setRequestedFrom(locationService.getLocation(1));
+        requisition.setExamLocation(examLocation);
+
+        Encounter radiologyRequisition = radiologyService.placeRadiologyRequisition(requisition);
+        Encounter encounter = encounterService.getEncounter(radiologyRequisition.getEncounterId());
+        String orderNumber = encounter.getOrders().iterator().next().getOrderNumber();
+
+        // fetch the order back fresh via the service, to confirm the attribute round-trips through persistence
+        Order persistedOrder = radiologyService.getRadiologyOrderByOrderNumber(orderNumber);
+        Assert.assertNotNull(persistedOrder);
+
+        OrderAttributeType examLocationAttributeType = radiologyProperties.getExamLocationOrderAttributeType();
+        Collection<OrderAttribute> activeAttributes = persistedOrder.getActiveAttributes(examLocationAttributeType);
+        assertThat(activeAttributes.size(), is(1));
+
+        OrderAttribute orderAttribute = activeAttributes.iterator().next();
+        assertThat((Location) orderAttribute.getValue(), is(examLocation));
     }
 
     @Test
@@ -193,7 +238,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         RadiologyStudy radiologyStudy = new RadiologyStudy();
         radiologyStudy.setPatient(patient);
@@ -256,7 +301,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         RadiologyStudy firstRadiologyStudy = new RadiologyStudy();
         firstRadiologyStudy.setPatient(patient);
@@ -290,7 +335,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         RadiologyReport radiologyReport = new RadiologyReport();
         radiologyReport.setPatient(patient);
@@ -364,7 +409,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // location and provider from test database
         Location location = locationService.getLocation(2);
@@ -414,7 +459,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // first create a couple reports
         RadiologyReport firstRadiologyReport = new RadiologyReport();
@@ -473,7 +518,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
 
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // location and provider from test database
         Location location = locationService.getLocation(2);
@@ -509,7 +554,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // first create a couple reports
         RadiologyReport firstRadiologyReport = new RadiologyReport();
@@ -561,7 +606,7 @@ public class RadiologyServiceComponentTest extends BaseModuleContextSensitiveTes
         // from radiologyServiceComponentTestDataset.xml
         Concept procedure = conceptService.getConcept(1001);
         Concept reportType = conceptService.getConcept(1009);
-        RadiologyOrder radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
+        Order radiologyOrder = radiologyService.getRadiologyOrderByOrderNumber("12345");
 
         // first create a couple reports
         RadiologyReport firstExpectedRadiologyReport = new RadiologyReport();

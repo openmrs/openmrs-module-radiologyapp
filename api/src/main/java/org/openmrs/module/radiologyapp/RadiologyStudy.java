@@ -16,6 +16,7 @@ package org.openmrs.module.radiologyapp;
 
 import org.openmrs.Concept;
 import org.openmrs.Location;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class RadiologyStudy {
 
-    private RadiologyOrder associatedRadiologyOrder;
+    private Order associatedRadiologyOrder;
 
     private String orderNumber;
 
@@ -42,11 +43,11 @@ public class RadiologyStudy {
 
     private List<RadiologyReport> reports;
 
-    public RadiologyOrder getAssociatedRadiologyOrder() {
+    public Order getAssociatedRadiologyOrder() {
         return associatedRadiologyOrder;
     }
 
-    public void setAssociatedRadiologyOrder(RadiologyOrder associatedRadiologyOrder) {
+    public void setAssociatedRadiologyOrder(Order associatedRadiologyOrder) {
         this.associatedRadiologyOrder = associatedRadiologyOrder;
     }
 
