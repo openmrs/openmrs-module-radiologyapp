@@ -38,17 +38,18 @@
             Radiology Order refactor: create an Exam Location order attribute type, backed by core's LocationDatatype,
             to replace the exam_location column previously stored on the now-retired emr_radiology_order table
         </comment>
-        <insert tableName="order_attribute_type">
-            <column name="name" value="Exam Location" />
-            <column name="description" value="Location to send a portable exam machine to" />
-            <column name="datatype" value="org.openmrs.customdatatype.datatype.LocationDatatype" />
-            <column name="min_occurs" valueNumeric="0" />
-            <column name="max_occurs" valueNumeric="1" />
-            <column name="creator" valueNumeric="1" />
-            <column name="date_created" valueComputed="NOW()" />
-            <column name="retired" valueNumeric="0" />
-            <column name="uuid" value="af127936-e165-44d2-a4e2-352dbbf7f834" />
-        </insert>
+        <sql>
+            INSERT INTO order_attribute_type (name, description, datatype, min_occurs, max_occurs, creator, date_created, retired, uuid)
+            VALUES ('Exam Location',
+                    'Location to send a portable exam machine to',
+                    'org.openmrs.customdatatype.datatype.LocationDatatype',
+                    0,
+                    1,
+                    1,
+                    NOW(),
+                    0,
+                    'af127936-e165-44d2-a4e2-352dbbf7f834')
+        </sql>
     </changeSet>
 
     <changeSet id="20260910-2-migrate-exam-location-to-order-attribute" author="mgoodrich">
