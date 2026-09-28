@@ -30,6 +30,7 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderContext;
 import org.openmrs.api.OrderService;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.customdatatype.CustomDatatypeUtil;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
@@ -177,11 +178,12 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional(readOnly = true)
     @Override
-    public Order getRadiologyOrderByOrderNumber(String orderNumber) {
-        Order order = orderService.getOrderByOrderNumber(orderNumber);
-        if (order != null && order.getOrderType() != null
+    public TestOrder getRadiologyOrderByOrderNumber(String orderNumber) {
+        // unproxy first: a lazy Order proxy already in the session would otherwise fail the instanceof TestOrder check
+        Order order = HibernateUtil.getRealObjectFromProxy(orderService.getOrderByOrderNumber(orderNumber));
+        if (order instanceof TestOrder && order.getOrderType() != null
                 && order.getOrderType().getUuid().equals(radiologyProperties.getRadiologyTestOrderType().getUuid())) {
-            return order;
+            return (TestOrder) order;
         }
         return null;
     }

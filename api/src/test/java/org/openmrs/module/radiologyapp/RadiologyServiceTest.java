@@ -1075,9 +1075,9 @@ public class RadiologyServiceTest{
         radiologyOrder.setOrderType(orderType);
         when(orderService.getOrderByOrderNumber("123")).thenReturn(radiologyOrder);
 
-        Order result = radiologyService.getRadiologyOrderByOrderNumber("123");
+        TestOrder result = radiologyService.getRadiologyOrderByOrderNumber("123");
 
-        assertThat(result, is((Order) radiologyOrder));
+        assertThat(result, is(radiologyOrder));
     }
 
     @Test
@@ -1088,7 +1088,7 @@ public class RadiologyServiceTest{
         nonRadiologyOrder.setOrderType(nonRadiologyOrderType);
         when(orderService.getOrderByOrderNumber("456")).thenReturn(nonRadiologyOrder);
 
-        Order result = radiologyService.getRadiologyOrderByOrderNumber("456");
+        TestOrder result = radiologyService.getRadiologyOrderByOrderNumber("456");
 
         assertNull(result);
     }
@@ -1098,7 +1098,7 @@ public class RadiologyServiceTest{
 
         when(orderService.getOrderByOrderNumber("789")).thenReturn(null);
 
-        Order result = radiologyService.getRadiologyOrderByOrderNumber("789");
+        TestOrder result = radiologyService.getRadiologyOrderByOrderNumber("789");
 
         assertNull(result);
     }

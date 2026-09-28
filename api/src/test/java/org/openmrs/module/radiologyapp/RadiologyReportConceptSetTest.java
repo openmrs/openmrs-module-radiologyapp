@@ -21,7 +21,7 @@ import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptSource;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
-import org.openmrs.Order;
+import org.openmrs.TestOrder;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.emrapi.EmrApiConstants;
 
@@ -83,7 +83,7 @@ public class RadiologyReportConceptSetTest extends BaseConceptSetTest {
 
         String orderNumber = "12345";
 
-        Order radiologyOrder = mock(Order.class);
+        TestOrder radiologyOrder = mock(TestOrder.class);
         when(radiologyOrder.getOrderNumber()).thenReturn(orderNumber);
 
         Concept procedure = new Concept();
