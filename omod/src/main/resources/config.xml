@@ -155,15 +155,6 @@
     </globalProperty>
 
     <globalProperty>
-        <property>radiologyapp.examLocationOrderAttributeType</property>
-        <defaultValue>af127936-e165-44d2-a4e2-352dbbf7f834</defaultValue>
-        <description>
-            UUID of the Exam Location order attribute type, used to record the location to send a portable exam
-            machine to for a radiology order (replaces the retired RadiologyOrder.examLocation field)
-        </description>
-    </globalProperty>
-
-    <globalProperty>
         <property>emr.radiologyOrderEncounterType</property>
         <defaultValue></defaultValue>
         <description>

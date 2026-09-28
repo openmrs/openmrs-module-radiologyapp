@@ -91,10 +91,10 @@ public class RadiologyProperties {
     }
 
     public OrderAttributeType getExamLocationOrderAttributeType() {
-        String globalProperty = administrationService.getGlobalProperty(RadiologyConstants.GP_EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE);
-        OrderAttributeType orderAttributeType = orderService.getOrderAttributeTypeByUuid(globalProperty);
+        OrderAttributeType orderAttributeType = orderService.getOrderAttributeTypeByUuid(RadiologyConstants.EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE_UUID);
         if (orderAttributeType == null) {
-            throw new IllegalStateException("Configuration required: " + RadiologyConstants.GP_EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE);
+            throw new IllegalStateException("Exam Location order attribute type not found (uuid "
+                    + RadiologyConstants.EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE_UUID + "); it should be created by the radiologyapp liquibase changesets");
         }
         return orderAttributeType;
     }

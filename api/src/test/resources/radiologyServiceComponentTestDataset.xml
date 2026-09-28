@@ -8,7 +8,6 @@
     <!-- "Exam Location" order attribute type: mirrors the row liquibase.xml inserts in production
          (this test harness does not run the module's own liquibase.xml, so it is declared explicitly here) -->
     <order_attribute_type order_attribute_type_id="1001" name="Exam Location" description="Location to send a portable exam machine to" datatype="org.openmrs.customdatatype.datatype.LocationDatatype" min_occurs="0" max_occurs="1" creator="1" date_created="2026-09-10 00:00:00.0" retired="false" uuid="af127936-e165-44d2-a4e2-352dbbf7f834"/>
-    <global_property property="radiologyapp.examLocationOrderAttributeType" property_value="af127936-e165-44d2-a4e2-352dbbf7f834" uuid="597f32e0-e9db-11e4-b571-0800200c9a67"/>
 
     <!-- define metadata for the Radiology Requisiton -->
     <concept concept_id="2001" retired="false" datatype_id="1" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="999e2ed3-dd5f-4f46-9459-26127c9265ab"/>
