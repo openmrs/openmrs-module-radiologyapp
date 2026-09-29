@@ -29,11 +29,6 @@
 	<activator>${project.parent.groupId}.${project.parent.artifactId}.RadiologyAppActivator</activator>
 
 
-	<!-- Maps hibernate file's, if present -->
-	<mappingFiles>
-        RadiologyOrder.hbm.xml
-	</mappingFiles>
-
 	<!-- Internationalization -->
 	<!-- All message codes should start with ${project.parent.artifactId}. -->
 	<messages>

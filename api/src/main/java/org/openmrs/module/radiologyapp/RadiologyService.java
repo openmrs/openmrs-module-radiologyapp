@@ -17,6 +17,7 @@ package org.openmrs.module.radiologyapp;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.TestOrder;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
@@ -47,11 +48,13 @@ public interface RadiologyService extends OpenmrsService {
 
     /**
      * Fetches the radiology order with the specified order number
+     * (returns null if no order with this order number exists, or if the order that exists
+     * is not a radiology test order)
      *
      * @param orderNumber
      * @return
      */
-    RadiologyOrder getRadiologyOrderByOrderNumber(String orderNumber);
+    TestOrder getRadiologyOrderByOrderNumber(String orderNumber);
 
     /**
      * Fetches the radiology study with the specified order number for the given patient

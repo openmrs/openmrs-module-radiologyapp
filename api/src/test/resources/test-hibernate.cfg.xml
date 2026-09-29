@@ -5,7 +5,6 @@
 
 <hibernate-configuration>
     <session-factory>
-        <mapping resource="RadiologyOrder.hbm.xml"/>
         <mapping resource="MetadataSource.hbm.xml" />
         <mapping resource="MetadataTermMapping.hbm.xml" />
         <mapping resource="MetadataSet.hbm.xml" />

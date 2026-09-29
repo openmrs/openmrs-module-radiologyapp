@@ -22,6 +22,7 @@ import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
 import org.openmrs.Location;
 import org.openmrs.OpenmrsMetadata;
+import org.openmrs.OrderAttributeType;
 import org.openmrs.OrderType;
 import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
@@ -87,6 +88,15 @@ public class RadiologyProperties {
 
     public OrderType getRadiologyTestOrderType() {
         return getOrderTypeByGlobalProperty(RadiologyConstants.GP_RADIOLOGY_TEST_ORDER_TYPE);
+    }
+
+    public OrderAttributeType getExamLocationOrderAttributeType() {
+        OrderAttributeType orderAttributeType = orderService.getOrderAttributeTypeByUuid(RadiologyConstants.EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE_UUID);
+        if (orderAttributeType == null) {
+            throw new IllegalStateException("Exam Location order attribute type not found (uuid "
+                    + RadiologyConstants.EXAM_LOCATION_ORDER_ATTRIBUTE_TYPE_UUID + "); it should be created by the radiologyapp liquibase changesets");
+        }
+        return orderAttributeType;
     }
 
     public CareSetting getRadiologyCareSetting() {
