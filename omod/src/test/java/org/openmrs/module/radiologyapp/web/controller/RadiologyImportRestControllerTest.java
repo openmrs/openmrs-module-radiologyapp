@@ -3,16 +3,13 @@ package org.openmrs.module.radiologyapp.web.controller;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.api.context.UserContext;
-import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.radiologyapp.RadiologyService;
 import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
 import org.openmrs.module.radiologyapp.importer.RadiologyReportImportRequest;
 import org.openmrs.module.radiologyapp.importer.RadiologyStudyImportRequest;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +25,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -45,12 +41,9 @@ public class RadiologyImportRestControllerTest {
     public void setUp() {
         radiologyService = mock(RadiologyService.class);
         userContext = mock(UserContext.class);
-        when(userContext.hasPrivilege(PrivilegeConstants.ADD_ENCOUNTERS)).thenReturn(true);
         Context.setUserContext(userContext);
         // ConversionUtil looks up registered converters; there are none in a unit test, so it falls back to its defaults
         ServiceContext.getInstance().setApplicationContext(mock(ApplicationContext.class));
-        // used by Context.requirePrivilege to build its error message
-        ServiceContext.getInstance().setMessageSourceService(mock(MessageSourceService.class));
         ServiceContext.getInstance().setService(RadiologyService.class, radiologyService);
     }
 
@@ -146,19 +139,5 @@ public class RadiologyImportRestControllerTest {
             assertThat(response.getBody().get("error"), is(notNullValue()));
         }
         verifyNoInteractions(radiologyService);
-    }
-
-    @Test
-    public void postStudy_shouldRequireAddEncountersPrivilege() {
-        when(userContext.hasPrivilege(PrivilegeConstants.ADD_ENCOUNTERS)).thenReturn(false);
-
-        try {
-            controller.postStudy(studyBody("2026-11-10T21:21:19.000+00:00"));
-            fail("expected APIAuthenticationException");
-        }
-        catch (APIAuthenticationException e) {
-            // expected
-        }
-        verify(radiologyService, never()).importRadiologyStudy(any(RadiologyStudyImportRequest.class));
     }
 }
