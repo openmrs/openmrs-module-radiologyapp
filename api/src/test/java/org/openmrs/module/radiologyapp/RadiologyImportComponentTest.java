@@ -306,6 +306,30 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
     }
 
     @Test
+    public void importRadiologyReport_shouldCreateCorrectionWithSameDateButDifferentText() {
+        Date issued = secondsFromNow(-30);
+
+        assertEquals(RadiologyImportResult.Outcome.CREATED,
+                radiologyService.importRadiologyReport(reportRequest("12345", "correction", issued, "One")).getOutcome());
+        RadiologyImportResult result = radiologyService.importRadiologyReport(reportRequest("12345", "correction", issued, "Two"));
+
+        assertEquals(RadiologyImportResult.Outcome.CREATED, result.getOutcome());
+        assertEquals(2, radiologyService.getRadiologyReportsByOrderNumber("12345").size());
+    }
+
+    @Test
+    public void importRadiologyReport_shouldTreatCorrectionWithSameTextButDifferentDateAsExisting() {
+        assertEquals(RadiologyImportResult.Outcome.CREATED, radiologyService.importRadiologyReport(
+                reportRequest("12345", "correction", secondsFromNow(-60), "Same")).getOutcome());
+
+        RadiologyImportResult result = radiologyService.importRadiologyReport(
+                reportRequest("12345", "correction", secondsFromNow(-10), "Same"));
+
+        assertEquals(RadiologyImportResult.Outcome.ALREADY_EXISTS, result.getOutcome());
+        assertEquals(1, radiologyService.getRadiologyReportsByOrderNumber("12345").size());
+    }
+
+    @Test
     public void importRadiologyReport_shouldTreatClampedCorrectionWithSameBodyAsExisting() throws Exception {
         assertEquals(RadiologyImportResult.Outcome.CREATED, radiologyService.importRadiologyReport(
                 reportRequest("12345", "correction", secondsFromNow(2 * 3600), "Same body")).getOutcome());

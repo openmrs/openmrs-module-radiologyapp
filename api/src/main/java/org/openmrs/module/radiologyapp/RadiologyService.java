@@ -133,7 +133,7 @@ public interface RadiologyService extends OpenmrsService {
      * Imports a final or correction radiology report produced in an external system against the existing radiology
      * order whose order number matches the accession number, creating the radiology study first if there is none.
      * The patient identifier must match the order's patient. A second final report is ALREADY_EXISTS; a correction is
-     * ALREADY_EXISTS only if a correction with the same report date (to the second) exists.
+     * ALREADY_EXISTS only if a correction with exactly the same report text exists (the report date is not compared).
      *
      * @param request
      * @return the outcome; CREATED (with the new report encounter's uuid),
