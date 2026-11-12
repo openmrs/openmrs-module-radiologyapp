@@ -26,6 +26,8 @@
                 <property name="conceptService" ref="conceptService"/>
                 <property name="orderService" ref="orderService"/>
                 <property name="emrEncounterDAO" ref="emrEncounterDAO"/>
+                <property name="providerService" ref="providerService"/>
+                <property name="patientService" ref="patientService"/>
             </bean>
         </property>
         <property name="preInterceptors">

@@ -24,15 +24,20 @@ import org.openmrs.Order;
 import org.openmrs.OrderAttribute;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.OrderContext;
 import org.openmrs.api.OrderService;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.customdatatype.CustomDatatypeUtil;
+import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
@@ -41,6 +46,10 @@ import org.openmrs.module.radiologyapp.comparator.RadiologyOrderByDateComparator
 import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparator;
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
+import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
+import org.openmrs.module.radiologyapp.importer.RadiologyReportImportRequest;
+import org.openmrs.module.radiologyapp.importer.RadiologyStudyImportRequest;
+import org.openmrs.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -65,6 +74,10 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     private OrderService orderService;
 
     private EmrEncounterDAO emrEncounterDAO;
+
+    private ProviderService providerService;
+
+    private PatientService patientService;
 
     @Transactional
     @Override
@@ -174,6 +187,196 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         encounter.addObs(radiologyStudyConceptSet.buildRadiologyStudyObsGroup(radiologyStudy));
 
         return encounterService.saveEncounter(encounter);
+    }
+
+    // core's EncounterValidator rejects encounter dates in the future, so a PACS clock running ahead is clamped to now
+    private Date clampToNow(Date date, String kind, String accessionNumber) {
+        Date now = new Date();
+        if (date.after(now)) {
+            log.warn("Radiology " + kind + " import for accession number " + accessionNumber + ": date is in the future, using the current time");
+            return now;
+        }
+        return date;
+    }
+
+    @Transactional
+    @Override
+    // NOTE: synchronized only narrows the race window between the already-exists check and the save; it does not close it,
+    // because the transactional proxy releases the lock before the transaction commits. Callers must not send concurrent
+    // imports for the same accession number; a caller that may receive duplicate events should process them one at a time.
+    public synchronized RadiologyImportResult importRadiologyStudy(RadiologyStudyImportRequest request) {
+
+        if (StringUtils.isBlank(request.getAccessionNumber())) {
+            throw new IllegalArgumentException("accessionNumber is required");
+        }
+        if (request.getDatePerformed() == null) {
+            throw new IllegalArgumentException("datePerformed is required");
+        }
+        if (StringUtils.isBlank(request.getPatientIdentifierTypeUuid())) {
+            throw new IllegalArgumentException("patientIdentifierTypeUuid is required");
+        }
+        if (StringUtils.isBlank(request.getPatientIdentifier())) {
+            throw new IllegalArgumentException("patientIdentifier is required");
+        }
+
+        PatientIdentifierType identifierType = patientService.getPatientIdentifierTypeByUuid(request.getPatientIdentifierTypeUuid());
+        if (identifierType == null) {
+            throw new IllegalArgumentException("Unknown patient identifier type");
+        }
+
+        String accessionNumber = request.getAccessionNumber();
+
+        TestOrder order = getRadiologyOrderByOrderNumber(accessionNumber);
+        if (order == null || order.getVoided()) {
+            log.warn("Radiology study import for accession number " + accessionNumber + ": NO_MATCHING_ORDER");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.NO_MATCHING_ORDER);
+        }
+
+        if (!patientMatches(order, identifierType, request.getPatientIdentifier())) {
+            log.warn("Radiology study import for accession number " + accessionNumber + ": PATIENT_MISMATCH");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.PATIENT_MISMATCH);
+        }
+
+        if (studyEncounterExists(accessionNumber)) {
+            log.warn("Radiology study import for accession number " + accessionNumber + ": ALREADY_EXISTS");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.ALREADY_EXISTS);
+        }
+
+        RadiologyStudy study = new RadiologyStudy();
+        study.setAssociatedRadiologyOrder(order);
+        study.setOrderNumber(order.getOrderNumber());
+        study.setPatient(order.getPatient());
+        study.setProcedure(order.getConcept());
+        study.setDatePerformed(clampToNow(DateUtil.truncateToSeconds(request.getDatePerformed()), "study", accessionNumber));
+        study.setImagesAvailable(request.getImagesAvailable());
+
+        if (StringUtils.isNotBlank(request.getTechnicianProviderUuid())) {
+            Provider technician = providerService.getProviderByUuid(request.getTechnicianProviderUuid());
+            if (technician != null && !technician.getRetired()) {
+                study.setTechnician(technician);
+            }
+        }
+
+        Encounter encounter = saveRadiologyStudy(study);
+        log.info("Radiology study import for accession number " + accessionNumber + ": CREATED");
+        return RadiologyImportResult.created(encounter.getUuid());
+    }
+
+    @Transactional
+    @Override
+    // NOTE: synchronized has the same limited effect as for importRadiologyStudy; see the note there
+    public synchronized RadiologyImportResult importRadiologyReport(RadiologyReportImportRequest request) {
+
+        if (StringUtils.isBlank(request.getAccessionNumber())) {
+            throw new IllegalArgumentException("accessionNumber is required");
+        }
+        if (request.getReportDate() == null) {
+            throw new IllegalArgumentException("reportDate is required");
+        }
+        if (StringUtils.isBlank(request.getReportBody())) {
+            throw new IllegalArgumentException("reportBody is required");
+        }
+        if (StringUtils.isBlank(request.getPatientIdentifierTypeUuid())) {
+            throw new IllegalArgumentException("patientIdentifierTypeUuid is required");
+        }
+        if (StringUtils.isBlank(request.getPatientIdentifier())) {
+            throw new IllegalArgumentException("patientIdentifier is required");
+        }
+
+        boolean isFinal = "final".equals(request.getReportType());
+        if (!isFinal && !"correction".equals(request.getReportType())) {
+            throw new IllegalArgumentException("reportType must be either final or correction");
+        }
+
+        String reportTypeCode = isFinal ? RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_FINAL
+                : RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_CORRECTION;
+        Concept reportType = conceptService.getConceptByMapping(reportTypeCode, EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+        if (reportType == null) {
+            throw new IllegalStateException("Radiology report type concept '" + reportTypeCode + "' is not configured");
+        }
+
+        PatientIdentifierType identifierType = patientService.getPatientIdentifierTypeByUuid(request.getPatientIdentifierTypeUuid());
+        if (identifierType == null) {
+            throw new IllegalArgumentException("Unknown patient identifier type");
+        }
+
+        String accessionNumber = request.getAccessionNumber();
+
+        TestOrder order = getRadiologyOrderByOrderNumber(accessionNumber);
+        if (order == null || order.getVoided()) {
+            log.warn("Radiology report import for accession number " + accessionNumber + ": NO_MATCHING_ORDER");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.NO_MATCHING_ORDER);
+        }
+
+        if (!patientMatches(order, identifierType, request.getPatientIdentifier())) {
+            log.warn("Radiology report import for accession number " + accessionNumber + ": PATIENT_MISMATCH");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.PATIENT_MISMATCH);
+        }
+
+        Date reportDate = clampToNow(DateUtil.truncateToSeconds(request.getReportDate()), "report", accessionNumber);
+
+        // a future-dated report is clamped to "now", so a retry gets a new date: corrections are
+        // also matched on identical body text
+        for (RadiologyReport existing : getRadiologyReportsByOrderNumber(accessionNumber)) {
+            if (reportType.equals(existing.getReportType())
+                    && (isFinal
+                        || reportDate.equals(DateUtil.truncateToSeconds(existing.getReportDate()))
+                        || request.getReportBody().equals(existing.getReportBody()))) {
+                log.warn("Radiology report import for accession number " + accessionNumber + ": ALREADY_EXISTS");
+                return RadiologyImportResult.of(RadiologyImportResult.Outcome.ALREADY_EXISTS);
+            }
+        }
+
+        if (!studyEncounterExists(accessionNumber)) {
+            RadiologyStudyImportRequest studyRequest = new RadiologyStudyImportRequest();
+            studyRequest.setAccessionNumber(accessionNumber);
+            studyRequest.setDatePerformed(request.getDatePerformed() != null ? request.getDatePerformed() : reportDate);
+            studyRequest.setPatientIdentifierTypeUuid(request.getPatientIdentifierTypeUuid());
+            studyRequest.setPatientIdentifier(request.getPatientIdentifier());
+            importRadiologyStudy(studyRequest);
+        }
+
+        RadiologyReport report = new RadiologyReport();
+        report.setAssociatedRadiologyOrder(order);
+        report.setOrderNumber(order.getOrderNumber());
+        report.setPatient(order.getPatient());
+        report.setProcedure(order.getConcept());
+        report.setReportType(reportType);
+        report.setReportBody(request.getReportBody());
+        report.setReportDate(reportDate);
+
+        if (StringUtils.isNotBlank(request.getRadiologistProviderUuid())) {
+            Provider radiologist = providerService.getProviderByUuid(request.getRadiologistProviderUuid());
+            if (radiologist != null && !radiologist.getRetired()) {
+                report.setPrincipalResultsInterpreter(radiologist);
+            }
+        }
+
+        Encounter encounter = saveRadiologyReport(report);
+        log.info("Radiology report import for accession number " + accessionNumber + ": CREATED");
+
+        return RadiologyImportResult.created(encounter.getUuid());
+    }
+
+    /**
+     * @return true if the order's patient has a non-voided identifier of the given type with exactly the given value
+     */
+    private boolean patientMatches(Order order, PatientIdentifierType identifierType, String patientIdentifier) {
+        for (PatientIdentifier identifier : order.getPatient().getPatientIdentifiers(identifierType)) {
+            if (!identifier.getVoided() && patientIdentifier.equals(identifier.getIdentifier())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return true if a Radiology Study encounter (as opposed to a study derived from reports) exists for the order number
+     */
+    private boolean studyEncounterExists(String orderNumber) {
+        List<Encounter> encounters = emrEncounterDAO.getEncountersByObsValueText(new RadiologyStudyConceptSet(conceptService).getOrderNumberConcept(),
+                orderNumber, radiologyProperties.getRadiologyStudyEncounterType(), false);
+        return encounters != null && !encounters.isEmpty();
     }
 
     @Transactional(readOnly = true)
@@ -493,5 +696,13 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     public void setEmrEncounterDAO(EmrEncounterDAO emrEncounterDAO) {
         this.emrEncounterDAO = emrEncounterDAO;
+    }
+
+    public void setProviderService(ProviderService providerService) {
+        this.providerService = providerService;
+    }
+
+    public void setPatientService(PatientService patientService) {
+        this.patientService = patientService;
     }
 }
