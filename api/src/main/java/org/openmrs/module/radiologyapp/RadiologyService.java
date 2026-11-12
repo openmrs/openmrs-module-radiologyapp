@@ -21,6 +21,8 @@ import org.openmrs.TestOrder;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
+import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
+import org.openmrs.module.radiologyapp.importer.RadiologyStudyImportRequest;
 
 import java.util.List;
 
@@ -113,5 +115,17 @@ public interface RadiologyService extends OpenmrsService {
      * @return
      */
     List<RadiologyStudy> getRadiologyStudiesForPatient(Patient patient);
+
+
+    /**
+     * Imports a radiology study performed in an external system against the existing radiology order whose order number
+     * matches the accession number. The patient identifier must match the order's patient.
+     *
+     * @param request
+     * @return the outcome; CREATED (with the new encounter's uuid), ALREADY_EXISTS, NO_MATCHING_ORDER or PATIENT_MISMATCH
+     * @throws IllegalArgumentException if accession number, date performed, identifier type or identifier is blank,
+     *         or the identifier type is unknown
+     */
+    RadiologyImportResult importRadiologyStudy(RadiologyStudyImportRequest request);
 
 }
