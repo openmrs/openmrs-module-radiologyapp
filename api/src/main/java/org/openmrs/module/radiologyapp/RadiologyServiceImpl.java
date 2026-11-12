@@ -327,14 +327,13 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
         }
 
-        boolean studyCreated = false;
         if (!studyEncounterExists(accessionNumber)) {
             RadiologyStudyImportRequest studyRequest = new RadiologyStudyImportRequest();
             studyRequest.setAccessionNumber(accessionNumber);
             studyRequest.setDatePerformed(request.getDatePerformed() != null ? request.getDatePerformed() : reportDate);
             studyRequest.setPatientIdentifierTypeUuid(request.getPatientIdentifierTypeUuid());
             studyRequest.setPatientIdentifier(request.getPatientIdentifier());
-            studyCreated = importRadiologyStudy(studyRequest).getOutcome() == RadiologyImportResult.Outcome.CREATED;
+            importRadiologyStudy(studyRequest);
         }
 
         RadiologyReport report = new RadiologyReport();
@@ -356,9 +355,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         Encounter encounter = saveRadiologyReport(report);
         log.info("Radiology report import for accession number " + accessionNumber + ": CREATED");
 
-        RadiologyImportResult result = RadiologyImportResult.created(encounter.getUuid());
-        result.setStudyCreated(studyCreated);
-        return result;
+        return RadiologyImportResult.created(encounter.getUuid());
     }
 
     /**

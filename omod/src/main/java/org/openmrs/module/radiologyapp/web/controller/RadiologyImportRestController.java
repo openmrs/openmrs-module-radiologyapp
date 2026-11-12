@@ -81,7 +81,6 @@ public class RadiologyImportRestController extends BaseRestController {
         Map<String, Object> response = new LinkedHashMap<String, Object>();
         response.put("outcome", result.getOutcome().name());
         response.put("encounterUuid", result.getEncounterUuid());
-        response.put("studyCreated", result.isStudyCreated());
         return response;
     }
 

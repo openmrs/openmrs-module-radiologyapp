@@ -91,7 +91,7 @@ public class RadiologyImportRestControllerTest {
         Map<?, ?> map = (Map<?, ?>) response;
         assertThat(map.get("outcome"), is((Object) "CREATED"));
         assertThat(map.get("encounterUuid"), is((Object) "enc-uuid"));
-        assertThat(map.get("studyCreated"), is((Object) false));
+        assertThat(map.containsKey("studyCreated"), is(false));
     }
 
     @Test

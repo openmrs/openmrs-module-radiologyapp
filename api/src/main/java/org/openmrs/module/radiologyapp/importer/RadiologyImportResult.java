@@ -31,9 +31,6 @@ public class RadiologyImportResult {
     // null unless the outcome is CREATED
     private String encounterUuid;
 
-    // only meaningful for report imports: true if a study encounter was also created
-    private boolean studyCreated;
-
     public static RadiologyImportResult created(String encounterUuid) {
         RadiologyImportResult result = new RadiologyImportResult();
         result.setOutcome(Outcome.CREATED);

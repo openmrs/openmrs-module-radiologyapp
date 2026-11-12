@@ -224,7 +224,6 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
 
         assertEquals(RadiologyImportResult.Outcome.CREATED, result.getOutcome());
         assertNotNull(result.getEncounterUuid());
-        assertTrue(result.isStudyCreated());
 
         List<RadiologyReport> reports = radiologyService.getRadiologyReportsByOrderNumber("12345");
         assertEquals(1, reports.size());
@@ -234,6 +233,7 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
                 encounterService.getEncounterByUuid(result.getEncounterUuid()).getLocation());
 
         assertEquals(1, studyEncounterCount());
+        assertNotNull(radiologyService.getRadiologyStudyByOrderNumber("12345"));
         assertEquals(request.getDatePerformed(), radiologyService.getRadiologyStudyByOrderNumber("12345").getDatePerformed());
     }
 
@@ -255,7 +255,6 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
         RadiologyImportResult result = radiologyService.importRadiologyReport(finalRequest("12345"));
 
         assertEquals(RadiologyImportResult.Outcome.CREATED, result.getOutcome());
-        assertFalse(result.isStudyCreated());
         assertEquals(1, studyEncounterCount());
     }
 
@@ -279,7 +278,6 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
                 reportRequest("12345", "correction", secondsFromNow(-60), "Corrected body"));
 
         assertEquals(RadiologyImportResult.Outcome.CREATED, result.getOutcome());
-        assertFalse(result.isStudyCreated());
         List<RadiologyReport> reports = radiologyService.getRadiologyReportsByOrderNumber("12345");
         assertEquals(2, reports.size());
         int corrections = 0;

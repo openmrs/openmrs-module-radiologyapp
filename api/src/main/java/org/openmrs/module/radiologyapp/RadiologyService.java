@@ -136,7 +136,7 @@ public interface RadiologyService extends OpenmrsService {
      * ALREADY_EXISTS only if a correction with the same report date (to the second) exists.
      *
      * @param request
-     * @return the outcome; CREATED (with the new report encounter's uuid, and studyCreated if a study was also created),
+     * @return the outcome; CREATED (with the new report encounter's uuid),
      *         ALREADY_EXISTS, NO_MATCHING_ORDER or PATIENT_MISMATCH
      * @throws IllegalArgumentException if a required field is blank, the report type is not "final" or "correction",
      *         or the identifier type is unknown
