@@ -109,13 +109,43 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
         RadiologyStudyImportRequest request = request("12345");
         Encounter encounter = createAndGetEncounter(request);
 
-        assertEquals(radiologyProperties.getUnknownLocation(), encounter.getLocation());
+        assertNull(encounter.getLocation());
+        assertNull(encounter.getVisit());
         assertEquals(Collections.singleton(radiologyProperties.getUnknownProvider()),
                 encounter.getProvidersByRole(radiologyProperties.getRadiologyTechnicianEncounterRole()));
 
         RadiologyStudy study = radiologyService.getRadiologyStudyByOrderNumber("12345");
         assertEquals(request.getDatePerformed(), study.getDatePerformed());
         assertTrue(study.getImagesAvailable());
+    }
+
+    @Test
+    public void importRadiologyStudy_shouldCreateEncounterWithoutLocationOrVisit() {
+        Encounter encounter = createAndGetEncounter(request("12345"));
+
+        assertNull(encounter.getLocation());
+        assertNull(encounter.getVisit());
+    }
+
+    @Test
+    public void importRadiologyReport_shouldCreateEncounterWithoutLocationOrVisit() {
+        RadiologyImportResult result = radiologyService.importRadiologyReport(finalRequest("12345"));
+
+        Encounter encounter = encounterService.getEncounterByUuid(result.getEncounterUuid());
+        assertNull(encounter.getLocation());
+        assertNull(encounter.getVisit());
+    }
+
+    @Test
+    public void importRadiologyReport_shouldCreateStudyEncounterWithoutLocationOrVisit() {
+        radiologyService.importRadiologyReport(finalRequest("12345"));
+
+        List<Encounter> studyEncounters = encounterService.getEncounters(patientService.getPatient(6), null, null, null, null,
+                Collections.singletonList(radiologyProperties.getRadiologyStudyEncounterType()),
+                null, null, null, false);
+        assertEquals(1, studyEncounters.size());
+        assertNull(studyEncounters.get(0).getLocation());
+        assertNull(studyEncounters.get(0).getVisit());
     }
 
     @Test
@@ -229,8 +259,9 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
         assertEquals(1, reports.size());
         assertEquals(reportTypeConcept(RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_FINAL), reports.get(0).getReportType());
         assertEquals("Final body", reports.get(0).getReportBody());
-        assertEquals(radiologyProperties.getUnknownLocation(),
-                encounterService.getEncounterByUuid(result.getEncounterUuid()).getLocation());
+        Encounter reportEncounter = encounterService.getEncounterByUuid(result.getEncounterUuid());
+        assertNull(reportEncounter.getLocation());
+        assertNull(reportEncounter.getVisit());
 
         assertEquals(1, studyEncounterCount());
         assertNotNull(radiologyService.getRadiologyStudyByOrderNumber("12345"));
