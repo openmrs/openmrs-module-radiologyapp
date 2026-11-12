@@ -203,7 +203,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
     @Override
     // NOTE: synchronized only narrows the race window between the already-exists check and the save; it does not close it,
     // because the transactional proxy releases the lock before the transaction commits. Callers must not send concurrent
-    // imports for the same accession number (the AdvaPACS mediator serialises its calls).
+    // imports for the same accession number; a caller that may receive duplicate events should process them one at a time.
     public synchronized RadiologyImportResult importRadiologyStudy(RadiologyStudyImportRequest request) {
 
         if (StringUtils.isBlank(request.getAccessionNumber())) {

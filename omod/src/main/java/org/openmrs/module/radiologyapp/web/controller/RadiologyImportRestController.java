@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Endpoints that let an external system (e.g. a PACS, via a mediator) import radiology studies and reports against
+ * Endpoints that let an external system (e.g. a PACS or an integration layer) import radiology studies and reports against
  * existing radiology orders
  */
 @Controller

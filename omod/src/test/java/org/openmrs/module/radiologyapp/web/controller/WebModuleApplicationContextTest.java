@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 public class WebModuleApplicationContextTest {
 
     // core's web context only scans org.openmrs.web.controller, so without this element the REST controller is not
-    // registered in a running server (the mediator would get a 404)
+    // registered in a running server (callers would get a 404)
     @Test
     public void shouldComponentScanTheRestControllerPackage() throws Exception {
         InputStream in = getClass().getClassLoader().getResourceAsStream("webModuleApplicationContext.xml");
