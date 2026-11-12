@@ -288,6 +288,13 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             throw new IllegalArgumentException("reportType must be either final or correction");
         }
 
+        String reportTypeCode = isFinal ? RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_FINAL
+                : RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_CORRECTION;
+        Concept reportType = conceptService.getConceptByMapping(reportTypeCode, EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+        if (reportType == null) {
+            throw new IllegalStateException("Radiology report type concept '" + reportTypeCode + "' is not configured");
+        }
+
         PatientIdentifierType identifierType = patientService.getPatientIdentifierTypeByUuid(request.getPatientIdentifierTypeUuid());
         if (identifierType == null) {
             throw new IllegalArgumentException("Unknown patient identifier type");
@@ -308,13 +315,13 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         Date reportDate = clampToNow(DateUtil.truncateToSeconds(request.getReportDate()), "report", accessionNumber);
 
-        Concept reportType = conceptService.getConceptByMapping(
-                isFinal ? RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_FINAL : RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_CORRECTION,
-                EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
-
+        // a future-dated report is clamped to "now", so a retry gets a new date: corrections are
+        // also matched on identical body text
         for (RadiologyReport existing : getRadiologyReportsByOrderNumber(accessionNumber)) {
             if (reportType.equals(existing.getReportType())
-                    && (isFinal || reportDate.equals(DateUtil.truncateToSeconds(existing.getReportDate())))) {
+                    && (isFinal
+                        || reportDate.equals(DateUtil.truncateToSeconds(existing.getReportDate()))
+                        || request.getReportBody().equals(existing.getReportBody()))) {
                 log.warn("Radiology report import for accession number " + accessionNumber + ": ALREADY_EXISTS");
                 return RadiologyImportResult.of(RadiologyImportResult.Outcome.ALREADY_EXISTS);
             }

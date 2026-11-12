@@ -46,6 +46,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest {
 
@@ -304,6 +305,37 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
 
         assertEquals(RadiologyImportResult.Outcome.ALREADY_EXISTS, result.getOutcome());
         assertEquals(1, radiologyService.getRadiologyReportsByOrderNumber("12345").size());
+    }
+
+    @Test
+    public void importRadiologyReport_shouldTreatClampedCorrectionWithSameBodyAsExisting() throws Exception {
+        assertEquals(RadiologyImportResult.Outcome.CREATED, radiologyService.importRadiologyReport(
+                reportRequest("12345", "correction", secondsFromNow(2 * 3600), "Same body")).getOutcome());
+        Thread.sleep(1100);
+
+        RadiologyImportResult retry = radiologyService.importRadiologyReport(
+                reportRequest("12345", "correction", secondsFromNow(2 * 3600), "Same body"));
+        assertEquals(RadiologyImportResult.Outcome.ALREADY_EXISTS, retry.getOutcome());
+
+        RadiologyImportResult different = radiologyService.importRadiologyReport(
+                reportRequest("12345", "correction", secondsFromNow(-5), "Different body"));
+        assertEquals(RadiologyImportResult.Outcome.CREATED, different.getOutcome());
+        assertEquals(2, radiologyService.getRadiologyReportsByOrderNumber("12345").size());
+    }
+
+    @Test
+    public void importRadiologyReport_shouldFailClearlyWhenReportTypeConceptIsNotConfigured() {
+        // a plain instance with a conceptService that knows no mappings, so shared test data is untouched
+        RadiologyServiceImpl unconfigured = new RadiologyServiceImpl();
+        unconfigured.setConceptService(org.mockito.Mockito.mock(org.openmrs.api.ConceptService.class));
+
+        try {
+            unconfigured.importRadiologyReport(reportRequest("12345", "correction", secondsFromNow(-5), "Body"));
+            fail("expected IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Radiology report type concept '" + RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_CORRECTION
+                    + "' is not configured", e.getMessage());
+        }
     }
 
     @Test
