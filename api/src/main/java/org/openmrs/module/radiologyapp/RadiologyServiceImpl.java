@@ -189,7 +189,9 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     @Transactional
     @Override
-    // synchronized for the same reason as saveRadiologyStudy: the already-exists check and the save must not interleave
+    // NOTE: synchronized only narrows the race window between the already-exists check and the save; it does not close it,
+    // because the transactional proxy releases the lock before the transaction commits. Callers must not send concurrent
+    // imports for the same accession number (the AdvaPACS mediator serialises its calls).
     public synchronized RadiologyImportResult importRadiologyStudy(RadiologyStudyImportRequest request) {
 
         if (StringUtils.isBlank(request.getAccessionNumber())) {
@@ -205,6 +207,11 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             throw new IllegalArgumentException("patientIdentifier is required");
         }
 
+        PatientIdentifierType identifierType = patientService.getPatientIdentifierTypeByUuid(request.getPatientIdentifierTypeUuid());
+        if (identifierType == null) {
+            throw new IllegalArgumentException("Unknown patient identifier type");
+        }
+
         String accessionNumber = request.getAccessionNumber();
 
         TestOrder order = getRadiologyOrderByOrderNumber(accessionNumber);
@@ -213,7 +220,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             return RadiologyImportResult.of(RadiologyImportResult.Outcome.NO_MATCHING_ORDER);
         }
 
-        if (!patientMatches(order, request.getPatientIdentifierTypeUuid(), request.getPatientIdentifier())) {
+        if (!patientMatches(order, identifierType, request.getPatientIdentifier())) {
             log.warn("Radiology study import for accession number " + accessionNumber + ": PATIENT_MISMATCH");
             return RadiologyImportResult.of(RadiologyImportResult.Outcome.PATIENT_MISMATCH);
         }
@@ -245,13 +252,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
     /**
      * @return true if the order's patient has a non-voided identifier of the given type with exactly the given value
-     * @throws IllegalArgumentException if the identifier type is unknown
      */
-    private boolean patientMatches(Order order, String patientIdentifierTypeUuid, String patientIdentifier) {
-        PatientIdentifierType identifierType = patientService.getPatientIdentifierTypeByUuid(patientIdentifierTypeUuid);
-        if (identifierType == null) {
-            throw new IllegalArgumentException("Unknown patient identifier type");
-        }
+    private boolean patientMatches(Order order, PatientIdentifierType identifierType, String patientIdentifier) {
         for (PatientIdentifier identifier : order.getPatient().getPatientIdentifiers(identifierType)) {
             if (!identifier.getVoided() && patientIdentifier.equals(identifier.getIdentifier())) {
                 return true;

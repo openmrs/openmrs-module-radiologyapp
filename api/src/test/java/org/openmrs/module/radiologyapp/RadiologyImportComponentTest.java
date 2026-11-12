@@ -166,4 +166,12 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
         request.setDatePerformed(null);
         radiologyService.importRadiologyStudy(request);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void importRadiologyStudy_shouldRejectUnknownIdentifierType() {
+        // unknown accession too: proves the identifier type is validated before the order lookup
+        RadiologyStudyImportRequest request = request("nope");
+        request.setPatientIdentifierTypeUuid(UUID.randomUUID().toString());
+        radiologyService.importRadiologyStudy(request);
+    }
 }
