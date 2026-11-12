@@ -43,8 +43,20 @@
         <metadatamappingVersion>1.7.0</metadatamappingVersion>
         <uicommonsVersion>2.26.0</uicommonsVersion>
         <uiframeworkVersion>4.0.0</uiframeworkVersion>
+        <webservicesRestVersion>2.42.0</webservicesRestVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>webservices.rest-omod</artifactId>
+                <version>${webservicesRestVersion}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
 
