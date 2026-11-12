@@ -152,6 +152,21 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         validate(radiologyReport);
 
+        return encounterService.saveEncounter(buildRadiologyReportEncounter(radiologyReport));
+    }
+
+    @Transactional
+    @Override
+    // we synchronize this method so that we can verify that we never create two studies with the same order number
+    public synchronized Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
+
+        validate(radiologyStudy);
+
+        return encounterService.saveEncounter(buildRadiologyStudyEncounter(radiologyStudy));
+    }
+
+    // location defaults to the unknown location when the report has none
+    private Encounter buildRadiologyReportEncounter(RadiologyReport radiologyReport) {
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyReportEncounterType());
         encounter.setEncounterDatetime(radiologyReport.getReportDate());
@@ -163,17 +178,11 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         RadiologyReportConceptSet radiologyReportConceptSet = new RadiologyReportConceptSet(conceptService);
         encounter.addObs(radiologyReportConceptSet.buildRadiologyReportObsGroup(radiologyReport));
-
-        return encounterService.saveEncounter(encounter);
+        return encounter;
     }
 
-    @Transactional
-    @Override
-    // we synchronize this method so that we can verify that we never create two studies with the same order number
-    public synchronized Encounter saveRadiologyStudy(RadiologyStudy radiologyStudy) {
-
-        validate(radiologyStudy);
-
+    // location defaults to the unknown location when the study has none
+    private Encounter buildRadiologyStudyEncounter(RadiologyStudy radiologyStudy) {
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyStudyEncounterType());
         encounter.setEncounterDatetime(radiologyStudy.getDatePerformed());
@@ -185,7 +194,14 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         RadiologyStudyConceptSet radiologyStudyConceptSet = new RadiologyStudyConceptSet(conceptService);
         encounter.addObs(radiologyStudyConceptSet.buildRadiologyStudyObsGroup(radiologyStudy));
+        return encounter;
+    }
 
+    // Imported encounters deliberately have no location, so that they have no visit: emrapi's visit assignment skips
+    // location-less encounters, whereas any location (the unknown location, or the order's) can make it throw
+    // "Patient already has an active visit at another location on this date" when the patient has an open visit elsewhere.
+    private Encounter saveImportedEncounter(Encounter encounter) {
+        encounter.setLocation(null);
         return encounterService.saveEncounter(encounter);
     }
 
@@ -257,7 +273,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
         }
 
-        Encounter encounter = saveRadiologyStudy(study);
+        validate(study);
+        Encounter encounter = saveImportedEncounter(buildRadiologyStudyEncounter(study));
         log.info("Radiology study import for accession number " + accessionNumber + ": CREATED");
         return RadiologyImportResult.created(encounter.getUuid());
     }
@@ -351,7 +368,8 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             }
         }
 
-        Encounter encounter = saveRadiologyReport(report);
+        validate(report);
+        Encounter encounter = saveImportedEncounter(buildRadiologyReportEncounter(report));
         log.info("Radiology report import for accession number " + accessionNumber + ": CREATED");
 
         return RadiologyImportResult.created(encounter.getUuid());
