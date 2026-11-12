@@ -29,7 +29,7 @@ import java.util.Map;
 @Controller
 public class RadiologyImportRestController extends BaseRestController {
 
-    @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/radiologyapp/study", method = RequestMethod.POST)
+    @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/radiologyapp/studyimport", method = RequestMethod.POST)
     @ResponseBody
     public Object postStudy(@RequestBody Map<String, Object> body) {
         RadiologyStudyImportRequest request = new RadiologyStudyImportRequest();
@@ -43,7 +43,7 @@ public class RadiologyImportRestController extends BaseRestController {
         return toResponse(Context.getService(RadiologyService.class).importRadiologyStudy(request));
     }
 
-    @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/radiologyapp/report", method = RequestMethod.POST)
+    @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/radiologyapp/reportimport", method = RequestMethod.POST)
     @ResponseBody
     public Object postReport(@RequestBody Map<String, Object> body) {
         RadiologyReportImportRequest request = new RadiologyReportImportRequest();
