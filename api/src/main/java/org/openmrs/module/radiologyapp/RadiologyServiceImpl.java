@@ -37,6 +37,7 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.customdatatype.CustomDatatypeUtil;
+import org.openmrs.module.emrapi.EmrApiConstants;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.emrapi.db.EmrEncounterDAO;
@@ -46,6 +47,7 @@ import org.openmrs.module.radiologyapp.comparator.RadiologyReportByDataComparato
 import org.openmrs.module.radiologyapp.comparator.RadiologyStudyByDateComparator;
 import org.openmrs.module.radiologyapp.exception.RadiologyAPIException;
 import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
+import org.openmrs.module.radiologyapp.importer.RadiologyReportImportRequest;
 import org.openmrs.module.radiologyapp.importer.RadiologyStudyImportRequest;
 import org.openmrs.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
@@ -248,6 +250,98 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         Encounter encounter = saveRadiologyStudy(study);
         log.info("Radiology study import for accession number " + accessionNumber + ": CREATED");
         return RadiologyImportResult.created(encounter.getUuid());
+    }
+
+    @Transactional
+    @Override
+    // NOTE: synchronized has the same limited effect as for importRadiologyStudy; see the note there
+    public synchronized RadiologyImportResult importRadiologyReport(RadiologyReportImportRequest request) {
+
+        if (StringUtils.isBlank(request.getAccessionNumber())) {
+            throw new IllegalArgumentException("accessionNumber is required");
+        }
+        if (request.getReportDate() == null) {
+            throw new IllegalArgumentException("reportDate is required");
+        }
+        if (StringUtils.isBlank(request.getReportBody())) {
+            throw new IllegalArgumentException("reportBody is required");
+        }
+        if (StringUtils.isBlank(request.getPatientIdentifierTypeUuid())) {
+            throw new IllegalArgumentException("patientIdentifierTypeUuid is required");
+        }
+        if (StringUtils.isBlank(request.getPatientIdentifier())) {
+            throw new IllegalArgumentException("patientIdentifier is required");
+        }
+
+        boolean isFinal = "final".equals(request.getReportType());
+        if (!isFinal && !"correction".equals(request.getReportType())) {
+            throw new IllegalArgumentException("reportType must be either final or correction");
+        }
+
+        PatientIdentifierType identifierType = patientService.getPatientIdentifierTypeByUuid(request.getPatientIdentifierTypeUuid());
+        if (identifierType == null) {
+            throw new IllegalArgumentException("Unknown patient identifier type");
+        }
+
+        String accessionNumber = request.getAccessionNumber();
+
+        TestOrder order = getRadiologyOrderByOrderNumber(accessionNumber);
+        if (order == null) {
+            log.warn("Radiology report import for accession number " + accessionNumber + ": NO_MATCHING_ORDER");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.NO_MATCHING_ORDER);
+        }
+
+        if (!patientMatches(order, identifierType, request.getPatientIdentifier())) {
+            log.warn("Radiology report import for accession number " + accessionNumber + ": PATIENT_MISMATCH");
+            return RadiologyImportResult.of(RadiologyImportResult.Outcome.PATIENT_MISMATCH);
+        }
+
+        Date reportDate = DateUtil.truncateToSeconds(request.getReportDate());
+
+        Concept reportType = conceptService.getConceptByMapping(
+                isFinal ? RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_FINAL : RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_CORRECTION,
+                EmrApiConstants.EMR_CONCEPT_SOURCE_NAME);
+
+        for (RadiologyReport existing : getRadiologyReportsByOrderNumber(accessionNumber)) {
+            if (reportType.equals(existing.getReportType())
+                    && (isFinal || reportDate.equals(DateUtil.truncateToSeconds(existing.getReportDate())))) {
+                log.warn("Radiology report import for accession number " + accessionNumber + ": ALREADY_EXISTS");
+                return RadiologyImportResult.of(RadiologyImportResult.Outcome.ALREADY_EXISTS);
+            }
+        }
+
+        boolean studyCreated = false;
+        if (!studyEncounterExists(accessionNumber)) {
+            RadiologyStudyImportRequest studyRequest = new RadiologyStudyImportRequest();
+            studyRequest.setAccessionNumber(accessionNumber);
+            studyRequest.setDatePerformed(request.getDatePerformed() != null ? request.getDatePerformed() : reportDate);
+            studyRequest.setPatientIdentifierTypeUuid(request.getPatientIdentifierTypeUuid());
+            studyRequest.setPatientIdentifier(request.getPatientIdentifier());
+            studyCreated = importRadiologyStudy(studyRequest).getOutcome() == RadiologyImportResult.Outcome.CREATED;
+        }
+
+        RadiologyReport report = new RadiologyReport();
+        report.setAssociatedRadiologyOrder(order);
+        report.setOrderNumber(order.getOrderNumber());
+        report.setPatient(order.getPatient());
+        report.setProcedure(order.getConcept());
+        report.setReportType(reportType);
+        report.setReportBody(request.getReportBody());
+        report.setReportDate(reportDate);
+
+        if (StringUtils.isNotBlank(request.getRadiologistProviderUuid())) {
+            Provider radiologist = providerService.getProviderByUuid(request.getRadiologistProviderUuid());
+            if (radiologist != null && !radiologist.getRetired()) {
+                report.setPrincipalResultsInterpreter(radiologist);
+            }
+        }
+
+        Encounter encounter = saveRadiologyReport(report);
+        log.info("Radiology report import for accession number " + accessionNumber + ": CREATED");
+
+        RadiologyImportResult result = RadiologyImportResult.created(encounter.getUuid());
+        result.setStudyCreated(studyCreated);
+        return result;
     }
 
     /**

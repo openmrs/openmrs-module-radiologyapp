@@ -22,6 +22,7 @@ import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateAfterVisitStopDateException;
 import org.openmrs.module.emrapi.adt.exception.EncounterDateBeforeVisitStartDateException;
 import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
+import org.openmrs.module.radiologyapp.importer.RadiologyReportImportRequest;
 import org.openmrs.module.radiologyapp.importer.RadiologyStudyImportRequest;
 
 import java.util.List;
@@ -127,5 +128,19 @@ public interface RadiologyService extends OpenmrsService {
      *         or the identifier type is unknown
      */
     RadiologyImportResult importRadiologyStudy(RadiologyStudyImportRequest request);
+
+    /**
+     * Imports a final or correction radiology report produced in an external system against the existing radiology
+     * order whose order number matches the accession number, creating the radiology study first if there is none.
+     * The patient identifier must match the order's patient. A second final report is ALREADY_EXISTS; a correction is
+     * ALREADY_EXISTS only if a correction with the same report date (to the second) exists.
+     *
+     * @param request
+     * @return the outcome; CREATED (with the new report encounter's uuid, and studyCreated if a study was also created),
+     *         ALREADY_EXISTS, NO_MATCHING_ORDER or PATIENT_MISMATCH
+     * @throws IllegalArgumentException if a required field is blank, the report type is not "final" or "correction",
+     *         or the identifier type is unknown
+     */
+    RadiologyImportResult importRadiologyReport(RadiologyReportImportRequest request);
 
 }

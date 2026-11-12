@@ -85,6 +85,13 @@
     <concept concept_id="1009" retired="false" datatype_id="4" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="0cbe2ed3-dd5f-4f46-9459-26333c9265ab"/>
     <concept_name concept_id="1009" name="Final Report" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1009" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f558-40c9-8177-1423fe119ca7"/>
     <concept_description concept_description_id="1009" concept_id="1009" locale="en" description="Final Report" creator="1" date_created="2004-08-12 00:00:00.0" uuid="5f4d710b-d444-40b7-b449-6e0e739d12d0"/>
+    <concept_reference_term concept_reference_term_id="1009" concept_source_id="1001" code="Radiology report final" description="Final Report" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5612a-f551-40c9-8757-145dfe119c01"/>
+    <concept_reference_map concept_map_id="1009" concept_id="1009" concept_reference_term_id="1009" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23b6e712-49d8-22e0-8fed-18a911e044c1"/>
+
+    <concept concept_id="1010" retired="false" datatype_id="4" class_id="2" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="0cbe2ed3-dd5f-4f46-9459-26333c9265ac"/>
+    <concept_name concept_id="1010" name="Correction Report" locale="en" creator="1" date_created="2004-08-12 00:00:00.0" concept_name_id="1010" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="9bc5693a-f558-40c9-8177-1423fe119c02"/>
+    <concept_reference_term concept_reference_term_id="1010" concept_source_id="1001" code="Radiology report correction" description="Correction Report" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="9bc5612a-f551-40c9-8757-145dfe119c02"/>
+    <concept_reference_map concept_map_id="1010" concept_id="1010" concept_reference_term_id="1010" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23b6e712-49d8-22e0-8fed-18a911e044c2"/>
 
 
     <concept_set concept_set_id="1006" concept_id="1003" concept_set="1006" sort_weight="0.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="1a111827-229f-4cb4-961f-1e0345f88d90"/>
