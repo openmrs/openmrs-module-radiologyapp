@@ -1,5 +1,6 @@
 package org.openmrs.module.radiologyapp.web.controller;
 
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.radiologyapp.RadiologyService;
 import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
@@ -33,7 +34,7 @@ public class RadiologyImportRestController extends BaseRestController {
     @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/radiologyapp/study", method = RequestMethod.POST)
     @ResponseBody
     public Object postStudy(@RequestBody Map<String, Object> body) {
-        Context.requirePrivilege(PrivilegeConstants.ADD_ENCOUNTERS);
+        requireAddEncounters();
 
         RadiologyStudyImportRequest request = new RadiologyStudyImportRequest();
         request.setAccessionNumber(asString(body, "accessionNumber"));
@@ -49,7 +50,7 @@ public class RadiologyImportRestController extends BaseRestController {
     @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/radiologyapp/report", method = RequestMethod.POST)
     @ResponseBody
     public Object postReport(@RequestBody Map<String, Object> body) {
-        Context.requirePrivilege(PrivilegeConstants.ADD_ENCOUNTERS);
+        requireAddEncounters();
 
         RadiologyReportImportRequest request = new RadiologyReportImportRequest();
         request.setAccessionNumber(asString(body, "accessionNumber"));
@@ -62,6 +63,12 @@ public class RadiologyImportRestController extends BaseRestController {
         request.setPatientIdentifier(asString(body, "patientIdentifier"));
 
         return toResponse(Context.getService(RadiologyService.class).importRadiologyReport(request));
+    }
+
+    private void requireAddEncounters() {
+        if (!Context.hasPrivilege(PrivilegeConstants.ADD_ENCOUNTERS)) {
+            throw new APIAuthenticationException("Privilege required: " + PrivilegeConstants.ADD_ENCOUNTERS);
+        }
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

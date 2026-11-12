@@ -189,6 +189,16 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return encounterService.saveEncounter(encounter);
     }
 
+    // core's EncounterValidator rejects encounter dates in the future, so a PACS clock running ahead is clamped to now
+    private Date clampToNow(Date date, String kind, String accessionNumber) {
+        Date now = new Date();
+        if (date.after(now)) {
+            log.warn("Radiology " + kind + " import for accession number " + accessionNumber + ": date is in the future, using the current time");
+            return now;
+        }
+        return date;
+    }
+
     @Transactional
     @Override
     // NOTE: synchronized only narrows the race window between the already-exists check and the save; it does not close it,
@@ -217,7 +227,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         String accessionNumber = request.getAccessionNumber();
 
         TestOrder order = getRadiologyOrderByOrderNumber(accessionNumber);
-        if (order == null) {
+        if (order == null || order.getVoided()) {
             log.warn("Radiology study import for accession number " + accessionNumber + ": NO_MATCHING_ORDER");
             return RadiologyImportResult.of(RadiologyImportResult.Outcome.NO_MATCHING_ORDER);
         }
@@ -237,7 +247,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         study.setOrderNumber(order.getOrderNumber());
         study.setPatient(order.getPatient());
         study.setProcedure(order.getConcept());
-        study.setDatePerformed(DateUtil.truncateToSeconds(request.getDatePerformed()));
+        study.setDatePerformed(clampToNow(DateUtil.truncateToSeconds(request.getDatePerformed()), "study", accessionNumber));
         study.setImagesAvailable(request.getImagesAvailable());
 
         if (StringUtils.isNotBlank(request.getTechnicianProviderUuid())) {
@@ -286,7 +296,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         String accessionNumber = request.getAccessionNumber();
 
         TestOrder order = getRadiologyOrderByOrderNumber(accessionNumber);
-        if (order == null) {
+        if (order == null || order.getVoided()) {
             log.warn("Radiology report import for accession number " + accessionNumber + ": NO_MATCHING_ORDER");
             return RadiologyImportResult.of(RadiologyImportResult.Outcome.NO_MATCHING_ORDER);
         }
@@ -296,7 +306,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
             return RadiologyImportResult.of(RadiologyImportResult.Outcome.PATIENT_MISMATCH);
         }
 
-        Date reportDate = DateUtil.truncateToSeconds(request.getReportDate());
+        Date reportDate = clampToNow(DateUtil.truncateToSeconds(request.getReportDate()), "report", accessionNumber);
 
         Concept reportType = conceptService.getConceptByMapping(
                 isFinal ? RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_FINAL : RadiologyConstants.CONCEPT_CODE_RADIOLOGY_REPORT_CORRECTION,

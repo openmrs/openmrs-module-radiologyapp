@@ -3,7 +3,7 @@ package org.openmrs.module.radiologyapp.web.controller;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.api.context.ContextAuthenticationException;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.api.context.UserContext;
@@ -154,9 +154,9 @@ public class RadiologyImportRestControllerTest {
 
         try {
             controller.postStudy(studyBody("2026-11-10T21:21:19.000+00:00"));
-            fail("expected ContextAuthenticationException");
+            fail("expected APIAuthenticationException");
         }
-        catch (ContextAuthenticationException e) {
+        catch (APIAuthenticationException e) {
             // expected
         }
         verify(radiologyService, never()).importRadiologyStudy(any(RadiologyStudyImportRequest.class));

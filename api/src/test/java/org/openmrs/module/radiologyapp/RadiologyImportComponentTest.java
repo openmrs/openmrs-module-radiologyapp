@@ -25,6 +25,7 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.radiologyapp.importer.RadiologyImportResult;
 import org.openmrs.module.radiologyapp.importer.RadiologyReportImportRequest;
 import org.openmrs.module.radiologyapp.importer.RadiologyStudyImportRequest;
@@ -346,5 +347,47 @@ public class RadiologyImportComponentTest extends BaseModuleContextSensitiveTest
     @Test(expected = IllegalArgumentException.class)
     public void importRadiologyReport_shouldRejectUnknownReportType() {
         radiologyService.importRadiologyReport(reportRequest("12345", "preliminary", secondsFromNow(0), "Body"));
+    }
+
+    @Test
+    public void importRadiologyStudy_shouldClampFutureDatePerformedToNow() {
+        RadiologyStudyImportRequest request = request("12345");
+        request.setDatePerformed(secondsFromNow(2 * 3600));
+        Date before = new Date();
+
+        Encounter encounter = createAndGetEncounter(request);
+
+        assertFalse(encounter.getEncounterDatetime().after(new Date()));
+        assertFalse(encounter.getEncounterDatetime().before(DateUtil.truncateToSeconds(before)));
+    }
+
+    @Test
+    public void importRadiologyReport_shouldClampFutureReportDateAndCreatedStudyToNow() {
+        RadiologyReportImportRequest request = reportRequest("12345", "final", secondsFromNow(2 * 3600), "Body");
+
+        RadiologyImportResult result = radiologyService.importRadiologyReport(request);
+
+        assertEquals(RadiologyImportResult.Outcome.CREATED, result.getOutcome());
+        Date now = new Date();
+        assertFalse(encounterService.getEncounterByUuid(result.getEncounterUuid()).getEncounterDatetime().after(now));
+        assertFalse(radiologyService.getRadiologyStudyByOrderNumber("12345").getDatePerformed().after(now));
+    }
+
+    @Test
+    public void importRadiologyStudy_shouldTreatVoidedOrderAsNoMatchingOrder() {
+        Context.getOrderService().getOrderByOrderNumber("12345").setVoided(true);
+
+        assertEquals(RadiologyImportResult.Outcome.NO_MATCHING_ORDER,
+                radiologyService.importRadiologyStudy(request("12345")).getOutcome());
+        assertEquals(0, studyEncounterCount());
+    }
+
+    @Test
+    public void importRadiologyReport_shouldTreatVoidedOrderAsNoMatchingOrder() {
+        Context.getOrderService().getOrderByOrderNumber("12345").setVoided(true);
+
+        assertEquals(RadiologyImportResult.Outcome.NO_MATCHING_ORDER,
+                radiologyService.importRadiologyReport(finalRequest("12345")).getOutcome());
+        assertEquals(0, radiologyService.getRadiologyReportsByOrderNumber("12345").size());
     }
 }
