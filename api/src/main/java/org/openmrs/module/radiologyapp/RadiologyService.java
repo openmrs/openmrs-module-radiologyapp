@@ -121,7 +121,7 @@ public interface RadiologyService extends OpenmrsService {
     /**
      * Imports a radiology study performed in an external system against the existing radiology order whose order number
      * matches the accession number. The patient identifier must match the order's patient.
-     * The created encounter has no location and therefore no visit.
+     * TODO: properly set location
      *
      * @param request
      * @return the outcome; CREATED (with the new encounter's uuid), ALREADY_EXISTS, NO_MATCHING_ORDER or PATIENT_MISMATCH
@@ -136,7 +136,7 @@ public interface RadiologyService extends OpenmrsService {
      * The patient identifier must match the order's patient. A second final report is ALREADY_EXISTS; a correction is
      * ALREADY_EXISTS only if a correction with exactly the same report text exists (the report date is not compared).
      *
-     * The created report encounter (and the study encounter created first, if needed) have no location and therefore no visit.
+     * TODO: properly set location
      *
      * @param request
      * @return the outcome; CREATED (with the new report encounter's uuid),

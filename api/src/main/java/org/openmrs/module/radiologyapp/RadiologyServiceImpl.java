@@ -165,7 +165,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return encounterService.saveEncounter(buildRadiologyStudyEncounter(radiologyStudy));
     }
 
-    // location defaults to the unknown location when the report has none
     private Encounter buildRadiologyReportEncounter(RadiologyReport radiologyReport) {
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyReportEncounterType());
@@ -181,7 +180,6 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return encounter;
     }
 
-    // location defaults to the unknown location when the study has none
     private Encounter buildRadiologyStudyEncounter(RadiologyStudy radiologyStudy) {
         Encounter encounter = new Encounter();
         encounter.setEncounterType(radiologyProperties.getRadiologyStudyEncounterType());
@@ -197,9 +195,7 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
         return encounter;
     }
 
-    // Imported encounters deliberately have no location, so that they have no visit: emrapi's visit assignment skips
-    // location-less encounters, whereas any location (the unknown location, or the order's) can make it throw
-    // "Patient already has an active visit at another location on this date" when the patient has an open visit elsewhere.
+    // TODO: properly set location
     private Encounter saveImportedEncounter(Encounter encounter) {
         encounter.setLocation(null);
         return encounterService.saveEncounter(encounter);
