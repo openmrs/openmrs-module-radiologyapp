@@ -315,13 +315,12 @@ public class RadiologyServiceImpl  extends BaseOpenmrsService implements Radiolo
 
         Date reportDate = clampToNow(DateUtil.truncateToSeconds(request.getReportDate()), "report", accessionNumber);
 
-        // a future-dated report is clamped to "now", so a retry gets a new date: corrections are
-        // also matched on identical body text
+        // a final report is imported once per order; a correction is a duplicate only when an existing
+        // correction has the same text (the date can't be used: a future-dated report is clamped to "now",
+        // so a retry gets a new date, and a genuine amendment may share its date with an earlier one)
         for (RadiologyReport existing : getRadiologyReportsByOrderNumber(accessionNumber)) {
             if (reportType.equals(existing.getReportType())
-                    && (isFinal
-                        || reportDate.equals(DateUtil.truncateToSeconds(existing.getReportDate()))
-                        || request.getReportBody().equals(existing.getReportBody()))) {
+                    && (isFinal || request.getReportBody().equals(existing.getReportBody()))) {
                 log.warn("Radiology report import for accession number " + accessionNumber + ": ALREADY_EXISTS");
                 return RadiologyImportResult.of(RadiologyImportResult.Outcome.ALREADY_EXISTS);
             }
