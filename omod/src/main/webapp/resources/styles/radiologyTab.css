@@ -2,7 +2,7 @@
     font-size: 14px;
 }
 
-/* coreapps colors .report-value with the theme highlight color, which looks like a link (LSO-313) */
+/* Show study and report values in gray instead of the coreapps highlight color */
 #study-details .report-value {
     color: #555555;
 }
