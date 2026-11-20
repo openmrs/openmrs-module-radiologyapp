@@ -2,3 +2,7 @@
     font-size: 14px;
 }
 
+/* Show study and report values in gray instead of the coreapps highlight color */
+#study-details .report-value {
+    color: #555555;
+}
